@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════
-   Westerwald App – Routing + Render-Engine
+   Westerwald App – Routing + Render-Engine v3
    ════════════════════════════════════════════════════════════════ */
 
 'use strict';
@@ -8,13 +8,13 @@ window.addEventListener('DOMContentLoaded', function() {
   initSplash();
   initCookieGate();
 
-  // Header-Link
+  // Header → wir-westerwaelder.de
   var hdr = document.getElementById('app-header-link');
   if (hdr) hdr.addEventListener('click', function() {
     window.open('https://www.wir-westerwaelder.de', '_blank', 'noopener');
   });
 
-  // Footer-Modals (Impressum, Datenschutz)
+  // Footer-Modals
   document.querySelectorAll('[data-modal]').forEach(function(el) {
     el.addEventListener('click', function(e) {
       e.preventDefault();
@@ -30,7 +30,7 @@ window.addEventListener('DOMContentLoaded', function() {
 window.addEventListener('hashchange', router);
 
 // ════════════════════════════════════════════════════════════════
-// SPLASH (Eichhörnchen)
+// SPLASH
 // ════════════════════════════════════════════════════════════════
 function initSplash() {
   setTimeout(function() {
@@ -49,9 +49,7 @@ function initCookieGate() {
     ov.style.display = 'none';
     router();
   } else {
-    setTimeout(function() {
-      ov.style.display = 'flex';
-    }, 3000);  // erst nach Splash
+    setTimeout(function() { ov.style.display = 'flex'; }, 3000);
     document.getElementById('cookie-akzeptieren').addEventListener('click', function() {
       localStorage.setItem('ww_dsgvo_akzeptiert', '1');
       ov.style.display = 'none';
@@ -63,47 +61,26 @@ function initCookieGate() {
 // ════════════════════════════════════════════════════════════════
 // MODALS
 // ════════════════════════════════════════════════════════════════
-var MODAL_INHALTE = {
-  impressum: '<h3>Impressum</h3>'
-    + '<p><strong>Westerwald Touristik-Service</strong><br>'
-    + 'Kirchstraße 48a<br>56410 Montabaur</p>'
-    + '<p><strong>Telefon:</strong> 02602 / 30 01-0<br>'
-    + '<strong>Fax:</strong> 02602 / 94 73 25<br>'
-    + '<strong>E-Mail:</strong> <a href="mailto:mail@westerwald.info">mail@westerwald.info</a><br>'
-    + '<strong>Web:</strong> <a href="https://www.westerwald.info" target="_blank">www.westerwald.info</a></p>'
-    + '<h3>Vertretungsberechtigt</h3>'
-    + '<p>Geschäftsführung: Christoph Hoopmann</p>'
-    + '<h3>Inhaltlich verantwortlich</h3>'
-    + '<p>Westerwald Touristik-Service, Kirchstraße 48a, 56410 Montabaur</p>'
-    + '<h3>Haftungshinweis</h3>'
-    + '<p>Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.</p>',
-
-  datenschutz: '<h3>Datenschutzerklärung</h3>'
-    + '<p>Diese App nutzt ausschließlich technisch notwendige Funktionen. Es werden keine Tracking-Cookies oder externe Analysedienste eingesetzt.</p>'
-    + '<h3>Lokale Speicherung</h3>'
-    + '<p>Im lokalen Speicher (LocalStorage) deines Geräts wird ausschließlich vermerkt, dass du dieser Datenschutzerklärung zugestimmt hast – damit du die Hinweise nicht bei jedem Besuch erneut bestätigen musst.</p>'
-    + '<h3>Externe Inhalte</h3>'
-    + '<p>Beim Klick auf weiterführende Links (z. B. zum Tourenplaner Rheinland-Pfalz oder zum GPX-Download) wirst du auf externe Seiten geleitet. Für deren Datenverarbeitung sind die jeweiligen Anbieter verantwortlich.</p>'
-    + '<h3>Verantwortlich</h3>'
-    + '<p>Westerwald Touristik-Service<br>Kirchstraße 48a<br>56410 Montabaur<br><a href="mailto:mail@westerwald.info">mail@westerwald.info</a></p>',
-
-  barrierefreiheit: '<h3>Erklärung zur Barrierefreiheit</h3>'
-    + '<p>Diese App ist bestrebt, ihre Inhalte für alle Nutzerinnen und Nutzer zugänglich zu gestalten – im Einklang mit den Anforderungen des Behindertengleichstellungsgesetzes (BGG) und der Barrierefreie-Informationstechnik-Verordnung (BITV 2.0).</p>'
-    + '<h3>Stand der Vereinbarkeit</h3>'
-    + '<p>Diese App wurde fortlaufend für mobile Endgeräte und Bildschirmleser optimiert. Hinweise auf Barrieren werden gerne aufgenommen.</p>'
-    + '<h3>Feedback und Kontakt</h3>'
-    + '<p>Sind Ihnen Mängel beim barrierefreien Zugang aufgefallen? <a href="mailto:mail@westerwald.info">mail@westerwald.info</a></p>'
-};
 function oeffneModal(name) {
-  var inhalt = MODAL_INHALTE[name];
+  var inhalt = '';
+  var titel = '';
+  if (name === 'impressum')        { inhalt = window._IMPRESSUM_HTML || ''; titel = 'Impressum'; }
+  else if (name === 'datenschutz') { inhalt = window._DATENSCHUTZ_HTML || ''; titel = 'Datenschutzerklärung'; }
+  else if (name === 'barrierefreiheit') {
+    inhalt = '<h3>Erklärung zur Barrierefreiheit</h3>'
+      + '<p>Diese App ist bestrebt, ihre Inhalte für alle Nutzerinnen und Nutzer zugänglich zu gestalten – im Einklang mit den Anforderungen des Behindertengleichstellungsgesetzes (BGG) und der Barrierefreie-Informationstechnik-Verordnung (BITV 2.0).</p>'
+      + '<h3>Stand der Vereinbarkeit</h3>'
+      + '<p>Diese App wurde fortlaufend für mobile Endgeräte und Bildschirmleser optimiert. Hinweise auf Barrieren werden gerne aufgenommen.</p>'
+      + '<h3>Feedback und Kontakt</h3>'
+      + '<p>Sind Ihnen Mängel beim barrierefreien Zugang aufgefallen? <a href="mailto:info@wir-westerwaelder.de">info@wir-westerwaelder.de</a></p>';
+    titel = 'Erklärung zur Barrierefreiheit';
+  }
   if (!inhalt) return;
-  document.getElementById('modal-titel').textContent =
-    name === 'impressum' ? 'Impressum'
-    : name === 'datenschutz' ? 'Datenschutz'
-    : 'Erklärung zur Barrierefreiheit';
+  document.getElementById('modal-titel').textContent = titel;
   document.getElementById('modal-inhalt').innerHTML = inhalt;
   document.getElementById('modal-overlay').classList.add('aktiv');
   document.body.classList.add('modal-offen');
+  document.getElementById('modal-inhalt').scrollTop = 0;
 }
 function schliesseModal() {
   document.getElementById('modal-overlay').classList.remove('aktiv');
@@ -121,37 +98,19 @@ function router() {
   document.body.classList.toggle('home-page', teile[0] === 'home' || teile[0] === '');
   window.scrollTo(0, 0);
 
-  if (teile[0] === 'home' || teile[0] === '') {
-    renderHome(ziel);
-  } else if (teile[0] === 'kategorie' && teile[1]) {
-    renderKategorie(ziel, teile[1]);
-  } else if (teile[0] === 'liste' && teile[1]) {
-    renderListe(ziel, teile[1]);
-  } else if (teile[0] === 'detail' && teile[1] && teile[2]) {
-    renderDetail(ziel, teile[1], teile[2]);
-  } else {
-    renderHome(ziel);
-  }
+  if (teile[0] === 'home' || teile[0] === '') renderHome(ziel);
+  else if (teile[0] === 'kategorie' && teile[1]) renderKategorie(ziel, teile[1]);
+  else if (teile[0] === 'liste' && teile[1])    renderListe(ziel, teile[1]);
+  else if (teile[0] === 'detail' && teile[1] && teile[2]) renderDetail(ziel, teile[1], teile[2]);
+  else renderHome(ziel);
 }
-
-function navigateTo(pfad) {
-  window.location.hash = pfad;
-}
+function navigateTo(pfad) { window.location.hash = pfad; }
 
 // ════════════════════════════════════════════════════════════════
 // LAYOUT-BAUSTEINE
 // ════════════════════════════════════════════════════════════════
 function intro(gruss, untertitel, animiert) {
   if (animiert) {
-    // Untertitel mit gewellter Buchstaben-Animation
-    var spans = '';
-    for (var i = 0; i < untertitel.length; i++) {
-      var c = untertitel.charAt(i);
-      spans += '<span style="animation-delay:' + (i * 0.04) + 's">'
-        + (c === ' ' ? '&nbsp;' : escapeHtml(c)) + '</span>';
-    }
-    // <em> Vielfalt </em> erkennen und ersetzen
-    var ut = untertitel.replace(/<em>/g, '').replace(/<\/em>/g, '');
     var spans2 = '';
     var inEm = false; var idxLetter = 0;
     for (var j = 0; j < untertitel.length; j++) {
@@ -204,45 +163,41 @@ function kachel(slug, label, iconSvg) {
 }
 
 // ════════════════════════════════════════════════════════════════
-// KATEGORIE-SEITE
+// KATEGORIEN
 // ════════════════════════════════════════════════════════════════
 var KATEGORIEN = {
   'tourismus': {
-    titel: 'Tourismus & Freizeit',
-    untertitel: 'Wandern, Radfahren, Ausflugsziele und mehr.',
-    subs: [
-      {slug:'wandern',       label:'Wandern',       meta:'5 Wanderregionen',     icon:ICONS.wandern},
-      {slug:'radfahren',     label:'Radfahren',     meta:'5 Routenarten',         icon:ICONS.fahrrad},
-      {slug:'ausflugsziele', label:'Ausflugsziele', meta:'POIs in der Region',    icon:ICONS.markierung},
-      {slug:'badeseen',      label:'Badeseen',      meta:'Naturbadestellen',      icon:ICONS.welle},
-      {slug:'unterkuenfte',  label:'Unterkünfte',   meta:'Hotels & Pensionen',    icon:ICONS.haus}
+    titel:'Tourismus & Freizeit', untertitel:'Wandern, Radfahren, Ausflugsziele und mehr.',
+    subs:[
+      {slug:'wandern',       label:'Wandern',       meta:'5 Wanderregionen', icon:ICONS.wandern},
+      {slug:'radfahren',     label:'Radfahren',     meta:'5 Routenarten',     icon:ICONS.fahrrad},
+      {slug:'ausflugsziele', label:'Ausflugsziele', meta:'POIs in der Region',icon:ICONS.markierung},
+      {slug:'badeseen',      label:'Badeseen',      meta:'Naturbadestellen',  icon:ICONS.welle},
+      {slug:'unterkuenfte',  label:'Unterkünfte',   meta:'Hotels & Pensionen',icon:ICONS.haus}
     ]
   },
   'regional': {
-    titel: 'Regionale Produkte',
-    untertitel: 'Direkt vom Erzeuger – aus dem Westerwald.',
-    subs: [
-      {slug:'hofladen',     label:'Hofläden',         meta:'Direktvermarkter',     icon:ICONS.korb},
-      {slug:'manufakturen', label:'Manufakturen',     meta:'Handwerk & Genuss',    icon:ICONS.werkbank},
-      {slug:'wochenmarkt',  label:'Wochenmärkte',     meta:'Termine & Orte',       icon:ICONS.markt}
+    titel:'Regionale Produkte', untertitel:'Direkt vom Erzeuger – aus dem Westerwald.',
+    subs:[
+      {slug:'hofladen',     label:'Hofläden',     meta:'Direktvermarkter', icon:ICONS.korb},
+      {slug:'manufakturen', label:'Manufakturen', meta:'Handwerk & Genuss', icon:ICONS.werkbank},
+      {slug:'wochenmarkt',  label:'Wochenmärkte', meta:'Termine & Orte',    icon:ICONS.markt}
     ]
   },
   'kultur': {
-    titel: 'Kunst & Kultur',
-    untertitel: 'Museen, Veranstaltungen und Festivals.',
-    subs: [
-      {slug:'museen',          label:'Museen',          meta:'Sammlungen & Ausstellungen',    icon:ICONS.krug},
-      {slug:'veranstaltungen', label:'Veranstaltungen', meta:'Aktuelle Termine',              icon:ICONS.kalender},
+    titel:'Kunst & Kultur', untertitel:'Museen, Veranstaltungen und Festivals.',
+    subs:[
+      {slug:'museen',          label:'Museen',          meta:'Sammlungen & Ausstellungen',  icon:ICONS.krug},
+      {slug:'veranstaltungen', label:'Veranstaltungen', meta:'Aktuelle Termine',            icon:ICONS.kalender},
       {slug:'literatur',       label:'Westerwälder Literaturtage', meta:'Programm & Lesungen', icon:ICONS.buch}
     ]
   },
   'mobilitaet': {
-    titel: 'Mobilität & Verkehr',
-    untertitel: 'So bist du in der Region unterwegs.',
-    subs: [
-      {slug:'bahn-bus',     label:'Bahn & Bus',         meta:'ÖPNV-Verbindungen',            icon:ICONS.bus},
-      {slug:'mitfahrbank',  label:'Mitfahrbänke',       meta:'Standorte in der Region',      icon:ICONS.markierung},
-      {slug:'service',      label:'Service-Infos',      meta:'Kontakte & Tipps',             icon:ICONS.info}
+    titel:'Mobilität & Verkehr', untertitel:'So bist du in der Region unterwegs.',
+    subs:[
+      {slug:'bahn-bus',     label:'Bahn & Bus',    meta:'ÖPNV-Verbindungen',       icon:ICONS.bus},
+      {slug:'mitfahrbank',  label:'Mitfahrbänke',  meta:'Standorte in der Region', icon:ICONS.markierung},
+      {slug:'service',      label:'Service-Infos', meta:'Kontakte & Tipps',        icon:ICONS.info}
     ]
   }
 };
@@ -277,8 +232,8 @@ var LISTEN = {
     typ:'unterkategorie',
     items:[
       {label:'WesterwaldSteig', meta:'16 Etappen, ca. 235 km', sub:'westerwaldsteig', icon:ICONS.wandernSimple},
-      {label:'Druidensteig',    meta:'Mehrtagestour',           sub:'druidensteig',    icon:ICONS.wandernSimple},
-      {label:'Wiedweg',         meta:'Etappentour',             sub:'wiedweg',         icon:ICONS.wandernSimple},
+      {label:'Druidensteig',    meta:'8 Etappen, ca. 84 km',    sub:'druidensteig',    icon:ICONS.wandernSimple},
+      {label:'Wiedweg',         meta:'8 Etappen, ca. 117 km',   sub:'wiedweg',         icon:ICONS.wandernSimple},
       {label:'Wäller Touren',   meta:'Tageswanderungen',         sub:'waeller-touren',  icon:ICONS.wandernSimple},
       {label:'Kleine Wäller',   meta:'Kurze Rundtouren',         sub:'kleine-waeller',  icon:ICONS.wandernSimple}
     ]
@@ -318,6 +273,165 @@ var RAD_DATEN = {
   'rennrad':         {name:'DATA_RADFAHREN_RENNRAD',         titel:'Rennrad',         breadcrumb:'Radfahren › <strong>Rennrad</strong>',         untertitel:'Anspruchsvolle Asphaltrouten.'}
 };
 
+// ════════════════════════════════════════════════════════════════
+// DATEN-NORMALISIERUNG
+// ════════════════════════════════════════════════════════════════
+function normalisiere(item) {
+  var s = item.stats || {};
+  return {
+    titel:        item.title || item.t || item.name || 'Tour',
+    subtitle:     item.subtitle || '',
+    typ:          item.type || '',
+    km:           item.km || s.distanz || '',
+    schwierigkeit: item.difficulty || item.sw || s.schwierigkeit || '',
+    dauer:        s.duration || s.dauer || item.duration || '',
+    aufstieg:     s.ascent || s.aufstieg || '',
+    abstieg:      s.descent || s.abstieg || '',
+    hoechster:    s.highPoint || s.hoechsterPunkt || '',
+    tiefster:     s.lowPoint || s.tiefsterPunkt || '',
+    tags:         item.tags || item.d || '',
+    gpxUrl:       item.gpxUrl || item.gpx || gpxAusTourenplaner(item.tourenplanerUrl || item.tourenplaner),
+    tourenplanerUrl: item.tourenplanerUrl || item.tourenplaner || '',
+    sourceUrl:    item.sourceUrl || item.url || '',
+    description:  item.description,
+    routeDescription: item.routeDescription,
+    publicTransport: item.publicTransport,
+    parking:      item.parking,
+    directions:   item.directions,
+    start:        item.start,
+    destination:  item.destination,
+    tips:         item.tips,
+    safetyNotes:  item.safetyNotes,
+    equipment:    item.equipment,
+    sections:     item.sections
+  };
+}
+
+function gpxAusTourenplaner(url) {
+  if (!url) return null;
+  var m = url.match(/tour\/(\d+)/);
+  if (!m) return null;
+  return 'https://www.tourenplaner-rheinland-pfalz.de/de/download.tour.gpx?i=' + m[1] + '&project=oar-rlp';
+}
+
+function swKlasse(s) {
+  s = (s||'').toLowerCase();
+  if (s.indexOf('leicht') >= 0) return 'leicht';
+  if (s.indexOf('schwer') >= 0) return 'schwer';
+  if (s) return 'mittel';
+  return '';
+}
+function dauerInMinuten(d) {
+  if (!d) return null;
+  var m = String(d).match(/(\d+(?:[.,]\d+)?)/);
+  if (!m) return null;
+  return parseFloat(m[1].replace(',','.')) * 60;
+}
+function kmZuZahl(k) {
+  if (!k) return null;
+  var m = String(k).match(/(\d+(?:[.,]\d+)?)/);
+  return m ? parseFloat(m[1].replace(',','.')) : null;
+}
+
+// ════════════════════════════════════════════════════════════════
+// FILTER-STATE (pro Listenseite zurückgesetzt)
+// ════════════════════════════════════════════════════════════════
+var FILTER_STATE = { sw: 'alle', dauer: 'alle', km: 'alle' };
+
+function filterAnwenden(eintraege) {
+  return eintraege.filter(function(n) {
+    if (FILTER_STATE.sw !== 'alle') {
+      if (swKlasse(n.schwierigkeit) !== FILTER_STATE.sw) return false;
+    }
+    if (FILTER_STATE.dauer !== 'alle') {
+      var dm = dauerInMinuten(n.dauer);
+      if (dm == null) return false;
+      if (FILTER_STATE.dauer === 'kurz'   && dm > 180) return false;
+      if (FILTER_STATE.dauer === 'mittel' && (dm <= 180 || dm > 360)) return false;
+      if (FILTER_STATE.dauer === 'lang'   && dm <= 360) return false;
+    }
+    if (FILTER_STATE.km !== 'alle') {
+      var kk = kmZuZahl(n.km);
+      if (kk == null) return false;
+      if (FILTER_STATE.km === 'kurz'   && kk > 10) return false;
+      if (FILTER_STATE.km === 'mittel' && (kk <= 10 || kk > 25)) return false;
+      if (FILTER_STATE.km === 'lang'   && kk <= 25) return false;
+    }
+    return true;
+  });
+}
+
+function pillRow(name, label, optionen) {
+  var pills = optionen.map(function(o) {
+    var akt = FILTER_STATE[name] === o.val ? ' aktiv' : '';
+    return '<button class="filter-pill' + akt + '" onclick="setzeFilter(\'' + name + '\',\'' + o.val + '\')">' + o.label + '</button>';
+  }).join('');
+  return '<div class="filter-row">'
+    + '<span class="filter-label-mini">' + label + '</span>'
+    + pills
+    + '</div>';
+}
+
+function filterUI() {
+  var anyAktiv = FILTER_STATE.sw !== 'alle' || FILTER_STATE.dauer !== 'alle' || FILTER_STATE.km !== 'alle';
+  return '<div class="filter-leiste">'
+    + '<div class="filter-titel">Filter'
+      + (anyAktiv ? '<button class="reset-btn" onclick="resetFilter()">↺ Zurücksetzen</button>' : '')
+    + '</div>'
+    + pillRow('sw', 'Schwierigkeit', [
+        {val:'alle',   label:'Alle'},
+        {val:'leicht', label:'Leicht'},
+        {val:'mittel', label:'Mittel'},
+        {val:'schwer', label:'Schwer'}
+      ])
+    + pillRow('dauer', 'Dauer', [
+        {val:'alle',   label:'Alle'},
+        {val:'kurz',   label:'< 3 h'},
+        {val:'mittel', label:'3 – 6 h'},
+        {val:'lang',   label:'> 6 h'}
+      ])
+    + pillRow('km', 'Länge', [
+        {val:'alle',   label:'Alle'},
+        {val:'kurz',   label:'< 10 km'},
+        {val:'mittel', label:'10 – 25 km'},
+        {val:'lang',   label:'> 25 km'}
+      ])
+    + '</div>';
+}
+
+// Globale Helpers, die der HTML aufruft
+window._aktuelleListe = null; // {slug, info, detailTyp}
+
+function setzeFilter(name, wert) {
+  FILTER_STATE[name] = wert;
+  rerenderListe();
+}
+function resetFilter() {
+  FILTER_STATE = { sw: 'alle', dauer: 'alle', km: 'alle' };
+  rerenderListe();
+}
+function rerenderListe() {
+  if (!window._aktuelleListe) return;
+  var l = window._aktuelleListe;
+  // Nur die Filter-Leiste + Liste neu rendern, Sticky-Region behalten
+  var fLeiste = document.getElementById('filter-leiste-wrapper');
+  var liste   = document.getElementById('etappen-liste');
+  if (fLeiste) fLeiste.innerHTML = filterUI();
+  if (liste)   liste.innerHTML = baueListenInhalt(l.slug, l.info, l.detailTyp);
+  aktualisiereTreffer(l);
+}
+
+function aktualisiereTreffer(l) {
+  var rohdaten = window[l.info.name] || [];
+  var n = rohdaten.map(normalisiere);
+  var g = filterAnwenden(n);
+  var el = document.getElementById('filter-treffer');
+  if (el) el.innerHTML = '<strong>' + g.length + '</strong> von <strong>' + n.length + '</strong> Touren angezeigt';
+}
+
+// ════════════════════════════════════════════════════════════════
+// LISTEN-AUSWAHL
+// ════════════════════════════════════════════════════════════════
 function renderListe(ziel, slug) {
   if (LISTEN[slug] && LISTEN[slug].typ === 'unterkategorie') {
     var l = LISTEN[slug];
@@ -350,7 +464,6 @@ function renderListe(ziel, slug) {
   }
   if (LISTEN[slug]) { renderDatenListe(ziel, slug, LISTEN[slug]); return; }
 
-  // Fallback
   ziel.innerHTML =
     navBar('home', '<strong>' + slug + '</strong>')
     + intro('In Vorbereitung', 'Diese Inhalte werden gerade aufbereitet.')
@@ -358,7 +471,43 @@ function renderListe(ziel, slug) {
     + '<div class="spacer"></div>';
 }
 
+// ════════════════════════════════════════════════════════════════
+// ETAPPEN-LISTE (mit Sticky-Region + Filter)
+// ════════════════════════════════════════════════════════════════
+function baueListenInhalt(slug, info, detailTyp) {
+  var rohdaten = window[info.name] || [];
+  var normiert = rohdaten.map(normalisiere);
+  var gefiltert = filterAnwenden(normiert);
+
+  if (!gefiltert.length) {
+    return '<div class="hinweis">Keine Touren passen zu deiner Auswahl. Bitte Filter anpassen oder zurücksetzen.</div>';
+  }
+
+  return gefiltert.map(function(n) {
+    var idx = normiert.indexOf(n);
+    var sw = swKlasse(n.schwierigkeit);
+    var meta = '';
+    if (n.km)      meta += '<span><strong>' + escapeHtml(n.km) + (String(n.km).indexOf('km')<0 ? ' km' : '') + '</strong></span>';
+    if (n.dauer)   meta += '<span>⏱ ' + escapeHtml(n.dauer) + '</span>';
+    if (n.aufstieg) meta += '<span>↑ ' + escapeHtml(n.aufstieg) + '</span>';
+    if (n.schwierigkeit) meta += '<span class="diff-' + sw + '">● ' + escapeHtml(n.schwierigkeit) + '</span>';
+
+    return '<button class="eintrag" onclick="navigateTo(\'detail/' + detailTyp + '/' + slug + '_' + idx + '\')">'
+      + '<div class="eintrag-text">'
+        + '<div class="eintrag-titel">' + escapeHtml(n.titel) + '</div>'
+        + (n.subtitle ? '<div class="eintrag-sub">' + escapeHtml(n.subtitle) + '</div>' : '')
+        + (meta ? '<div class="eintrag-meta">' + meta + '</div>' : '')
+      + '</div>'
+      + '<div class="eintrag-pfeil">&rsaquo;</div>'
+    + '</button>';
+  }).join('');
+}
+
 function renderEtappenListe(ziel, slug, info, zurueckSlug, detailTyp) {
+  // Filter-State zurücksetzen bei jedem Aufruf
+  FILTER_STATE = { sw: 'alle', dauer: 'alle', km: 'alle' };
+  window._aktuelleListe = { slug: slug, info: info, detailTyp: detailTyp };
+
   var daten = window[info.name];
   if (!daten || !daten.length) {
     ziel.innerHTML =
@@ -368,32 +517,23 @@ function renderEtappenListe(ziel, slug, info, zurueckSlug, detailTyp) {
       + '<div class="spacer"></div>';
     return;
   }
-  var items = daten.map(function(item, idx) {
-    var titel = item.title || item.name || ('Etappe ' + (idx+1));
-    var km = item.km || (item.stats && item.stats.distanz) || '';
-    var diff = (item.difficulty || (item.stats && item.stats.schwierigkeit) || '').toLowerCase();
-    var dauer = (item.stats && (item.stats.duration || item.stats.dauer)) || '';
-    var diffClass = diff.indexOf('leicht') >= 0 ? 'diff-leicht'
-                  : diff.indexOf('schwer') >= 0 ? 'diff-schwer' : 'diff-mittel';
-    var meta = '';
-    if (km)    meta += '<span><strong>' + km + (km.indexOf('km')<0 ? ' km' : '') + '</strong></span>';
-    if (dauer) meta += '<span>⏱ ' + dauer + '</span>';
-    if (diff)  meta += '<span class="' + diffClass + '">● ' + diff.charAt(0).toUpperCase() + diff.slice(1) + '</span>';
-    return '<button class="eintrag" onclick="navigateTo(\'detail/' + detailTyp + '/' + slug + '_' + idx + '\')">'
-      + '<div class="eintrag-text">'
-        + '<div class="eintrag-titel">' + titel + '</div>'
-        + (meta ? '<div class="eintrag-meta">' + meta + '</div>' : '')
-      + '</div>'
-      + '<div class="eintrag-pfeil">&rsaquo;</div>'
-    + '</button>';
-  }).join('');
+
+  // Sticky-Region: navBar + intro + filter-leiste
+  // Beim Scrollen bleibt diese gesamte Box oben kleben
   ziel.innerHTML =
-    navBar('liste/' + zurueckSlug, info.breadcrumb)
-    + intro(info.titel, info.untertitel)
-    + '<div class="liste">' + items + '</div>'
+    '<div class="sticky-region">'
+      + navBar('liste/' + zurueckSlug, info.breadcrumb)
+      + intro(info.titel, info.untertitel)
+      + '<div id="filter-leiste-wrapper">' + filterUI() + '</div>'
+    + '</div>'
+    + '<div id="filter-treffer" class="filter-treffer"><strong>' + daten.length + '</strong> Touren angezeigt</div>'
+    + '<div class="liste" id="etappen-liste">' + baueListenInhalt(slug, info, detailTyp) + '</div>'
     + '<div class="spacer"></div>';
 }
 
+// ════════════════════════════════════════════════════════════════
+// DATEN-LISTE (Ausflugsziele etc.)
+// ════════════════════════════════════════════════════════════════
 function renderDatenListe(ziel, slug, l) {
   var daten = window[l.datenName] || [];
   if (l.max) daten = daten.slice(0, l.max);
@@ -412,8 +552,8 @@ function renderDatenListe(ziel, slug, l) {
     var meta = [ort, thema].filter(Boolean).join(' · ');
     return '<button class="eintrag" onclick="navigateTo(\'detail/' + l.detailKey + '/' + slug + '_' + idx + '\')">'
       + '<div class="eintrag-text">'
-        + '<div class="eintrag-titel">' + titel + '</div>'
-        + (meta ? '<div class="eintrag-meta">' + meta + '</div>' : '')
+        + '<div class="eintrag-titel">' + escapeHtml(titel) + '</div>'
+        + (meta ? '<div class="eintrag-meta">' + escapeHtml(meta) + '</div>' : '')
       + '</div>'
       + '<div class="eintrag-pfeil">&rsaquo;</div>'
     + '</button>';
@@ -428,7 +568,7 @@ function renderDatenListe(ziel, slug, l) {
 }
 
 // ════════════════════════════════════════════════════════════════
-// DETAIL
+// DETAIL-SEITE
 // ════════════════════════════════════════════════════════════════
 function renderDetail(ziel, typ, schluessel) {
   var teile = schluessel.split('_');
@@ -457,22 +597,15 @@ function renderDetail(ziel, typ, schluessel) {
   }
   var item = daten[idx];
 
-  if (typ === 'wandern' || typ === 'rad') {
-    renderRouteDetail(ziel, item, info, zurueck, typ);
-  } else if (typ === 'ausfl') {
-    renderAusflDetail(ziel, item, info, zurueck);
-  } else if (typ === 'badesee') {
-    renderBadeseeDetail(ziel, item, info, zurueck);
-  } else if (typ === 'unterkunft') {
-    renderUnterkunftDetail(ziel, item, info, zurueck);
-  } else if (typ === 'museum' || typ === 'literatur') {
-    renderAusflDetail(ziel, item, info, zurueck);
-  } else {
-    ziel.innerHTML = navBar('home','') + intro('Detail','') + '<pre>' + JSON.stringify(item, null, 2) + '</pre>';
-  }
+  if (typ === 'wandern' || typ === 'rad')      renderRouteDetail(ziel, item, info, zurueck);
+  else if (typ === 'ausfl')                    renderAusflDetail(ziel, item, info, zurueck);
+  else if (typ === 'badesee')                  renderBadeseeDetail(ziel, item, info, zurueck);
+  else if (typ === 'unterkunft')               renderUnterkunftDetail(ziel, item, info, zurueck);
+  else if (typ === 'museum' || typ === 'literatur') renderAusflDetail(ziel, item, info, zurueck);
+  else ziel.innerHTML = navBar('home','') + intro('Detail','') + '<pre>' + JSON.stringify(item, null, 2) + '</pre>';
 }
 
-// ── Hilfen ──
+// ─── Hilfen ───
 function escapeHtml(s) {
   if (s == null) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -486,7 +619,6 @@ function linkifyAndBreak(s) {
 }
 function txt(s) { return linkifyAndBreak(s); }
 
-// Dropdown-Block
 function dropdown(titel, inhalt, offen) {
   if (!inhalt) return '';
   return '<div class="dropdown' + (offen ? ' offen' : '') + '">'
@@ -498,171 +630,133 @@ function dropdown(titel, inhalt, offen) {
   + '</div>';
 }
 
-// GPX-URL aus Tourenplaner-URL ableiten (für Radwege)
-function gpxAusTourenplaner(url) {
-  if (!url) return null;
-  var m = url.match(/tour\/(\d+)/);
-  if (!m) return null;
-  return 'https://www.tourenplaner-rheinland-pfalz.de/de/download.tour.gpx?i=' + m[1] + '&project=oar-rlp';
-}
+// ════════════════════════════════════════════════════════════════
+// ROUTE-DETAIL (einheitlich)
+// ════════════════════════════════════════════════════════════════
+function renderRouteDetail(ziel, item, info, zurueck) {
+  var n = normalisiere(item);
+  var sw = swKlasse(n.schwierigkeit);
+  var diffBg = sw ? 'diff-' + sw + '-bg' : '';
 
-// === Routen-Detail (Wandern + Rad) ===
-function renderRouteDetail(ziel, item, info, zurueck, typ) {
-  // GPX-URL ermitteln
-  var gpxUrl = item.gpxUrl || gpxAusTourenplaner(item.tourenplaner || item.tourenplanerUrl);
-
-  // Schwierigkeit
-  var diffRaw = item.difficulty || (item.stats && item.stats.schwierigkeit) || '';
-  var diff = diffRaw.toLowerCase();
-  var diffBgClass = diff.indexOf('leicht') >= 0 ? 'diff-leicht-bg'
-                  : diff.indexOf('schwer') >= 0 ? 'diff-schwer-bg' : 'diff-mittel-bg';
-
-  // HTML-Aufbau
   var html = navBar(zurueck, info.breadcrumb)
     + intro(info.titel, info.untertitel || '')
     + '<div class="detail-section">'
-    + '<h2 class="detail-titel">' + escapeHtml(item.title || item.name) + '</h2>';
+    + '<h2 class="detail-titel">' + escapeHtml(n.titel) + '</h2>';
 
-  // Schwierigkeit + GPX-Button nebeneinander
+  if (n.subtitle) html += '<div class="detail-subtitle">' + escapeHtml(n.subtitle) + '</div>';
+
+  // Schwierigkeit + GPX + Karte
   var topRow = '<div class="diff-gpx-row">';
-  if (diffRaw) topRow += '<span class="diff-pill ' + diffBgClass + '">' + escapeHtml(diffRaw) + '</span>';
-  if (gpxUrl) topRow += '<a class="btn-action btn-gpx" href="' + gpxUrl + '" target="_blank" rel="noopener">📥 GPX-Datei</a>';
-  if (item.tourenplanerUrl || item.tourenplaner) {
-    topRow += '<a class="btn-action outline" href="' + (item.tourenplanerUrl || item.tourenplaner) + '" target="_blank" rel="noopener">🗺️ Karte</a>';
-  }
+  if (n.schwierigkeit) topRow += '<span class="diff-pill ' + diffBg + '">' + escapeHtml(n.schwierigkeit) + '</span>';
+  if (n.gpxUrl) topRow += '<a class="btn-action btn-gpx" href="' + n.gpxUrl + '" target="_blank" rel="noopener">📥 GPX</a>';
+  if (n.tourenplanerUrl) topRow += '<a class="btn-action outline" href="' + n.tourenplanerUrl + '" target="_blank" rel="noopener">🗺️ Karte</a>';
   topRow += '</div>';
   html += topRow;
 
   // Stats
-  var stats = item.stats || {};
   var sList = [];
-  var addStat = function(label, val) { if (val) sList.push('<div class="stat"><div class="stat-label">' + label + '</div><div class="stat-wert">' + val + '</div></div>'); };
-  addStat('Distanz', item.km ? (item.km + (item.km.indexOf('km')<0 ? ' km' : '')) : (stats.distanz));
-  addStat('Dauer', stats.duration || stats.dauer);
-  addStat('Aufstieg', stats.ascent || stats.aufstieg);
-  addStat('Abstieg', stats.descent || stats.abstieg);
-  addStat('Höchster Punkt', stats.highPoint || stats.hoechsterPunkt);
-  addStat('Tiefster Punkt', stats.lowPoint || stats.tiefsterPunkt);
+  var addStat = function(label, val) { if (val) sList.push('<div class="stat"><div class="stat-label">' + label + '</div><div class="stat-wert">' + escapeHtml(val) + '</div></div>'); };
+  addStat('Distanz', n.km ? (n.km + (String(n.km).indexOf('km')<0 ? ' km' : '')) : '');
+  addStat('Dauer', n.dauer);
+  addStat('Aufstieg', n.aufstieg);
+  addStat('Abstieg', n.abstieg);
+  addStat('Höchster Punkt', n.hoechster);
+  addStat('Tiefster Punkt', n.tiefster);
   if (sList.length) html += '<div class="stats-grid">' + sList.join('') + '</div>';
 
-  // Dropdowns
-  // 1. Über die Tour
-  if (item.description) {
-    var inhalt = '';
-    if (typeof item.description === 'object') {
-      if (item.description.headline) inhalt += '<p><strong>' + escapeHtml(item.description.headline) + '</strong></p>';
-      if (item.description.text) inhalt += linkifyAndBreak(item.description.text);
-    } else {
-      inhalt = linkifyAndBreak(item.description);
-    }
-    html += dropdown('Über die Tour', inhalt, true);  // erste Box offen
-  }
-
-  // 2. Wegbeschreibung
-  if (item.routeDescription) {
-    var rb = '';
-    if (typeof item.routeDescription === 'object') {
-      if (item.routeDescription.general) rb += linkifyAndBreak(item.routeDescription.general);
-      if (item.routeDescription.accessTrails && item.routeDescription.accessTrails.length) {
-        rb += '<p><strong>Zuwege:</strong></p><ul>';
-        item.routeDescription.accessTrails.forEach(function(t) { rb += '<li>' + escapeHtml(t) + '</li>'; });
-        rb += '</ul>';
-      }
-      if (item.routeDescription.accessTrailMarking) rb += '<p><strong>Markierung:</strong> ' + escapeHtml(item.routeDescription.accessTrailMarking) + '</p>';
-    } else {
-      rb = linkifyAndBreak(item.routeDescription);
-    }
-    html += dropdown('Wegbeschreibung', rb);
-  }
-
-  // 3. Start & Ziel
-  if (item.start || item.destination) {
-    var sd = '';
-    if (item.start) sd += '<p><strong>Start:</strong> ' + escapeHtml(item.start.name)
-      + (item.start.address ? '<br>' + escapeHtml(item.start.address) : '')
-      + (item.start.coordinates ? '<br>' + escapeHtml(item.start.coordinates) : '') + '</p>';
-    if (item.destination) sd += '<p><strong>Ziel:</strong> ' + escapeHtml(item.destination.name)
-      + (item.destination.address ? '<br>' + escapeHtml(item.destination.address) : '')
-      + (item.destination.coordinates ? '<br>' + escapeHtml(item.destination.coordinates) : '') + '</p>';
-    html += dropdown('Start &amp; Ziel', sd);
-  }
-
-  // 4. Anreise
-  var anreiseInhalt = '';
-  if (item.directions && item.directions.byCar)
-    anreiseInhalt += '<p><strong>Mit dem Auto:</strong></p>' + linkifyAndBreak(item.directions.byCar);
-  if (item.publicTransport) {
-    if (typeof item.publicTransport === 'object') {
-      if (item.publicTransport.arrival)
-        anreiseInhalt += '<p><strong>Mit Bahn/Bus:</strong></p>' + linkifyAndBreak(item.publicTransport.arrival);
-      if (item.publicTransport.returnTrip)
-        anreiseInhalt += '<p><strong>Rückfahrt:</strong></p>' + linkifyAndBreak(item.publicTransport.returnTrip);
-      if (item.publicTransport.taxis && item.publicTransport.taxis.length) {
-        anreiseInhalt += '<p><strong>Taxis:</strong></p><ul>';
-        item.publicTransport.taxis.forEach(function(t) { anreiseInhalt += '<li>' + escapeHtml(t) + '</li>'; });
-        anreiseInhalt += '</ul>';
-      }
-    } else {
-      anreiseInhalt += '<p><strong>Mit Bahn/Bus:</strong></p>' + linkifyAndBreak(item.publicTransport);
-    }
-  }
-  if (item.parking) {
-    if (Array.isArray(item.parking)) {
-      anreiseInhalt += '<p><strong>Parken:</strong></p><ul>';
-      item.parking.forEach(function(p) {
-        anreiseInhalt += '<li><strong>' + escapeHtml(p.location) + ':</strong>'
-          + (p.free ? ' kostenlos: ' + escapeHtml(p.free) : '')
-          + (p.paid ? ' · gebührenpflichtig: ' + escapeHtml(p.paid) : '') + '</li>';
-      });
-      anreiseInhalt += '</ul>';
-    } else {
-      anreiseInhalt += '<p><strong>Parken:</strong></p>' + linkifyAndBreak(item.parking);
-    }
-  }
-  html += dropdown('Anreise', anreiseInhalt);
-
-  // 5. Tipps für unterwegs
-  if (item.tips && Array.isArray(item.tips) && item.tips.length) {
-    var tInhalt = '<ul>';
-    item.tips.forEach(function(t) {
-      tInhalt += '<li><strong>' + escapeHtml(t.name) + '</strong>'
-        + (t.note ? '<br>' + escapeHtml(t.note) : '')
-        + (t.url ? '<br><a href="' + t.url + '" target="_blank" rel="noopener">' + t.url + '</a>' : '')
-        + '</li>';
+  // Wenn SECTIONS-Schema (Druidensteig, Wiedweg)
+  if (n.sections && Array.isArray(n.sections)) {
+    var firstShown = false;
+    n.sections.forEach(function(sec) {
+      if (sec.icon === 'profil' || (sec.title || '').toLowerCase().indexOf('profil') >= 0) return;
+      html += dropdown(sec.title, sec.html, !firstShown);
+      firstShown = true;
     });
-    tInhalt += '</ul>';
-    html += dropdown('Tipps für unterwegs', tInhalt);
+  } else {
+    // STANDARD-Schema
+    if (n.description) {
+      var inhalt = '';
+      if (typeof n.description === 'object') {
+        if (n.description.headline) inhalt += '<p><strong>' + escapeHtml(n.description.headline) + '</strong></p>';
+        if (n.description.text)     inhalt += linkifyAndBreak(n.description.text);
+      } else inhalt = linkifyAndBreak(n.description);
+      html += dropdown('Über die Tour', inhalt, true);
+    }
+    if (n.routeDescription) {
+      var rb = '';
+      if (typeof n.routeDescription === 'object') {
+        if (n.routeDescription.general) rb += linkifyAndBreak(n.routeDescription.general);
+        if (n.routeDescription.accessTrails && n.routeDescription.accessTrails.length) {
+          rb += '<p><strong>Zuwege:</strong></p><ul>';
+          n.routeDescription.accessTrails.forEach(function(t) { rb += '<li>' + escapeHtml(t) + '</li>'; });
+          rb += '</ul>';
+        }
+        if (n.routeDescription.accessTrailMarking) rb += '<p><strong>Markierung:</strong> ' + escapeHtml(n.routeDescription.accessTrailMarking) + '</p>';
+      } else rb = linkifyAndBreak(n.routeDescription);
+      html += dropdown('Wegbeschreibung', rb);
+    }
+    if (n.start || n.destination) {
+      var sd = '';
+      if (n.start) sd += '<p><strong>Start:</strong> ' + escapeHtml(n.start.name||'')
+        + (n.start.address ? '<br>' + escapeHtml(n.start.address) : '') + '</p>';
+      if (n.destination) sd += '<p><strong>Ziel:</strong> ' + escapeHtml(n.destination.name||'')
+        + (n.destination.address ? '<br>' + escapeHtml(n.destination.address) : '') + '</p>';
+      html += dropdown('Start &amp; Ziel', sd);
+    }
+    var anr = '';
+    if (n.directions && n.directions.byCar) anr += '<p><strong>Mit dem Auto:</strong></p>' + linkifyAndBreak(n.directions.byCar);
+    if (n.publicTransport) {
+      if (typeof n.publicTransport === 'object') {
+        if (n.publicTransport.arrival) anr += '<p><strong>Mit Bahn/Bus:</strong></p>' + linkifyAndBreak(n.publicTransport.arrival);
+        if (n.publicTransport.returnTrip) anr += '<p><strong>Rückfahrt:</strong></p>' + linkifyAndBreak(n.publicTransport.returnTrip);
+      } else anr += '<p><strong>Mit Bahn/Bus:</strong></p>' + linkifyAndBreak(n.publicTransport);
+    }
+    if (n.parking) {
+      if (Array.isArray(n.parking)) {
+        anr += '<p><strong>Parken:</strong></p><ul>';
+        n.parking.forEach(function(p) {
+          anr += '<li><strong>' + escapeHtml(p.location||'') + ':</strong>'
+            + (p.free ? ' kostenlos: ' + escapeHtml(p.free) : '')
+            + (p.paid ? ' · gebührenpflichtig: ' + escapeHtml(p.paid) : '') + '</li>';
+        });
+        anr += '</ul>';
+      } else anr += '<p><strong>Parken:</strong></p>' + linkifyAndBreak(n.parking);
+    }
+    if (anr) html += dropdown('Anreise', anr);
+    if (n.tips && Array.isArray(n.tips) && n.tips.length) {
+      var tInhalt = '<ul>';
+      n.tips.forEach(function(t) {
+        tInhalt += '<li><strong>' + escapeHtml(t.name||'') + '</strong>'
+          + (t.note ? '<br>' + escapeHtml(t.note) : '')
+          + (t.url ? '<br><a href="' + t.url + '" target="_blank" rel="noopener">' + t.url + '</a>' : '')
+          + '</li>';
+      });
+      tInhalt += '</ul>';
+      html += dropdown('Tipps für unterwegs', tInhalt);
+    }
+    var sai = '';
+    if (n.safetyNotes) sai += '<p><strong>Sicherheit:</strong></p>' + linkifyAndBreak(n.safetyNotes);
+    if (n.equipment)   sai += '<p><strong>Ausrüstung:</strong></p>' + linkifyAndBreak(n.equipment);
+    if (sai) html += dropdown('Sicherheit &amp; Ausrüstung', sai);
   }
-
-  // 6. Sicherheit & Ausrüstung
-  var saiInhalt = '';
-  if (item.safetyNotes) saiInhalt += '<p><strong>Sicherheit:</strong></p>' + linkifyAndBreak(item.safetyNotes);
-  if (item.equipment)   saiInhalt += '<p><strong>Ausrüstung:</strong></p>' + linkifyAndBreak(item.equipment);
-  if (saiInhalt) html += dropdown('Sicherheit &amp; Ausrüstung', saiInhalt);
 
   html += '</div><div class="spacer"></div>';
   ziel.innerHTML = html;
 }
 
-// === Ausflugsziel ===
+// === Ausflugsziel / Museum / Literatur ===
 function renderAusflDetail(ziel, item, info, zurueck) {
   var html = navBar(zurueck, info.breadcrumb)
     + intro(info.titel || 'Detail', '')
     + '<div class="detail-section">'
     + '<h2 class="detail-titel">' + escapeHtml(item.name) + '</h2>';
-
-  // Top-Tags (Ort + Thema)
   var tagRow = '<div class="diff-gpx-row">';
   if (item.mainTopic || item.topic) tagRow += '<span class="diff-pill">' + escapeHtml(item.mainTopic || item.topic) + '</span>';
   if (item.town) tagRow += '<span class="diff-pill diff-leicht-bg">' + escapeHtml(item.town) + '</span>';
   tagRow += '</div>';
   html += tagRow;
-
-  // Beschreibung als Dropdown
   if (item.description || item.desc) html += dropdown('Beschreibung', txt(item.description || item.desc), true);
-
   if (item.url) html += dropdown('Mehr Informationen', '<p><a href="' + item.url + '" target="_blank" rel="noopener">' + item.url + '</a></p>');
-
   html += '</div><div class="spacer"></div>';
   ziel.innerHTML = html;
 }
@@ -676,8 +770,6 @@ function renderBadeseeDetail(ziel, item, info, zurueck) {
   if (item.ort) html += '<div class="diff-gpx-row"><span class="diff-pill diff-leicht-bg">' + escapeHtml(item.ort) + '</span></div>';
   if (item.kurz) html += dropdown('Kurzinfo', txt(item.kurz), true);
   if (item.detail) html += dropdown('Beschreibung', txt(item.detail));
-
-  // Kontakt-Block
   var kontakt = '';
   if (item.strasse) kontakt += escapeHtml(item.strasse) + '<br>';
   if (item.plz)     kontakt += escapeHtml(item.plz) + '<br>';
@@ -689,7 +781,6 @@ function renderBadeseeDetail(ziel, item, info, zurueck) {
     });
   }
   if (kontakt) html += dropdown('Kontakt', '<p>' + kontakt + '</p>');
-
   html += '</div><div class="spacer"></div>';
   ziel.innerHTML = html;
 }
