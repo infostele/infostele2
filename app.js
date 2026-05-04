@@ -110,7 +110,9 @@ function navigateTo(pfad) { window.location.hash = pfad; }
 // LAYOUT-BAUSTEINE
 // ════════════════════════════════════════════════════════════════
 function intro(gruss, untertitel, animiert) {
-  if (animiert) {
+  // Default: animieren wann immer ein Untertitel da ist (Welleneffekt)
+  if (animiert === undefined) animiert = !!untertitel;
+  if (animiert && untertitel) {
     var spans2 = '';
     var inEm = false; var idxLetter = 0;
     for (var j = 0; j < untertitel.length; j++) {
@@ -424,9 +426,18 @@ function rerenderListe() {
 function aktualisiereTreffer(l) {
   var rohdaten = window[l.info.name] || [];
   var n = rohdaten.map(normalisiere);
-  var g = filterAnwenden(n);
+  // Nur Touren mit Filterdaten in den Zähler – sonst stimmt 16 ≠ 17
+  var voll = n.filter(istVollstaendig);
+  var g = filterAnwenden(voll);
+  var unvoll = n.length - voll.length;
   var el = document.getElementById('filter-treffer');
-  if (el) el.innerHTML = '<strong>' + g.length + '</strong> von <strong>' + n.length + '</strong> Touren angezeigt';
+  if (el) {
+    var txt = '<strong>' + g.length + '</strong> von <strong>' + voll.length + '</strong> Touren angezeigt';
+    if (unvoll > 0) {
+      txt += ' · <span class="treffer-extra">+' + unvoll + ' in Vorbereitung</span>';
+    }
+    el.innerHTML = txt;
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -474,33 +485,69 @@ function renderListe(ziel, slug) {
 // ════════════════════════════════════════════════════════════════
 // ETAPPEN-LISTE (mit Sticky-Region + Filter)
 // ════════════════════════════════════════════════════════════════
+// Prüft, ob eine Tour genug Daten hat, um in Filtern aufzutauchen.
+// Ohne Schwierigkeit oder Distanz fällt sie sonst in jedem Filter raus
+// und der Gesamtcount stimmt nicht mit der Summe der Pillen-Buckets überein.
+function istVollstaendig(n) {
+  return !!(n.schwierigkeit && n.km);
+}
+
 function baueListenInhalt(slug, info, detailTyp) {
   var rohdaten = window[info.name] || [];
   var normiert = rohdaten.map(normalisiere);
-  var gefiltert = filterAnwenden(normiert);
 
-  if (!gefiltert.length) {
+  // Trennen in „filterbare" und „in Vorbereitung"
+  var voll   = [];
+  var unvoll = [];
+  normiert.forEach(function(n, i) {
+    n.__idx = i; // ursprünglichen Listenindex merken (für Detail-Routing)
+    if (istVollstaendig(n)) voll.push(n);
+    else unvoll.push(n);
+  });
+
+  var gefiltert = filterAnwenden(voll);
+
+  if (!gefiltert.length && !unvoll.length) {
     return '<div class="hinweis">Keine Touren passen zu deiner Auswahl. Bitte Filter anpassen oder zurücksetzen.</div>';
   }
 
-  return gefiltert.map(function(n) {
-    var idx = normiert.indexOf(n);
-    var sw = swKlasse(n.schwierigkeit);
-    var meta = '';
-    if (n.km)      meta += '<span><strong>' + escapeHtml(n.km) + (String(n.km).indexOf('km')<0 ? ' km' : '') + '</strong></span>';
-    if (n.dauer)   meta += '<span>⏱ ' + escapeHtml(n.dauer) + '</span>';
-    if (n.aufstieg) meta += '<span>↑ ' + escapeHtml(n.aufstieg) + '</span>';
-    if (n.schwierigkeit) meta += '<span class="diff-' + sw + '">● ' + escapeHtml(n.schwierigkeit) + '</span>';
+  var html = '';
+  if (gefiltert.length) {
+    html += gefiltert.map(function(n) {
+      return baueListenEintrag(n, slug, detailTyp, false);
+    }).join('');
+  } else {
+    html += '<div class="hinweis">Keine Touren passen zu deiner Auswahl. Bitte Filter anpassen oder zurücksetzen.</div>';
+  }
 
-    return '<button class="eintrag" onclick="navigateTo(\'detail/' + detailTyp + '/' + slug + '_' + idx + '\')">'
-      + '<div class="eintrag-text">'
-        + '<div class="eintrag-titel">' + escapeHtml(n.titel) + '</div>'
-        + (n.subtitle ? '<div class="eintrag-sub">' + escapeHtml(n.subtitle) + '</div>' : '')
-        + (meta ? '<div class="eintrag-meta">' + meta + '</div>' : '')
-      + '</div>'
-      + '<div class="eintrag-pfeil">&rsaquo;</div>'
-    + '</button>';
-  }).join('');
+  // Touren in Vorbereitung am Ende, immer sichtbar (nicht von Filtern abhängig)
+  if (unvoll.length) {
+    html += '<div class="tour-vorbereitung">'
+         +  unvoll.length + ' weitere Tour' + (unvoll.length === 1 ? '' : 'en') + ' in Vorbereitung'
+         +  '</div>';
+    html += unvoll.map(function(n) {
+      return baueListenEintrag(n, slug, detailTyp, true);
+    }).join('');
+  }
+  return html;
+}
+
+function baueListenEintrag(n, slug, detailTyp, inVorbereitung) {
+  var sw = swKlasse(n.schwierigkeit);
+  var meta = '';
+  if (n.km)      meta += '<span><strong>' + escapeHtml(n.km) + (String(n.km).indexOf('km')<0 ? ' km' : '') + '</strong></span>';
+  if (n.dauer)   meta += '<span>⏱ ' + escapeHtml(n.dauer) + '</span>';
+  if (n.aufstieg) meta += '<span>↑ ' + escapeHtml(n.aufstieg) + '</span>';
+  if (n.schwierigkeit) meta += '<span class="diff-' + sw + '">● ' + escapeHtml(n.schwierigkeit) + '</span>';
+  var cls = 'eintrag' + (inVorbereitung ? ' in-vorbereitung' : '');
+  return '<button class="' + cls + '" onclick="navigateTo(\'detail/' + detailTyp + '/' + slug + '_' + n.__idx + '\')">'
+    + '<div class="eintrag-text">'
+      + '<div class="eintrag-titel">' + escapeHtml(n.titel) + '</div>'
+      + (n.subtitle ? '<div class="eintrag-sub">' + escapeHtml(n.subtitle) + '</div>' : '')
+      + (meta ? '<div class="eintrag-meta">' + meta + '</div>' : '')
+    + '</div>'
+    + '<div class="eintrag-pfeil">&rsaquo;</div>'
+  + '</button>';
 }
 
 function renderEtappenListe(ziel, slug, info, zurueckSlug, detailTyp) {
@@ -518,6 +565,15 @@ function renderEtappenListe(ziel, slug, info, zurueckSlug, detailTyp) {
     return;
   }
 
+  // Anfangs-Treffer-Display: nur vollständige Touren zählen
+  var initialNorm = daten.map(normalisiere);
+  var initialVoll = initialNorm.filter(istVollstaendig);
+  var initialUnvoll = initialNorm.length - initialVoll.length;
+  var trefferTxt = '<strong>' + initialVoll.length + '</strong> Touren angezeigt';
+  if (initialUnvoll > 0) {
+    trefferTxt += ' · <span class="treffer-extra">+' + initialUnvoll + ' in Vorbereitung</span>';
+  }
+
   // Sticky-Region: navBar + intro + filter-leiste
   // Beim Scrollen bleibt diese gesamte Box oben kleben
   ziel.innerHTML =
@@ -526,7 +582,7 @@ function renderEtappenListe(ziel, slug, info, zurueckSlug, detailTyp) {
       + intro(info.titel, info.untertitel)
       + '<div id="filter-leiste-wrapper">' + filterUI() + '</div>'
     + '</div>'
-    + '<div id="filter-treffer" class="filter-treffer"><strong>' + daten.length + '</strong> Touren angezeigt</div>'
+    + '<div id="filter-treffer" class="filter-treffer">' + trefferTxt + '</div>'
     + '<div class="liste" id="etappen-liste">' + baueListenInhalt(slug, info, detailTyp) + '</div>'
     + '<div class="spacer"></div>';
 }
@@ -617,7 +673,29 @@ function linkifyAndBreak(s) {
   html = html.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
   return '<p>' + html + '</p>';
 }
-function txt(s) { return linkifyAndBreak(s); }
+/* richText: erkennt automatisch ob es schon HTML-Markup enthält.
+   Wenn ja → unverändert (mit Linkifizierung) ausgeben.
+   Wenn nein → wie linkifyAndBreak behandeln (Plain-Text). */
+function richText(s) {
+  if (!s) return '';
+  var t = String(s).trim();
+  if (!t) return '';
+  // HTML-Erkennung: enthält Tags wie <strong>, <p>, <br>, <ul> etc.
+  var hasHtml = /<(?:strong|em|b|i|u|p|br|ul|ol|li|a\s|h[1-6]|div|span|table|tr|td|th)\b[^>]*>|<br\s*\/?>/i.test(t);
+  if (hasHtml) {
+    // Schon HTML – nur Plain-URLs verlinken (sofern nicht bereits in <a>)
+    // Einfache Heuristik: Wenn URL nicht in href steht, wird sie verlinkt
+    var html = t.replace(/(^|[^"'>=])(https?:\/\/[^\s<)"']+)/g,
+      '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
+    // Wenn der Text nicht mit einem Block-Element beginnt, in <p> wrappen
+    if (!/^\s*<(?:p|div|ul|ol|h[1-6]|table)\b/i.test(html)) {
+      html = '<p>' + html + '</p>';
+    }
+    return html;
+  }
+  return linkifyAndBreak(s);
+}
+function txt(s) { return richText(s); }
 
 function dropdown(titel, inhalt, offen) {
   if (!inhalt) return '';
@@ -631,29 +709,317 @@ function dropdown(titel, inhalt, offen) {
 }
 
 // ════════════════════════════════════════════════════════════════
-// ROUTE-DETAIL (einheitlich)
+// ROUTE-DETAIL (einheitlich – kanonische Reihenfolge der Dropdowns)
+// Funktioniert für ALLE Schemata:
+//   • Westerwaldsteig / Wäller Touren / Kleine Wäller   (objektbasiert)
+//   • Druidensteig                                       (sections-Schema)
+//   • Wiedweg                                            (HTML-Strings, eigene Felder)
+//   • Rennrad / Streckenradwege / Rundradwege / Gravel / MTB (Plain-Text-Strings)
+//
+// Reihenfolge der Dropdowns IMMER:
+//   1. Beschreibung (Über die Tour)
+//   2. Anfahrt
+//   3. Öffentliche Verkehrsmittel
+//   4. Parken
+//   5. Wegbeschreibung
+//   6. Sicherheitshinweise
+//   7. Ausrüstung
+//   8. Tipps
+//   9. Literatur
+//   10. Start
+//   11. Ziel
 // ════════════════════════════════════════════════════════════════
+
+// Kanonische Reihenfolge – KEY:LABEL
+var CANON_ORDER = [
+  ['beschreibung',  'Beschreibung'],
+  ['anfahrt',       'Anfahrt'],
+  ['oepnv',         'Öffentliche Verkehrsmittel'],
+  ['parken',        'Parken'],
+  ['wegbeschreibung', 'Wegbeschreibung'],
+  ['sicherheit',    'Sicherheitshinweise'],
+  ['ausruestung',   'Ausrüstung'],
+  ['tipps',         'Tipps'],
+  ['literatur',     'Literatur'],
+  ['start',         'Start'],
+  ['ziel',          'Ziel']
+];
+
+/* Mapping der Druidensteig-Section-Icons auf canonical Keys */
+var SECTION_ICON_MAP = {
+  'beschreibung': 'beschreibung',
+  'anfahrt':      'anfahrt',
+  'oepnv':        'oepnv',
+  'parken':       'parken',
+  'weg':          'wegbeschreibung',
+  'wegbeschreibung': 'wegbeschreibung',
+  'sicherheit':   'sicherheit',
+  'sicherheitshinweise': 'sicherheit',
+  'ausruestung':  'ausruestung',
+  'tipps':        'tipps',
+  'literatur':    'literatur',
+  'start':        'start',
+  'ziel':         'ziel'
+};
+
+function buildCanonicalSections(item) {
+  var sections = {}; // key -> html
+
+  // ── Pfad A: SECTIONS-SCHEMA (Druidensteig)
+  if (item.sections && Array.isArray(item.sections)) {
+    item.sections.forEach(function(sec) {
+      var icon = (sec.icon || '').toLowerCase();
+      // Profil überspringen (steckt schon in Stats-Grid)
+      if (icon === 'profil') return;
+      var key = SECTION_ICON_MAP[icon];
+      if (!key) {
+        // Fallback: anhand des Titels mappen
+        var t = (sec.title || '').toLowerCase();
+        if (t.indexOf('beschreib') >= 0) key = 'beschreibung';
+        else if (t.indexOf('anfahrt') >= 0) key = 'anfahrt';
+        else if (t.indexOf('öpnv') >= 0 || t.indexOf('öffentlich') >= 0) key = 'oepnv';
+        else if (t.indexOf('park') >= 0) key = 'parken';
+        else if (t.indexOf('weg') >= 0) key = 'wegbeschreibung';
+        else if (t.indexOf('sicher') >= 0) key = 'sicherheit';
+        else if (t.indexOf('ausrüst') >= 0 || t.indexOf('ausruest') >= 0) key = 'ausruestung';
+        else if (t.indexOf('tipp') >= 0) key = 'tipps';
+        else if (t.indexOf('literatur') >= 0) key = 'literatur';
+        else if (t.indexOf('start') >= 0) key = 'start';
+        else if (t.indexOf('ziel') >= 0) key = 'ziel';
+      }
+      if (key) sections[key] = sec.html || '';
+    });
+    return sections;
+  }
+
+  // ── Pfad B: STRUCTURED + RICH-TEXT (alle anderen Schemata)
+  // BESCHREIBUNG
+  if (item.description) {
+    var desc = '';
+    if (typeof item.description === 'object') {
+      if (item.description.headline) desc += '<p><strong>' + escapeHtml(item.description.headline) + '</strong></p>';
+      if (item.description.text)     desc += richText(item.description.text);
+    } else desc = richText(item.description);
+    if (desc) sections.beschreibung = desc;
+  }
+
+  // ANFAHRT
+  var anfahrt = '';
+  if (item.directions) {
+    if (typeof item.directions === 'object') {
+      if (item.directions.byCar) {
+        anfahrt += '<p><strong>Mit dem Auto:</strong></p>' + richText(item.directions.byCar);
+      }
+    } else {
+      anfahrt = richText(item.directions);
+    }
+  }
+  if (anfahrt) sections.anfahrt = anfahrt;
+
+  // ÖFFENTLICHE VERKEHRSMITTEL
+  var oepnv = '';
+  // Variante 1: directions.byPublicTransport (Wiedweg)
+  if (item.directions && typeof item.directions === 'object' && item.directions.byPublicTransport) {
+    oepnv += richText(item.directions.byPublicTransport);
+  }
+  // Variante 2: publicTransport-Objekt oder -String
+  if (item.publicTransport) {
+    if (typeof item.publicTransport === 'object') {
+      var pt = item.publicTransport;
+      if (pt.arrival)    oepnv += '<p><strong>Anfahrt mit Bahn/Bus:</strong></p>' + richText(pt.arrival);
+      if (pt.returnTrip) oepnv += '<p><strong>Rückfahrt:</strong></p>' + richText(pt.returnTrip);
+      if (pt.returnTripUrl) oepnv += '<p><a href="' + pt.returnTripUrl + '" target="_blank" rel="noopener">Fahrplan-PDF</a></p>';
+      if (pt.stops && pt.stops.length) {
+        oepnv += '<p><strong>Haltestellen:</strong></p><ul>';
+        pt.stops.forEach(function(s) {
+          oepnv += '<li><strong>' + escapeHtml(s.name||'') + '</strong>' + (s.note ? '<br>' + escapeHtml(s.note) : '') + '</li>';
+        });
+        oepnv += '</ul>';
+      }
+      if (pt.links && pt.links.length) {
+        oepnv += '<p><strong>Fahrplaninfos:</strong></p><ul>';
+        pt.links.forEach(function(l) {
+          oepnv += '<li><a href="' + l.url + '" target="_blank" rel="noopener">' + escapeHtml(l.label || l.url) + '</a></li>';
+        });
+        oepnv += '</ul>';
+      }
+      if (pt.taxis && pt.taxis.length) {
+        oepnv += '<p><strong>Taxiunternehmen:</strong></p><ul>';
+        pt.taxis.forEach(function(t) { oepnv += '<li>' + escapeHtml(t) + '</li>'; });
+        oepnv += '</ul>';
+      }
+      if (pt.sustainableTip) {
+        oepnv += '<p><strong>🌱 Nachhaltig anreisen:</strong></p>' + richText(pt.sustainableTip);
+        if (pt.sustainableTipUrls && pt.sustainableTipUrls.length) {
+          oepnv += '<p>';
+          pt.sustainableTipUrls.forEach(function(u, i) {
+            if (i > 0) oepnv += ' · ';
+            oepnv += '<a href="' + u.url + '" target="_blank" rel="noopener">' + escapeHtml(u.label || u.url) + '</a>';
+          });
+          oepnv += '</p>';
+        }
+      }
+      if (pt.moreInfoUrl) {
+        oepnv += '<p><a href="' + pt.moreInfoUrl + '" target="_blank" rel="noopener">Weitere Infos zur Anreise</a></p>';
+      }
+    } else {
+      oepnv += richText(item.publicTransport);
+    }
+  }
+  if (oepnv) sections.oepnv = oepnv;
+
+  // PARKEN
+  var parken = '';
+  // Variante 1: directions.parking (Wiedweg)
+  if (item.directions && typeof item.directions === 'object' && item.directions.parking) {
+    parken += richText(item.directions.parking);
+  }
+  // Variante 2: parking-Array oder -String
+  if (item.parking) {
+    if (Array.isArray(item.parking)) {
+      if (item.parking.length) {
+        parken += '<ul>';
+        item.parking.forEach(function(p) {
+          parken += '<li><strong>' + escapeHtml(p.location||'') + ':</strong>'
+            + (p.free ? '<br>kostenlos: ' + escapeHtml(p.free) : '')
+            + (p.paid ? '<br>gebührenpflichtig: ' + escapeHtml(p.paid) : '')
+            + '</li>';
+        });
+        parken += '</ul>';
+      }
+    } else {
+      parken += richText(item.parking);
+    }
+  }
+  if (parken) sections.parken = parken;
+
+  // WEGBESCHREIBUNG
+  var weg = '';
+  if (item.routeDescription) {
+    if (typeof item.routeDescription === 'object') {
+      if (item.routeDescription.general) weg += richText(item.routeDescription.general);
+      if (item.routeDescription.accessTrails && item.routeDescription.accessTrails.length) {
+        weg += '<p><strong>Zuwege:</strong></p><ul>';
+        item.routeDescription.accessTrails.forEach(function(t) { weg += '<li>' + escapeHtml(t) + '</li>'; });
+        weg += '</ul>';
+      }
+      if (item.routeDescription.accessTrailMarking) {
+        weg += '<p><strong>Markierung:</strong> ' + escapeHtml(item.routeDescription.accessTrailMarking) + '</p>';
+      }
+    } else {
+      weg = richText(item.routeDescription);
+    }
+  }
+  // Wiedweg nutzt wayDescription
+  if (!weg && item.wayDescription) weg = richText(item.wayDescription);
+  if (weg) sections.wegbeschreibung = weg;
+
+  // SICHERHEITSHINWEISE
+  var sicher = '';
+  if (item.safetyNotes) sicher += richText(item.safetyNotes);
+  if (item.safetyAppUrl) {
+    sicher += '<p><strong>App-Empfehlung:</strong> '
+      + '<a href="' + item.safetyAppUrl + '" target="_blank" rel="noopener">'
+      + 'Rheinland-Pfalz erleben</a></p>';
+  }
+  if (sicher) sections.sicherheit = sicher;
+
+  // AUSRÜSTUNG
+  if (item.equipment) sections.ausruestung = richText(item.equipment);
+
+  // TIPPS
+  var tipps = '';
+  if (item.tips) {
+    if (Array.isArray(item.tips)) {
+      if (item.tips.length) {
+        tipps += '<ul>';
+        item.tips.forEach(function(t) {
+          tipps += '<li><strong>' + escapeHtml(t.name||'') + '</strong>'
+            + (t.note ? '<br>' + escapeHtml(t.note) : '')
+            + (t.url ? '<br><a href="' + t.url + '" target="_blank" rel="noopener">' + t.url + '</a>' : '')
+            + '</li>';
+        });
+        tipps += '</ul>';
+      }
+    } else {
+      tipps = richText(item.tips);
+    }
+  }
+  if (tipps) sections.tipps = tipps;
+
+  // LITERATUR
+  var lit = '';
+  if (item.literature) {
+    if (Array.isArray(item.literature)) {
+      if (item.literature.length) {
+        lit += '<ul>';
+        item.literature.forEach(function(l) { lit += '<li>' + escapeHtml(l) + '</li>'; });
+        lit += '</ul>';
+      }
+    } else {
+      lit = richText(item.literature);
+    }
+  }
+  if (lit) sections.literatur = lit;
+
+  // START
+  var start = '';
+  if (item.start) {
+    if (typeof item.start === 'object') {
+      start = '<p><strong>' + escapeHtml(item.start.name||'') + '</strong>'
+        + (item.start.address ? '<br>' + escapeHtml(item.start.address) : '')
+        + (item.start.coordinates ? '<br><em>' + escapeHtml(item.start.coordinates) + '</em>' : '')
+        + '</p>';
+    } else {
+      start = richText(item.start);
+    }
+  } else if (item.startPoint) {
+    start = richText(item.startPoint);
+  }
+  if (start) sections.start = start;
+
+  // ZIEL
+  var ziel = '';
+  if (item.destination) {
+    if (typeof item.destination === 'object') {
+      ziel = '<p><strong>' + escapeHtml(item.destination.name||'') + '</strong>'
+        + (item.destination.address ? '<br>' + escapeHtml(item.destination.address) : '')
+        + (item.destination.coordinates ? '<br><em>' + escapeHtml(item.destination.coordinates) + '</em>' : '')
+        + '</p>';
+    } else {
+      ziel = richText(item.destination);
+    }
+  } else if (item.endPoint) {
+    ziel = richText(item.endPoint);
+  }
+  if (ziel) sections.ziel = ziel;
+
+  return sections;
+}
+
 function renderRouteDetail(ziel, item, info, zurueck) {
   var n = normalisiere(item);
   var sw = swKlasse(n.schwierigkeit);
   var diffBg = sw ? 'diff-' + sw + '-bg' : '';
 
-  var html = navBar(zurueck, info.breadcrumb)
-    + intro(info.titel, info.untertitel || '')
-    + '<div class="detail-section">'
-    + '<h2 class="detail-titel">' + escapeHtml(n.titel) + '</h2>';
+  // STICKY HEADER: nav + intro + Etappentitel + Schwierigkeit/GPX/Karte
+  var stickyTopRow = '<div class="diff-gpx-row">';
+  if (n.schwierigkeit) stickyTopRow += '<span class="diff-pill ' + diffBg + '">' + escapeHtml(n.schwierigkeit) + '</span>';
+  if (n.gpxUrl) stickyTopRow += '<a class="btn-action btn-gpx" href="' + n.gpxUrl + '" target="_blank" rel="noopener">📥 GPX</a>';
+  if (n.tourenplanerUrl) stickyTopRow += '<a class="btn-action outline" href="' + n.tourenplanerUrl + '" target="_blank" rel="noopener">🗺️ Karte</a>';
+  stickyTopRow += '</div>';
 
+  var html = '<div class="sticky-detail">'
+    + navBar(zurueck, info.breadcrumb)
+    + intro(info.titel, info.untertitel || '')
+    + '<div class="sticky-detail-titel">' + escapeHtml(n.titel) + '</div>'
+    + stickyTopRow
+    + '</div>';
+
+  // STATS-GRID (im scrollenden Bereich)
+  html += '<div class="detail-section">';
   if (n.subtitle) html += '<div class="detail-subtitle">' + escapeHtml(n.subtitle) + '</div>';
 
-  // Schwierigkeit + GPX + Karte
-  var topRow = '<div class="diff-gpx-row">';
-  if (n.schwierigkeit) topRow += '<span class="diff-pill ' + diffBg + '">' + escapeHtml(n.schwierigkeit) + '</span>';
-  if (n.gpxUrl) topRow += '<a class="btn-action btn-gpx" href="' + n.gpxUrl + '" target="_blank" rel="noopener">📥 GPX</a>';
-  if (n.tourenplanerUrl) topRow += '<a class="btn-action outline" href="' + n.tourenplanerUrl + '" target="_blank" rel="noopener">🗺️ Karte</a>';
-  topRow += '</div>';
-  html += topRow;
-
-  // Stats
   var sList = [];
   var addStat = function(label, val) { if (val) sList.push('<div class="stat"><div class="stat-label">' + label + '</div><div class="stat-wert">' + escapeHtml(val) + '</div></div>'); };
   addStat('Distanz', n.km ? (n.km + (String(n.km).indexOf('km')<0 ? ' km' : '')) : '');
@@ -664,80 +1030,21 @@ function renderRouteDetail(ziel, item, info, zurueck) {
   addStat('Tiefster Punkt', n.tiefster);
   if (sList.length) html += '<div class="stats-grid">' + sList.join('') + '</div>';
 
-  // Wenn SECTIONS-Schema (Druidensteig, Wiedweg)
-  if (n.sections && Array.isArray(n.sections)) {
-    var firstShown = false;
-    n.sections.forEach(function(sec) {
-      if (sec.icon === 'profil' || (sec.title || '').toLowerCase().indexOf('profil') >= 0) return;
-      html += dropdown(sec.title, sec.html, !firstShown);
+  // KANONISCHE DROPDOWNS in fester Reihenfolge
+  var sections = buildCanonicalSections(item);
+  var firstShown = false;
+  for (var i = 0; i < CANON_ORDER.length; i++) {
+    var key = CANON_ORDER[i][0];
+    var label = CANON_ORDER[i][1];
+    if (sections[key]) {
+      html += dropdown(label, sections[key], !firstShown);
       firstShown = true;
-    });
-  } else {
-    // STANDARD-Schema
-    if (n.description) {
-      var inhalt = '';
-      if (typeof n.description === 'object') {
-        if (n.description.headline) inhalt += '<p><strong>' + escapeHtml(n.description.headline) + '</strong></p>';
-        if (n.description.text)     inhalt += linkifyAndBreak(n.description.text);
-      } else inhalt = linkifyAndBreak(n.description);
-      html += dropdown('Über die Tour', inhalt, true);
     }
-    if (n.routeDescription) {
-      var rb = '';
-      if (typeof n.routeDescription === 'object') {
-        if (n.routeDescription.general) rb += linkifyAndBreak(n.routeDescription.general);
-        if (n.routeDescription.accessTrails && n.routeDescription.accessTrails.length) {
-          rb += '<p><strong>Zuwege:</strong></p><ul>';
-          n.routeDescription.accessTrails.forEach(function(t) { rb += '<li>' + escapeHtml(t) + '</li>'; });
-          rb += '</ul>';
-        }
-        if (n.routeDescription.accessTrailMarking) rb += '<p><strong>Markierung:</strong> ' + escapeHtml(n.routeDescription.accessTrailMarking) + '</p>';
-      } else rb = linkifyAndBreak(n.routeDescription);
-      html += dropdown('Wegbeschreibung', rb);
-    }
-    if (n.start || n.destination) {
-      var sd = '';
-      if (n.start) sd += '<p><strong>Start:</strong> ' + escapeHtml(n.start.name||'')
-        + (n.start.address ? '<br>' + escapeHtml(n.start.address) : '') + '</p>';
-      if (n.destination) sd += '<p><strong>Ziel:</strong> ' + escapeHtml(n.destination.name||'')
-        + (n.destination.address ? '<br>' + escapeHtml(n.destination.address) : '') + '</p>';
-      html += dropdown('Start &amp; Ziel', sd);
-    }
-    var anr = '';
-    if (n.directions && n.directions.byCar) anr += '<p><strong>Mit dem Auto:</strong></p>' + linkifyAndBreak(n.directions.byCar);
-    if (n.publicTransport) {
-      if (typeof n.publicTransport === 'object') {
-        if (n.publicTransport.arrival) anr += '<p><strong>Mit Bahn/Bus:</strong></p>' + linkifyAndBreak(n.publicTransport.arrival);
-        if (n.publicTransport.returnTrip) anr += '<p><strong>Rückfahrt:</strong></p>' + linkifyAndBreak(n.publicTransport.returnTrip);
-      } else anr += '<p><strong>Mit Bahn/Bus:</strong></p>' + linkifyAndBreak(n.publicTransport);
-    }
-    if (n.parking) {
-      if (Array.isArray(n.parking)) {
-        anr += '<p><strong>Parken:</strong></p><ul>';
-        n.parking.forEach(function(p) {
-          anr += '<li><strong>' + escapeHtml(p.location||'') + ':</strong>'
-            + (p.free ? ' kostenlos: ' + escapeHtml(p.free) : '')
-            + (p.paid ? ' · gebührenpflichtig: ' + escapeHtml(p.paid) : '') + '</li>';
-        });
-        anr += '</ul>';
-      } else anr += '<p><strong>Parken:</strong></p>' + linkifyAndBreak(n.parking);
-    }
-    if (anr) html += dropdown('Anreise', anr);
-    if (n.tips && Array.isArray(n.tips) && n.tips.length) {
-      var tInhalt = '<ul>';
-      n.tips.forEach(function(t) {
-        tInhalt += '<li><strong>' + escapeHtml(t.name||'') + '</strong>'
-          + (t.note ? '<br>' + escapeHtml(t.note) : '')
-          + (t.url ? '<br><a href="' + t.url + '" target="_blank" rel="noopener">' + t.url + '</a>' : '')
-          + '</li>';
-      });
-      tInhalt += '</ul>';
-      html += dropdown('Tipps für unterwegs', tInhalt);
-    }
-    var sai = '';
-    if (n.safetyNotes) sai += '<p><strong>Sicherheit:</strong></p>' + linkifyAndBreak(n.safetyNotes);
-    if (n.equipment)   sai += '<p><strong>Ausrüstung:</strong></p>' + linkifyAndBreak(n.equipment);
-    if (sai) html += dropdown('Sicherheit &amp; Ausrüstung', sai);
+  }
+
+  // Hinweis falls noch keine Detail-Daten
+  if (!firstShown) {
+    html += '<div class="hinweis">Detail-Informationen zu dieser Tour werden noch ergänzt.</div>';
   }
 
   html += '</div><div class="spacer"></div>';
