@@ -93,7 +93,8 @@ var DATA_RADFAHREN_STRECKENRADWEGE = [
     "tips": "In Bad Marienberg den Apothekergarten und den Barfußweg der Sinne besuchen.",
     "literature": "Kostenfreie Prospektbestellung unter westerwald.info",
     "start": "Linz: Fähre, Rheinradweg",
-    "destination": "Diez: Ecke Alter Markt/Pfaffengasse"
+    "destination": "Diez: Ecke Alter Markt/Pfaffengasse",
+    "safetyNotes": "Streckenradwege im Westerwald sind meist gut ausgebaut, aber beachten Sie:\n\n• Helmpflicht beachten – auch auf flacheren Abschnitten\n• An Querungen mit dem Auto- oder Wirtschaftsverkehr besondere Vorsicht\n• Auf landwirtschaftlich genutzten Strecken kann gelegentlich Schmutz oder Splitt auf der Fahrbahn liegen\n• Tunnel- und Brückenpassagen mit Licht durchqueren\n• Bei Mehrtagestouren: Etappen so planen, dass Unterkünfte und Verpflegungsmöglichkeiten erreichbar sind\n• Notruf: 112 (Rettung), 110 (Polizei)"
   },
   {
     "id": "sr-05",
@@ -215,7 +216,8 @@ var DATA_RADFAHREN_STRECKENRADWEGE = [
     "tips": "Besonders Sportliche testen den Golfplatz bei Stahlhofen am Wiesensee und nehmen anschliessend ein erfrischendes Bad im See.",
     "literature": "Kostenfreie Prospektbestellung unter westerwald.info",
     "start": "Hachenburg, Bahnhof",
-    "destination": "Hachenburg, Bahnhof"
+    "destination": "Hachenburg, Bahnhof",
+    "safetyNotes": "Streckenradwege im Westerwald sind meist gut ausgebaut, aber beachten Sie:\n\n• Helmpflicht beachten – auch auf flacheren Abschnitten\n• An Querungen mit dem Auto- oder Wirtschaftsverkehr besondere Vorsicht\n• Auf landwirtschaftlich genutzten Strecken kann gelegentlich Schmutz oder Splitt auf der Fahrbahn liegen\n• Tunnel- und Brückenpassagen mit Licht durchqueren\n• Bei Mehrtagestouren: Etappen so planen, dass Unterkünfte und Verpflegungsmöglichkeiten erreichbar sind\n• Notruf: 112 (Rettung), 110 (Polizei)"
   },
   {
     "id": "sr-10",
@@ -236,7 +238,8 @@ var DATA_RADFAHREN_STRECKENRADWEGE = [
     "tips": "In Nisterberg steht ein alter Backes (Gemeindebackofen), in dem bis heute Steinofenbrot gebacken wird. Das jaehrliche Backesfest zieht zahlreiche Besucher an.",
     "literature": "Kombi-Flyer Rad/Wandern, kostenfrei erhaeltlich.",
     "start": "Fuchskaute, Lodge",
-    "destination": "Hachenburg, Bahnhof"
+    "destination": "Hachenburg, Bahnhof",
+    "equipment": "Empfohlene Ausrüstung für Streckenradtouren:\n\n• Verkehrssicheres Trekking- oder Reiserad mit Schutzblechen und Gepäckträger\n• Helm\n• Front- und Rücklicht (auch tagsüber empfehlenswert)\n• Gepäcktasche oder Rucksack für Wechselkleidung, Verpflegung, Werkzeug\n• Ausreichend Wasser, energiereiche Snacks\n• Mini-Werkzeug, Ersatzschlauch, Pumpe, Flickzeug\n• Regenjacke und -hose, dünne Funktionsjacke für kühle Abschnitte\n• GPS oder Smartphone-Halterung mit GPX-Track\n• Erste-Hilfe-Set\n• Bei Mehrtagestouren: Powerbank, Navigations-Backup auf Papier"
   },
   {
     "id": "sr-11",
@@ -259,7 +262,8 @@ var DATA_RADFAHREN_STRECKENRADWEGE = [
     "tips": "Schutzhütten laden unterwegs zur Pause ein, in den groesseren Ortschaften gibt es Einkehrmoelichkeiten. Fuer alle Faelle Brotzeit und Getraenk mitnehmen.",
     "literature": "Kombi-Flyer Rad/Wandern, kostenfrei erhaeltlich.",
     "start": "Grenzau",
-    "destination": "Nomborn, Landhotel Studentenmuehle"
+    "destination": "Nomborn, Landhotel Studentenmuehle",
+    "equipment": "Empfohlene Ausrüstung für Streckenradtouren:\n\n• Verkehrssicheres Trekking- oder Reiserad mit Schutzblechen und Gepäckträger\n• Helm\n• Front- und Rücklicht (auch tagsüber empfehlenswert)\n• Gepäcktasche oder Rucksack für Wechselkleidung, Verpflegung, Werkzeug\n• Ausreichend Wasser, energiereiche Snacks\n• Mini-Werkzeug, Ersatzschlauch, Pumpe, Flickzeug\n• Regenjacke und -hose, dünne Funktionsjacke für kühle Abschnitte\n• GPS oder Smartphone-Halterung mit GPX-Track\n• Erste-Hilfe-Set\n• Bei Mehrtagestouren: Powerbank, Navigations-Backup auf Papier"
   },
   {
     "id": "sr-12",
@@ -280,7 +284,8 @@ var DATA_RADFAHREN_STRECKENRADWEGE = [
     "tips": "Fuer diesen anspruchsvollen Streckenabschnitt sollte man sich viel Zeit nehmen, um die einzelnen Stationen zu geniessen. Also frueh losfahren!",
     "literature": "Kombi-Flyer Rad/Wandern, kostenfrei erhaeltlich.",
     "start": "Nomborn, Landhotel Studentenmuehle",
-    "destination": "Fuchskaute, Lodge"
+    "destination": "Fuchskaute, Lodge",
+    "equipment": "Empfohlene Ausrüstung für Streckenradtouren:\n\n• Verkehrssicheres Trekking- oder Reiserad mit Schutzblechen und Gepäckträger\n• Helm\n• Front- und Rücklicht (auch tagsüber empfehlenswert)\n• Gepäcktasche oder Rucksack für Wechselkleidung, Verpflegung, Werkzeug\n• Ausreichend Wasser, energiereiche Snacks\n• Mini-Werkzeug, Ersatzschlauch, Pumpe, Flickzeug\n• Regenjacke und -hose, dünne Funktionsjacke für kühle Abschnitte\n• GPS oder Smartphone-Halterung mit GPX-Track\n• Erste-Hilfe-Set\n• Bei Mehrtagestouren: Powerbank, Navigations-Backup auf Papier"
   },
   {
     "id": "sr-13",
@@ -302,7 +307,8 @@ var DATA_RADFAHREN_STRECKENRADWEGE = [
     "tips": "Fuer die WW1-Tour Schwimmsachen einpacken, hier am Waldsee gibt es eine schoene Bademoeglichkeit. Ein Fernglas ist ebenfalls empfehlenswert.",
     "literature": "Kombi-Flyer Rad/Wandern, kostenfrei erhaeltlich.",
     "start": "Hachenburg, Bahnhof",
-    "destination": "Grenzau"
+    "destination": "Grenzau",
+    "equipment": "Empfohlene Ausrüstung für Streckenradtouren:\n\n• Verkehrssicheres Trekking- oder Reiserad mit Schutzblechen und Gepäckträger\n• Helm\n• Front- und Rücklicht (auch tagsüber empfehlenswert)\n• Gepäcktasche oder Rucksack für Wechselkleidung, Verpflegung, Werkzeug\n• Ausreichend Wasser, energiereiche Snacks\n• Mini-Werkzeug, Ersatzschlauch, Pumpe, Flickzeug\n• Regenjacke und -hose, dünne Funktionsjacke für kühle Abschnitte\n• GPS oder Smartphone-Halterung mit GPX-Track\n• Erste-Hilfe-Set\n• Bei Mehrtagestouren: Powerbank, Navigations-Backup auf Papier"
   },
   {
     "id": "sr-14",
@@ -322,7 +328,9 @@ var DATA_RADFAHREN_STRECKENRADWEGE = [
     "routeDescription": "Streckencharakter: 20 km Forst-, Wirtschaftswege und Radwege, 1,5 km auf Strassen innerorts ohne Radwege, 2,5 km auf Strassen ausserorts ohne Radwege. Die Strecke ist vollstaendig asphaltiert. Fuer alle geeignet. Nach Norden bestaendig leicht ansteigend, aber keine besonderen Kraefte erforderlich. Nach Sueden rollt es von alleine.",
     "literature": "Radwander- und Mountainbikekarte Westerwald Nord Kompass Verlag Massstab 1:50.000",
     "start": "Landesgrenze zwischen Troembach und Hilchenbach - weiter nach Meschede an der Ruhr, Nordrhein-Westfalen",
-    "destination": "Kirchen (Sieg)"
+    "destination": "Kirchen (Sieg)",
+    "safetyNotes": "Streckenradwege im Westerwald sind meist gut ausgebaut, aber beachten Sie:\n\n• Helmpflicht beachten – auch auf flacheren Abschnitten\n• An Querungen mit dem Auto- oder Wirtschaftsverkehr besondere Vorsicht\n• Auf landwirtschaftlich genutzten Strecken kann gelegentlich Schmutz oder Splitt auf der Fahrbahn liegen\n• Tunnel- und Brückenpassagen mit Licht durchqueren\n• Bei Mehrtagestouren: Etappen so planen, dass Unterkünfte und Verpflegungsmöglichkeiten erreichbar sind\n• Notruf: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Streckenradtouren:\n\n• Verkehrssicheres Trekking- oder Reiserad mit Schutzblechen und Gepäckträger\n• Helm\n• Front- und Rücklicht (auch tagsüber empfehlenswert)\n• Gepäcktasche oder Rucksack für Wechselkleidung, Verpflegung, Werkzeug\n• Ausreichend Wasser, energiereiche Snacks\n• Mini-Werkzeug, Ersatzschlauch, Pumpe, Flickzeug\n• Regenjacke und -hose, dünne Funktionsjacke für kühle Abschnitte\n• GPS oder Smartphone-Halterung mit GPX-Track\n• Erste-Hilfe-Set\n• Bei Mehrtagestouren: Powerbank, Navigations-Backup auf Papier"
   },
   {
     "id": "sr-15",

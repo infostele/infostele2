@@ -19,7 +19,8 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "equipment": "Wir empfehlen ein Fernglas mitzunehmen, damit die vielen schönen Aussichtspunkte noch besser wahrgenommen werden können.",
     "tips": "Kleine Läden und Eisdielen, ein Regionalladen mit ca. 120 ProduzentInnen aus der Umgebung und vielfältige Gastronomie in Altenkirchen lohnen den Besuch.",
     "start": "Park- und Ride Parkplatz am Bahnhof, Konrad-Adenauer-Platz, 57610 Altenkirchen",
-    "destination": "Park- und Ride Parkplatz am Bahnhof, Konrad-Adenauer-Platz, 57610 Altenkirchen"
+    "destination": "Park- und Ride Parkplatz am Bahnhof, Konrad-Adenauer-Platz, 57610 Altenkirchen",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)"
   },
   {
     "id": "rr-02",
@@ -165,7 +166,8 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "safetyNotes": "Die Tour ist nicht ausgeschildert, daher Karte bzw. GPX-Daten mit auf die Fahrt nehmen.",
     "tips": "Wenn der Hofverkauf beim Heinrichshof geschlossen ist, gibt es den Hofkäse auch im 24 Stunden Hofladen in Kaffroth.",
     "start": "Am Kirmesplatz, 57632 Flammersfeld",
-    "destination": "Am Kirmesplatz, 57632 Flammersfeld"
+    "destination": "Am Kirmesplatz, 57632 Flammersfeld",
+    "equipment": "Empfohlene Ausrüstung für Rundtouren im Westerwald:\n\n• Verkehrssicheres Rad (Bremsen, Beleuchtung, Reflektoren, Klingel)\n• Helm\n• Ausreichend Wasser und kleiner Snack – Verpflegungsstationen sind unterwegs nicht überall vorhanden\n• Mini-Werkzeug, Ersatzschlauch, Pumpe\n• Wetterfeste, atmungsaktive Kleidung in Lagen, Regenjacke\n• GPS oder Smartphone mit GPX-Track\n• Erste-Hilfe-Set für unterwegs\n• Bei längeren Touren: Powerbank für GPS/Handy"
   },
   {
     "id": "rr-08",
@@ -214,7 +216,8 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "tips": "Besonders Sportliche testen den Golfplatz bei Stahlhofen am Wiesensee und nehmen anschließend ein erfrischendes Bad im See.",
     "literature": "Kostenfreie Prospektbestellung (westerwald.info)",
     "start": "Hachenburg, Bahnhof",
-    "destination": "Hachenburg, Bahnhof"
+    "destination": "Hachenburg, Bahnhof",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)"
   },
   {
     "id": "rr-10",
@@ -261,7 +264,9 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "tips": "Von Mai bis Oktober ist sonntags auch die Museumsscheune in Helmenzen geöffnet. Sie liegt gleich am Startpunkt unserer Tour.",
     "literature": "Topographische Karte 1:25.000, Blatt 1, Nördlicher Westerwald, 5. Auflage 2015, Kosten: 3 Euro, erhältlich im Rathaus Flammersfeld oder im UNIKUM-Regionalladen, Bahnhofstr. 26, 57610 Altenkirchen",
     "start": "Parkplatz am Landgasthof Westerwälder Hof, 57612 Helmenzen",
-    "destination": "Parkplatz am Landgasthof Westerwälder Hof, 57612 Helmenzen"
+    "destination": "Parkplatz am Landgasthof Westerwälder Hof, 57612 Helmenzen",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rundtouren im Westerwald:\n\n• Verkehrssicheres Rad (Bremsen, Beleuchtung, Reflektoren, Klingel)\n• Helm\n• Ausreichend Wasser und kleiner Snack – Verpflegungsstationen sind unterwegs nicht überall vorhanden\n• Mini-Werkzeug, Ersatzschlauch, Pumpe\n• Wetterfeste, atmungsaktive Kleidung in Lagen, Regenjacke\n• GPS oder Smartphone mit GPX-Track\n• Erste-Hilfe-Set für unterwegs\n• Bei längeren Touren: Powerbank für GPS/Handy"
   },
   {
     "id": "rr-12",
@@ -284,7 +289,9 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "tips": "Oberhalb der Ortschaft Nassen lohnt sich ein Abstecher zum ehem. Kloster Marienthal, heute Restaurantbetrieb. Hierzu der Ausschilderung \"Westerwald-Schleife\" folgen.",
     "literature": "Topographische Rad- und Wanderkarte 1:25.000, Blatt 1, Nördlicher Westerwald, 5. Auflage 2015, Kosten: 3 Euro, erhältlich im Rathaus Flammersfeld oder im UNIKUM-Regionalladen, Bahnhofstr. 26, 57610 Altenkirchen",
     "start": "Parkplatz Dorfgemeinschaftshaus, Siegener Str. 48, 57636 Mammelzen",
-    "destination": "Parkplatz Dorfgemeinschaftshaus, Siegener Str. 48, 57636 Mammelzen"
+    "destination": "Parkplatz Dorfgemeinschaftshaus, Siegener Str. 48, 57636 Mammelzen",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rundtouren im Westerwald:\n\n• Verkehrssicheres Rad (Bremsen, Beleuchtung, Reflektoren, Klingel)\n• Helm\n• Ausreichend Wasser und kleiner Snack – Verpflegungsstationen sind unterwegs nicht überall vorhanden\n• Mini-Werkzeug, Ersatzschlauch, Pumpe\n• Wetterfeste, atmungsaktive Kleidung in Lagen, Regenjacke\n• GPS oder Smartphone mit GPX-Track\n• Erste-Hilfe-Set für unterwegs\n• Bei längeren Touren: Powerbank für GPS/Handy"
   },
   {
     "id": "rr-13",
@@ -402,7 +409,9 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "tips": "Ein selbst mitgebrachtes Abschlusspicknick am Bismarckturm, mit einer tollen Aussicht über die Stadt, macht den Tag zu einer gelungenen Tour.",
     "literature": "Karte mit Tourenverlauf und Beschreibung der Hohlwege: http://www.fleischer-amteroth.de/resources/Hohlweg-Fahrradtour.pdf",
     "start": "Parkplatz Heimstraße, gegenüber Koblenzerstr. 25, 57610 Altenkirchen",
-    "destination": "Parkplatz Heimstraße, gegenüber Koblenzerstr. 25, 57610 Altenkirchen"
+    "destination": "Parkplatz Heimstraße, gegenüber Koblenzerstr. 25, 57610 Altenkirchen",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rundtouren im Westerwald:\n\n• Verkehrssicheres Rad (Bremsen, Beleuchtung, Reflektoren, Klingel)\n• Helm\n• Ausreichend Wasser und kleiner Snack – Verpflegungsstationen sind unterwegs nicht überall vorhanden\n• Mini-Werkzeug, Ersatzschlauch, Pumpe\n• Wetterfeste, atmungsaktive Kleidung in Lagen, Regenjacke\n• GPS oder Smartphone mit GPX-Track\n• Erste-Hilfe-Set für unterwegs\n• Bei längeren Touren: Powerbank für GPS/Handy"
   },
   {
     "id": "rr-18",
@@ -424,7 +433,9 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "tips": "In Werkhausen gibt es einen kleinen Wander-Parcours \"Weg der Sinne\". Für Familien mit Kindern unbedingt zu empfehlen.",
     "literature": "Topographische Karte 1:25.000, Blatt 1, Nördlicher Westerwald, 5. Auflage 2015, Kosten: 3,- Euro (erhältlich über die VG Altenkirchen-Flammersfeld oder im UNIKUM-Regionalladen, Altenkirchen)",
     "start": "Parkplatz am Hotel Sonnenhof, Kölner Str. 33, 57635 Weyerbusch",
-    "destination": "Parkplatz am Hotel Sonnenhof, Kölner Str. 33, 57635 Weyerbusch"
+    "destination": "Parkplatz am Hotel Sonnenhof, Kölner Str. 33, 57635 Weyerbusch",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rundtouren im Westerwald:\n\n• Verkehrssicheres Rad (Bremsen, Beleuchtung, Reflektoren, Klingel)\n• Helm\n• Ausreichend Wasser und kleiner Snack – Verpflegungsstationen sind unterwegs nicht überall vorhanden\n• Mini-Werkzeug, Ersatzschlauch, Pumpe\n• Wetterfeste, atmungsaktive Kleidung in Lagen, Regenjacke\n• GPS oder Smartphone mit GPX-Track\n• Erste-Hilfe-Set für unterwegs\n• Bei längeren Touren: Powerbank für GPS/Handy"
   },
   {
     "id": "rr-19",
@@ -470,7 +481,9 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "tips": "In Heuberg (hinter dem Wasserhäuschen, links der Raiffeisenstraße) gibt es einen tollen Aussichtspunkt mit \"Fernsicht-Markierungstisch\". Ein lohnender Abstecher.",
     "literature": "Topographische Karte 1:25.000, Blatt 1, Nördlicher Westerwald, 5. Auflage 2015, Kosten: 3,- Euro (erhältlich über die VG Altenkirchen-Flammersfeld oder im UNIKUM-Regionalladen, Altenkirchen)",
     "start": "Dorfgemeinschaftshaus Hilkhausen, Talweg 6, 57635 Weyerbusch-Hilkhausen",
-    "destination": "Dorfgemeinschaftshaus Hilkhausen, Talweg 6, 57635 Weyerbusch-Hilkhausen"
+    "destination": "Dorfgemeinschaftshaus Hilkhausen, Talweg 6, 57635 Weyerbusch-Hilkhausen",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rundtouren im Westerwald:\n\n• Verkehrssicheres Rad (Bremsen, Beleuchtung, Reflektoren, Klingel)\n• Helm\n• Ausreichend Wasser und kleiner Snack – Verpflegungsstationen sind unterwegs nicht überall vorhanden\n• Mini-Werkzeug, Ersatzschlauch, Pumpe\n• Wetterfeste, atmungsaktive Kleidung in Lagen, Regenjacke\n• GPS oder Smartphone mit GPX-Track\n• Erste-Hilfe-Set für unterwegs\n• Bei längeren Touren: Powerbank für GPS/Handy"
   },
   {
     "id": "rr-21",
@@ -515,7 +528,9 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "routeDescription": "Die Radtour führt uns von Kircheib nach Neuenhof, wo einst eine frühmittelalterliche Burganlage, die Motte Broichhausen, stand. Ein ca. 5 m hoher Wohnhügel und Reste eines Wassergrabens erinnern an diese Turmhügelburg. Der kurze Abstecher dorthin ist mit Schilderhinweisen markiert.\n\nIn Neuenhof selbst fahren wir vorbei am Elvis Museum von Jonny Winters. Wir streifen die Dörfer Hirz-Maulsbach und nun geht es hinab ins Mehrbachtal. An der ehemaligen Hardtmühle (erste Erwähnung bereits im 14. Jahrhundert) vorbei und weiter nach Mehren, eines der schönsten Fachwerkdörfer im Westerwald. Der Ortskern steht unter Denkmalschutz.\n\nDie Mehrener Kirche (aus dem 12. Jahrhundert) ist ein typischer Vertreter der Basilika und gilt als Dokument der romanischen Baukunst. Wenig unterhalb der Kirche sollten wir unbedingt auch das \"Bullesje\", ein altes Dorfgefängnis aus dem 15./16. Jahrhundert besichtigen.\n\nBevor Kircheib erreicht ist, kann man noch einen Abstecher in die Schulstrasse machen, um sich dort den alten Backes anzusehen. Empfehlenswert ist auch noch der Besuch der romanischen Kirche in Kircheib (Kirchstraße), die bereits seit dem 12. Jahrhundert an diesem Ort steht.",
     "tips": "Wer eine längere Radtour sucht, kann ab Mehren einfach die Radtour 3 (15 km) einbinden. Einige Steigungen aber auch tolle Abfahrten kommen dann dazu.",
     "start": "Wanderparkplatz beim Friedhof Kircheib",
-    "destination": "Wanderparkplatz beim Friedhof Kircheib"
+    "destination": "Wanderparkplatz beim Friedhof Kircheib",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rundtouren im Westerwald:\n\n• Verkehrssicheres Rad (Bremsen, Beleuchtung, Reflektoren, Klingel)\n• Helm\n• Ausreichend Wasser und kleiner Snack – Verpflegungsstationen sind unterwegs nicht überall vorhanden\n• Mini-Werkzeug, Ersatzschlauch, Pumpe\n• Wetterfeste, atmungsaktive Kleidung in Lagen, Regenjacke\n• GPS oder Smartphone mit GPX-Track\n• Erste-Hilfe-Set für unterwegs\n• Bei längeren Touren: Powerbank für GPS/Handy"
   },
   {
     "id": "rr-23",
@@ -538,7 +553,9 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "tips": "Altenkirchen bietet mit seinen zahlreichen Gastronomiebetrieben eine gute Gelegenheit für eine ausgiebige Radlerpause.",
     "literature": "Topographische Karte 1:25.000, Blatt 1, Nördlicher Westerwald, 5. Auflage 2015, Kosten: 3,- Euro. Erhältlich im Rathaus Flammersfeld oder im UNIKUM-Regionalladen, Bahnhofstr. 26, 57610 Altenkirchen",
     "start": "Parkplatz beim Friedhof in 57614 Oberwambach",
-    "destination": "Parkplatz beim Friedhof in 57614 Oberwambach"
+    "destination": "Parkplatz beim Friedhof in 57614 Oberwambach",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rundtouren im Westerwald:\n\n• Verkehrssicheres Rad (Bremsen, Beleuchtung, Reflektoren, Klingel)\n• Helm\n• Ausreichend Wasser und kleiner Snack – Verpflegungsstationen sind unterwegs nicht überall vorhanden\n• Mini-Werkzeug, Ersatzschlauch, Pumpe\n• Wetterfeste, atmungsaktive Kleidung in Lagen, Regenjacke\n• GPS oder Smartphone mit GPX-Track\n• Erste-Hilfe-Set für unterwegs\n• Bei längeren Touren: Powerbank für GPS/Handy"
   },
   {
     "id": "rr-24",
@@ -611,7 +628,8 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "tips": "Gern besuche ich die Hausgalerie Ursula Meister in Bad Marienberg, denn die intuitiv arbeitende Künstlerin kreiert bildschöne Kunst ohne Materialvorgaben.",
     "literature": "Kombi-Flyer Rad/Wandern, kostenfrei erhältlich",
     "start": "Bad Marienberg, Stadtmitte",
-    "destination": "Bad Marienberg, Stadtmitte"
+    "destination": "Bad Marienberg, Stadtmitte",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)"
   },
   {
     "id": "rr-27",
@@ -634,7 +652,9 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "tips": "Am Panoramablick bei Fluterschen gibt es eine kleine Schutzhütte, ideal um den Picknickkorb auszupacken und den Weitblick zu genießen.",
     "literature": "Topographische Karte 1:25.000, Blatt 1, Nördlicher Westerwald, 5. Auflage 2015, Kosten: 3,- Euro, erhältlich im Rathaus Flammersfeld oder im UNIKUM-Regionalladen, Bahnhofstr. 26, 57610 Altenkirchen",
     "start": "Parkplatz Heimstraße, gegenüber Koblenzerstr. 25, 57610 Altenkirchen",
-    "destination": "Parkplatz Heimstraße, gegenüber Koblenzerstr. 25, 57610 Altenkirchen"
+    "destination": "Parkplatz Heimstraße, gegenüber Koblenzerstr. 25, 57610 Altenkirchen",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rundtouren im Westerwald:\n\n• Verkehrssicheres Rad (Bremsen, Beleuchtung, Reflektoren, Klingel)\n• Helm\n• Ausreichend Wasser und kleiner Snack – Verpflegungsstationen sind unterwegs nicht überall vorhanden\n• Mini-Werkzeug, Ersatzschlauch, Pumpe\n• Wetterfeste, atmungsaktive Kleidung in Lagen, Regenjacke\n• GPS oder Smartphone mit GPX-Track\n• Erste-Hilfe-Set für unterwegs\n• Bei längeren Touren: Powerbank für GPS/Handy"
   },
   {
     "id": "rr-28",
@@ -680,7 +700,9 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "routeDescription": "Der Weg führt für 22 km auf Wirtschafts- und Forstwegen, 7,5 km auf Innerortsstraßen und 3,5 km auf Straßen ohne Radweg. Der Rundweg erfordert durchweg gut geübte Radkräfte. Mit einem Fahrrad mit Elektrounterstützung ist die Tour eine optimale Strecke für alle.\n\nHINWEIS: Bitte beachten Sie, dass die Beschilderung momentan auf einigen kurzen Abschnitten erhöhte Aufmerksamkeit erfordert. Wir empfehlen, die Tour mit Kartenunterstützung zu fahren.",
     "literature": "Radtourenkarte VG Bad Marienberg Kompass Verlag 1:25.000, 5,95 Euro (Tourist-Information Bad Marienberg)\nRadwander- und Mountainbikekarte Westerwald Nord/Süd, Kompass Verlag 1:50.000, je 6,00 Euro (Westerwald Touristik-Service)",
     "start": "Fehl-Ritzhausen (Nister-Radweg)",
-    "destination": "Fehl-Ritzhausen (Nister-Radweg)"
+    "destination": "Fehl-Ritzhausen (Nister-Radweg)",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rundtouren im Westerwald:\n\n• Verkehrssicheres Rad (Bremsen, Beleuchtung, Reflektoren, Klingel)\n• Helm\n• Ausreichend Wasser und kleiner Snack – Verpflegungsstationen sind unterwegs nicht überall vorhanden\n• Mini-Werkzeug, Ersatzschlauch, Pumpe\n• Wetterfeste, atmungsaktive Kleidung in Lagen, Regenjacke\n• GPS oder Smartphone mit GPX-Track\n• Erste-Hilfe-Set für unterwegs\n• Bei längeren Touren: Powerbank für GPS/Handy"
   },
   {
     "id": "rr-30",
@@ -729,7 +751,8 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "tips": "Kurz vor Hilgenroth sollten wir die Möglichkeit nutzen, einen Abstecher zum ehemaligen Kloster Marienthal (heute angesehener Gastronomiebetrieb) zu machen.",
     "literature": "Topographische Karte 1:25.000, Blatt 1, Nördlicher Westerwald, 5. Auflage 2015, Kosten: 3,- Euro, erhältlich im Rathaus Flammersfeld oder im UNIKUM-Regionalladen, Bahnhofstr. 26, 57610 Altenkirchen",
     "start": "Parkplatz gegenüber Kirche, Hauptstr. 8, 57612 Hilgenroth",
-    "destination": "Parkplatz gegenüber Kirche, Hauptstr. 8, 57612 Hilgenroth"
+    "destination": "Parkplatz gegenüber Kirche, Hauptstr. 8, 57612 Hilgenroth",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)"
   },
   {
     "id": "rr-32",
@@ -775,7 +798,8 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "equipment": "Eine Brotzeit und ein Getränk solltest du mitnehmen. Du findest schöne Pausenstationen entlang der Strecke, an denen du gemütlich picknicken kannst.",
     "tips": "Schau unbedingt beim authentischen Raiffeisenhaus vorbei. Es ist jeden ersten Sonntag im Monat von 15 bis 16 Uhr geöffnet. Für Gruppenführungen Termin unter www.vg-ak-ff.de vereinbaren.",
     "start": "57632 Flammersfeld",
-    "destination": "57632 Flammersfeld"
+    "destination": "57632 Flammersfeld",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)"
   },
   {
     "id": "rr-34",
@@ -837,6 +861,8 @@ var DATA_RADFAHREN_RUNDRADWEGE = [
     "routeDescription": "Ich starte meine Tour am Marktplatz von Selters und folge der Saynstraße rund 450 Meter am Ortsrand entlang und weiter durch die Wiesen. Nach dem ich den Saynbach überquert habe, fahre ich kurz danach links in den Rückersteg. Nach 375 Metern biege ich nach rechts, am Ortsteil Alter Hof vorbei erreiche ich nach etwa 400 Metern eine Weggabelung. Ich biege nach links in ein Waldstück ab und etwa 90 Metern nach rechts. Ich folge rund 600 Meter dem Weg durch den Wald und wende mich anschließend an einer Kreuzung nach links. Nach einem guten Kilometer liegt Sessenhausen direkt vor mir. Die Route führt weiter über Marienrachdorf, vorbei an den Waldseen, durch Rückeroth mit seiner denkmalgeschützten Linde, über Maxsain und schließlich bergab zurück nach Selters.",
     "tips": "In Selters besuche ich den ältesten Jüdischen Friedhof im Westerwald und habe die Wahl, in verschiedenen Lokalitäten rund um den Marktplatz einzukehren.",
     "start": "Marktplatz, 56242 Selters",
-    "destination": "Marktplatz, 56242 Selters"
+    "destination": "Marktplatz, 56242 Selters",
+    "safetyNotes": "Auf Radtouren im Westerwald gelten allgemeine Sicherheitsregeln:\n\n• Helm tragen (gerade auf längeren Abfahrten dringend empfohlen)\n• Verkehrsregeln beachten – Radwege sind teilweise gemeinsam mit Fußgängern oder landwirtschaftlichem Verkehr genutzt\n• Bei Nässe und auf wassergebundenen Wegdecken vorsichtiger fahren, insbesondere in Kurven\n• Auf abschüssigen Strecken vorausschauend und kontrolliert bremsen\n• Sichtbare Kleidung tragen – im Wald herrscht oft gedämpftes Licht\n• Bei alleinigem Fahren Tour an Vertraute melden\n• Notruf: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rundtouren im Westerwald:\n\n• Verkehrssicheres Rad (Bremsen, Beleuchtung, Reflektoren, Klingel)\n• Helm\n• Ausreichend Wasser und kleiner Snack – Verpflegungsstationen sind unterwegs nicht überall vorhanden\n• Mini-Werkzeug, Ersatzschlauch, Pumpe\n• Wetterfeste, atmungsaktive Kleidung in Lagen, Regenjacke\n• GPS oder Smartphone mit GPX-Track\n• Erste-Hilfe-Set für unterwegs\n• Bei längeren Touren: Powerbank für GPS/Handy"
   }
 ];

@@ -92,7 +92,9 @@ var DATA_RADFAHREN_GRAVELBIKE = [
     "routeDescription": "Der Weg führt für 22 km auf Wirtschafts- und Forstwegen, 7,5 km auf Innerortsstraßen und 3,5 km auf Straßen ohne Radweg.\n\nDer Rundweg erfordert durchweg gut geübte Radkräfte. Mit einem Fahrrad mit Elektrounterstützung ist die Tour eine optimale Strecke für alle.\n\nHINWEIS: Bitte beachten Sie, dass die Beschilderung momentan auf einigen kurzen Abschnitten erhöhte Aufmerksamkeit erfordert.\n\nWir empfehlen, die Tour mit Kartenunterstützung zu fahren.",
     "literature": "Radtourenkarte Verbandsgemeinde Bad Marienberg Kompass Verlag Maßstab 1:25.000 5,95 Euro zzgl. Versand. Erhältlich bei der Tourist-Information Bad Marienberg. Radwander- und Mountainbikekarte Westerwald Nord Kompass Verlag Maßstab 1:50.000 6,00 Euro zzgl. Versand. Radwander- und Mountainbikekarte Westerwald Süd Kompass Verlag Maßstab 1:50.000 6,00 Euro zzgl. Versand. Setpreis Radwander- und Mountainbikekarten Westerwald Nord + Westerwald Süd: 10,00 Euro zzgl. Versand. Erhältlich beim Westerwald Touristik-Service",
     "start": "Fehl-Ritzhausen (Nister-Radweg)",
-    "destination": "Fehl-Ritzhausen (Nister-Radweg)"
+    "destination": "Fehl-Ritzhausen (Nister-Radweg)",
+    "safetyNotes": "Auf Gravelbike-Touren wechseln befestigte und unbefestigte Wegabschnitte. Beachten Sie:\n\n• Helm tragen\n• Bei Schotter und losen Untergründen Reifendruck und Fahrlinie anpassen\n• Auf schmalen Wirtschaftswegen vorsichtig an Wanderern und Reitern vorbeifahren\n• Bei Nässe können wassergebundene Wege rutschig werden – Tempo reduzieren\n• Auf Forststraßen mit Holzfuhrwerken und landwirtschaftlichem Verkehr rechnen\n• Mit dem Wetter im Mittelgebirge schnell umschlagen lassen – Schutzkleidung mitnehmen\n• Notruf: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Gravelbike-Touren im Westerwald:\n\n• Gravelbike oder vergleichbares Allroad-Bike mit Reifen ab 35 mm Breite\n• Helm\n• Handschuhe\n• Trinksystem mit 1,5–2 L\n• Mini-Werkzeug, Ersatzschlauch (Tubeless: Reparaturset), Reifenheber, Pumpe oder CO2\n• Wetterfeste Funktionskleidung in Lagen, Wind- und Regenjacke\n• Sonnenbrille mit Wechselgläsern\n• GPS-Gerät oder Smartphone-Halterung mit GPX-Track\n• Erste-Hilfe-Set\n• Bei längeren Touren: Powerbank, kleine Lampe für Tunnel oder Dämmerung"
   },
   {
     "id": "gb-05",
@@ -138,7 +140,8 @@ var DATA_RADFAHREN_GRAVELBIKE = [
     "safetyNotes": "Bitte geht sorgsam mit der Natur um und nehmt Rücksicht auf andere Gäste und auf Wildtiere.\n\nAchtet zu eurem eigenen Schutz auf herabfallende Äste oder umfallende Bäume.",
     "tips": "Tolle Aussichten:\n\nPanoramaschaukel Oberraden\n\nSchauinsland Rengsdorf\n\nGrube Alexander",
     "start": "Waldfestplatz Rengsdorf",
-    "destination": "Waldfestplatz Rengsdorf"
+    "destination": "Waldfestplatz Rengsdorf",
+    "equipment": "Empfohlene Ausrüstung für Gravelbike-Touren im Westerwald:\n\n• Gravelbike oder vergleichbares Allroad-Bike mit Reifen ab 35 mm Breite\n• Helm\n• Handschuhe\n• Trinksystem mit 1,5–2 L\n• Mini-Werkzeug, Ersatzschlauch (Tubeless: Reparaturset), Reifenheber, Pumpe oder CO2\n• Wetterfeste Funktionskleidung in Lagen, Wind- und Regenjacke\n• Sonnenbrille mit Wechselgläsern\n• GPS-Gerät oder Smartphone-Halterung mit GPX-Track\n• Erste-Hilfe-Set\n• Bei längeren Touren: Powerbank, kleine Lampe für Tunnel oder Dämmerung"
   },
   {
     "id": "gb-07",
@@ -159,7 +162,8 @@ var DATA_RADFAHREN_GRAVELBIKE = [
     "safetyNotes": "Da die Strecken auch teilweise von Wanderern, Joggern, Nordic-Walkern und Reitern genutzt werden, bitten wir um gegenseitige Rücksichtnahme.",
     "tips": "Bitte geht sorgsam mit der Natur um und nehmt Rücksicht auf andere Gäste und auf Wildtiere.\n\nAchtet zu eurem eigenen Schutz auf herabfallende Äste oder umfallende Bäume.",
     "start": "Marktplatz Straßenhaus",
-    "destination": "Marktplatz Straßenhaus"
+    "destination": "Marktplatz Straßenhaus",
+    "equipment": "Empfohlene Ausrüstung für Gravelbike-Touren im Westerwald:\n\n• Gravelbike oder vergleichbares Allroad-Bike mit Reifen ab 35 mm Breite\n• Helm\n• Handschuhe\n• Trinksystem mit 1,5–2 L\n• Mini-Werkzeug, Ersatzschlauch (Tubeless: Reparaturset), Reifenheber, Pumpe oder CO2\n• Wetterfeste Funktionskleidung in Lagen, Wind- und Regenjacke\n• Sonnenbrille mit Wechselgläsern\n• GPS-Gerät oder Smartphone-Halterung mit GPX-Track\n• Erste-Hilfe-Set\n• Bei längeren Touren: Powerbank, kleine Lampe für Tunnel oder Dämmerung"
   },
   {
     "id": "gb-08",
@@ -180,7 +184,8 @@ var DATA_RADFAHREN_GRAVELBIKE = [
     "safetyNotes": "Bitte geht sorgsam mit der Natur um und nehmt Rücksicht auf andere Gäste und auf Wildtiere.\n\nAchtet zu eurem eigenen Schutz auf herabfallende Äste oder umfallende Bäume.",
     "tips": "Viele gute Restaurants und Cafés laden uns in Waldbreitbach zum genussvollen Ausklang des Tages ein. Sie sind alle auf der Karte vermerkt.\n\nAußerdem ist das Wiedtalbad in Hausen immer für eine Erfrischung gut!",
     "start": "Parkplatz Marktstraße Waldbreitbach",
-    "destination": "Parkplatz Marktstraße Waldbreitbach"
+    "destination": "Parkplatz Marktstraße Waldbreitbach",
+    "equipment": "Empfohlene Ausrüstung für Gravelbike-Touren im Westerwald:\n\n• Gravelbike oder vergleichbares Allroad-Bike mit Reifen ab 35 mm Breite\n• Helm\n• Handschuhe\n• Trinksystem mit 1,5–2 L\n• Mini-Werkzeug, Ersatzschlauch (Tubeless: Reparaturset), Reifenheber, Pumpe oder CO2\n• Wetterfeste Funktionskleidung in Lagen, Wind- und Regenjacke\n• Sonnenbrille mit Wechselgläsern\n• GPS-Gerät oder Smartphone-Halterung mit GPX-Track\n• Erste-Hilfe-Set\n• Bei längeren Touren: Powerbank, kleine Lampe für Tunnel oder Dämmerung"
   },
   {
     "id": "gb-09",
@@ -201,6 +206,7 @@ var DATA_RADFAHREN_GRAVELBIKE = [
     "safetyNotes": "Bitte geht sorgsam mit der Natur um und nehmt Rücksicht auf andere Gäste und auf Wildtiere.\n\nAchtet zu eurem eigenen Schutz auf herabfallende Äste oder umfallende Bäume.",
     "tips": "Ein Abstecher zum Roßbacher Häubchen lohnt sich immer: Der abgetragene Vulkankegel lockt uns mit fantastischen Weitblicken ins Wiedtal und auf dem Gipfel sogar bis in die Eifel und ins Siebengebirge!",
     "start": "Parkplatz Marktstraße, 56588 Waldbreitbach",
-    "destination": "Parkplatz Marktstraße, 56588 Waldbreitbach"
+    "destination": "Parkplatz Marktstraße, 56588 Waldbreitbach",
+    "equipment": "Empfohlene Ausrüstung für Gravelbike-Touren im Westerwald:\n\n• Gravelbike oder vergleichbares Allroad-Bike mit Reifen ab 35 mm Breite\n• Helm\n• Handschuhe\n• Trinksystem mit 1,5–2 L\n• Mini-Werkzeug, Ersatzschlauch (Tubeless: Reparaturset), Reifenheber, Pumpe oder CO2\n• Wetterfeste Funktionskleidung in Lagen, Wind- und Regenjacke\n• Sonnenbrille mit Wechselgläsern\n• GPS-Gerät oder Smartphone-Halterung mit GPX-Track\n• Erste-Hilfe-Set\n• Bei längeren Touren: Powerbank, kleine Lampe für Tunnel oder Dämmerung"
   }
 ];

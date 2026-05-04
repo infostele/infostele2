@@ -17,7 +17,9 @@ var DATA_RADFAHREN_RENNRAD = [
     "parking": "Im Ort Grenzau, 56203 Höhr-Grenzhausen",
     "tips": "Möglichkeiten zum Auffüllen der Flaschen:\nSelters (Tankstelle, Bäckereien, Supermärkte)\n\nMöglichkeiten zum „Kaffee-Stop“:\nMartplatz in Selters",
     "start": "Grenzau",
-    "destination": "Grenzau"
+    "destination": "Grenzau",
+    "safetyNotes": "Auf Rennradtouren im Westerwald sind viele Strecken über regionale und Landstraßen geführt. Beachten Sie:\n\n• Helmpflicht beachten und Helm immer aufsetzen\n• Bei Abfahrten – besonders auf älteren Asphaltdecken – mit Schlaglöchern und losen Splittstellen rechnen\n• Auf stark befahrenen Streckenabschnitten defensiv und sichtbar fahren (Rückleuchte, Warnweste empfehlenswert)\n• Bei Nässe Bremswege deutlich verlängern – Carbonfelgen brauchen länger zum Greifen\n• Im Mittelgebirge wechseln Sonnen- und Schattenpartien stark – auf Temperaturwechsel einstellen\n• In der Hauptverkehrszeit Hauptstraßen meiden, frühe Morgenstunden bevorzugen\n• Notrufnummern: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rennradtouren im Westerwald:\n\n• Verkehrssicheres Rennrad mit funktionierender Bremsanlage und ausreichendem Reifenprofil\n• Helm (Pflicht)\n• Trinksystem mit zwei Flaschen (lange Anstiege, wenige Verpflegungspunkte unterwegs)\n• Mini-Werkzeug, Ersatzschlauch, Reifenheber, CO2-Patrone oder Mini-Pumpe\n• Funktionskleidung in Lagen, Windweste und Regenjacke (das Wetter im Mittelgebirge kann schnell umschlagen)\n• Radschuhe mit Klick-Pedalen für längere Touren\n• GPS-Gerät oder Smartphone-Halterung mit GPX-Track\n• Bei kühleren Temperaturen: Arm- und Beinlinge, lange Handschuhe\n• Sonnenbrille mit klaren Wechselgläsern für wechselnde Lichtverhältnisse"
   },
   {
     "id": "rr-02",
@@ -37,7 +39,9 @@ var DATA_RADFAHREN_RENNRAD = [
     "parking": "Im Ort Grenzau, 56203 Höhr-Grenzhausen",
     "tips": "Möglichkeiten zum Auffüllen der Flaschen:\nARAL Tankstelle in Steinen\n\nMöglichkeiten zum „Kaffee-Stop“:\nRestaurant „Haus am See“ (Dreifelder Weiher), Seeburger Str.1, 57629 Steinebach",
     "start": "Grenzau",
-    "destination": "Grenzau"
+    "destination": "Grenzau",
+    "safetyNotes": "Auf Rennradtouren im Westerwald sind viele Strecken über regionale und Landstraßen geführt. Beachten Sie:\n\n• Helmpflicht beachten und Helm immer aufsetzen\n• Bei Abfahrten – besonders auf älteren Asphaltdecken – mit Schlaglöchern und losen Splittstellen rechnen\n• Auf stark befahrenen Streckenabschnitten defensiv und sichtbar fahren (Rückleuchte, Warnweste empfehlenswert)\n• Bei Nässe Bremswege deutlich verlängern – Carbonfelgen brauchen länger zum Greifen\n• Im Mittelgebirge wechseln Sonnen- und Schattenpartien stark – auf Temperaturwechsel einstellen\n• In der Hauptverkehrszeit Hauptstraßen meiden, frühe Morgenstunden bevorzugen\n• Notrufnummern: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rennradtouren im Westerwald:\n\n• Verkehrssicheres Rennrad mit funktionierender Bremsanlage und ausreichendem Reifenprofil\n• Helm (Pflicht)\n• Trinksystem mit zwei Flaschen (lange Anstiege, wenige Verpflegungspunkte unterwegs)\n• Mini-Werkzeug, Ersatzschlauch, Reifenheber, CO2-Patrone oder Mini-Pumpe\n• Funktionskleidung in Lagen, Windweste und Regenjacke (das Wetter im Mittelgebirge kann schnell umschlagen)\n• Radschuhe mit Klick-Pedalen für längere Touren\n• GPS-Gerät oder Smartphone-Halterung mit GPX-Track\n• Bei kühleren Temperaturen: Arm- und Beinlinge, lange Handschuhe\n• Sonnenbrille mit klaren Wechselgläsern für wechselnde Lichtverhältnisse"
   },
   {
     "id": "rr-03",
@@ -57,7 +61,9 @@ var DATA_RADFAHREN_RENNRAD = [
     "parking": "Im Ort Grenzau, 56203 Höhr-Grenzhausen",
     "tips": "Die Strecke zwischen Westerburg und Guckheim ist von 30.06.2016 bis voraussichtlich 31.08.2016 gesperrt. Hier wird eine Umfahrung über Bahnhof Westerburg und Sainscheid nach Guckheim empfohlen.\n\nMöglichkeiten zum Auffüllen der Flaschen:\nARAL Tankstelle in Steinen\nRossmann Drogeriemarkt, Bismarckstraße, Bad Marienberg\nQ1 Tankstelle, Wallmerod\n\nMöglichkeiten zum „Kaffee-Stop“:\nRestaurant „Haus am See“ (Dreifelder Weiher), Seeburger Str.1, 57629 Steinebach\nEiscafé(s) und Konditorei Wäller in der Bismarckstraße, Bad Marienberg",
     "start": "Grenzau",
-    "destination": "Grenzau"
+    "destination": "Grenzau",
+    "safetyNotes": "Auf Rennradtouren im Westerwald sind viele Strecken über regionale und Landstraßen geführt. Beachten Sie:\n\n• Helmpflicht beachten und Helm immer aufsetzen\n• Bei Abfahrten – besonders auf älteren Asphaltdecken – mit Schlaglöchern und losen Splittstellen rechnen\n• Auf stark befahrenen Streckenabschnitten defensiv und sichtbar fahren (Rückleuchte, Warnweste empfehlenswert)\n• Bei Nässe Bremswege deutlich verlängern – Carbonfelgen brauchen länger zum Greifen\n• Im Mittelgebirge wechseln Sonnen- und Schattenpartien stark – auf Temperaturwechsel einstellen\n• In der Hauptverkehrszeit Hauptstraßen meiden, frühe Morgenstunden bevorzugen\n• Notrufnummern: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rennradtouren im Westerwald:\n\n• Verkehrssicheres Rennrad mit funktionierender Bremsanlage und ausreichendem Reifenprofil\n• Helm (Pflicht)\n• Trinksystem mit zwei Flaschen (lange Anstiege, wenige Verpflegungspunkte unterwegs)\n• Mini-Werkzeug, Ersatzschlauch, Reifenheber, CO2-Patrone oder Mini-Pumpe\n• Funktionskleidung in Lagen, Windweste und Regenjacke (das Wetter im Mittelgebirge kann schnell umschlagen)\n• Radschuhe mit Klick-Pedalen für längere Touren\n• GPS-Gerät oder Smartphone-Halterung mit GPX-Track\n• Bei kühleren Temperaturen: Arm- und Beinlinge, lange Handschuhe\n• Sonnenbrille mit klaren Wechselgläsern für wechselnde Lichtverhältnisse"
   },
   {
     "id": "rr-04",
@@ -76,7 +82,9 @@ var DATA_RADFAHREN_RENNRAD = [
     "directions": "Bad Marienberg liegt verkehrsgünstig, zentral, mitten in Deutschland. Bequem erreichbar über zwei Autobahnen, die A3 und die A 45.\n\nAutobahnabfahrten:\nBAB 3, Köln - Frankfurt: Hennef/Sieg oder Dierdorf\nBAB 3, Frankfurt - Köln: Limburg-Nord oder Montabaur\nBAB 45, Dortmund - Frankfurt: Haiger Burbach oder Herborn West\n\nOder mit der Bahn: (www.bahn.de) bis zur Station Nistertal-Bad Marienberg\n\nAlternativ:\nICE Bahnhof Montabaur, Busverbindung nach Bad Marienberg (35km)\nICE Bahnhof Limburg weiter mit der Regionalbahn bis Station Nistertal-Bad Marienberg. Busverbindung bis Stadt Bad Marienberg (7km).",
     "parking": "Stadtmitte (Bismarckstraße)",
     "start": "Bad Marienberg",
-    "destination": "Bad Marienberg"
+    "destination": "Bad Marienberg",
+    "safetyNotes": "Auf Rennradtouren im Westerwald sind viele Strecken über regionale und Landstraßen geführt. Beachten Sie:\n\n• Helmpflicht beachten und Helm immer aufsetzen\n• Bei Abfahrten – besonders auf älteren Asphaltdecken – mit Schlaglöchern und losen Splittstellen rechnen\n• Auf stark befahrenen Streckenabschnitten defensiv und sichtbar fahren (Rückleuchte, Warnweste empfehlenswert)\n• Bei Nässe Bremswege deutlich verlängern – Carbonfelgen brauchen länger zum Greifen\n• Im Mittelgebirge wechseln Sonnen- und Schattenpartien stark – auf Temperaturwechsel einstellen\n• In der Hauptverkehrszeit Hauptstraßen meiden, frühe Morgenstunden bevorzugen\n• Notrufnummern: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rennradtouren im Westerwald:\n\n• Verkehrssicheres Rennrad mit funktionierender Bremsanlage und ausreichendem Reifenprofil\n• Helm (Pflicht)\n• Trinksystem mit zwei Flaschen (lange Anstiege, wenige Verpflegungspunkte unterwegs)\n• Mini-Werkzeug, Ersatzschlauch, Reifenheber, CO2-Patrone oder Mini-Pumpe\n• Funktionskleidung in Lagen, Windweste und Regenjacke (das Wetter im Mittelgebirge kann schnell umschlagen)\n• Radschuhe mit Klick-Pedalen für längere Touren\n• GPS-Gerät oder Smartphone-Halterung mit GPX-Track\n• Bei kühleren Temperaturen: Arm- und Beinlinge, lange Handschuhe\n• Sonnenbrille mit klaren Wechselgläsern für wechselnde Lichtverhältnisse"
   },
   {
     "id": "rr-05",
@@ -96,6 +104,8 @@ var DATA_RADFAHREN_RENNRAD = [
     "publicTransport": "Mit der Bahn: (www.bahn.de) bis zur Station Nistertal-Bad Marienberg\n\nAlternativ:\nICE Bahnhof Montabaur, Busverbindung nach Bad Marienberg (35km)\nICE Bahnhof Limburg weiter mit der Regionalbahn bis Station Nistertal-Bad Marienberg. Busverbindung bis Stadt Bad Marienberg (7km).",
     "parking": "Im Ort Grenzau, 56203 Höhr-Grenzhausen",
     "start": "Bad Marienberg",
-    "destination": "Bad Marienberg"
+    "destination": "Bad Marienberg",
+    "safetyNotes": "Auf Rennradtouren im Westerwald sind viele Strecken über regionale und Landstraßen geführt. Beachten Sie:\n\n• Helmpflicht beachten und Helm immer aufsetzen\n• Bei Abfahrten – besonders auf älteren Asphaltdecken – mit Schlaglöchern und losen Splittstellen rechnen\n• Auf stark befahrenen Streckenabschnitten defensiv und sichtbar fahren (Rückleuchte, Warnweste empfehlenswert)\n• Bei Nässe Bremswege deutlich verlängern – Carbonfelgen brauchen länger zum Greifen\n• Im Mittelgebirge wechseln Sonnen- und Schattenpartien stark – auf Temperaturwechsel einstellen\n• In der Hauptverkehrszeit Hauptstraßen meiden, frühe Morgenstunden bevorzugen\n• Notrufnummern: 112 (Rettung), 110 (Polizei)",
+    "equipment": "Empfohlene Ausrüstung für Rennradtouren im Westerwald:\n\n• Verkehrssicheres Rennrad mit funktionierender Bremsanlage und ausreichendem Reifenprofil\n• Helm (Pflicht)\n• Trinksystem mit zwei Flaschen (lange Anstiege, wenige Verpflegungspunkte unterwegs)\n• Mini-Werkzeug, Ersatzschlauch, Reifenheber, CO2-Patrone oder Mini-Pumpe\n• Funktionskleidung in Lagen, Windweste und Regenjacke (das Wetter im Mittelgebirge kann schnell umschlagen)\n• Radschuhe mit Klick-Pedalen für längere Touren\n• GPS-Gerät oder Smartphone-Halterung mit GPX-Track\n• Bei kühleren Temperaturen: Arm- und Beinlinge, lange Handschuhe\n• Sonnenbrille mit klaren Wechselgläsern für wechselnde Lichtverhältnisse"
   }
 ];

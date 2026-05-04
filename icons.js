@@ -39,61 +39,159 @@ var ICONS = {
   // Wandern (für die Subkategorie-Liste – einfacher als Hauptkategorie-Icon, aber gleicher Stil)
   berge: '<svg viewBox="0 0 64 64"><path d="M6 50 L18 30 L26 38 L36 22 L46 38 L56 28"/><circle cx="48" cy="20" r="3" fill="#00663A" stroke="none"/><path d="M6 56 L56 56"/></svg>',
 
-  /* Allgemeines Fahrrad – Standardrad (für Hauptkategorie Radfahren UND Rundradwege/Streckenradwege) */
+  /* Allgemeines Fahrrad – Standardrad (für Hauptkategorie Radfahren) */
   fahrrad: '<svg viewBox="0 0 64 64">'
-    + '<circle cx="16" cy="46" r="10"/>'              /* Hinterrad */
-    + '<circle cx="48" cy="46" r="10"/>'              /* Vorderrad */
-    + '<path d="M16 46 L26 24 L40 24 L48 46"/>'        /* Rahmen */
-    + '<path d="M26 24 L34 14 L40 14"/>'               /* Lenker + Sattelstütze */
-    + '<circle cx="34" cy="14" r="2" fill="#00663A" stroke="none"/>' /* Sattel */
+    + '<circle cx="14" cy="46" r="11" fill="none" stroke-width="2.5"/>'
+    + '<circle cx="50" cy="46" r="11" fill="none" stroke-width="2.5"/>'
+    + '<circle cx="14" cy="46" r="2" fill="#00663A" stroke="none"/>'
+    + '<circle cx="50" cy="46" r="2" fill="#00663A" stroke="none"/>'
+    /* Diamantrahmen */
+    + '<path d="M14 46 L24 24 L42 24 L50 46 M24 24 L33 16 L40 16 M33 16 L42 24" stroke-width="2.5"/>'
+    /* Sattel */
+    + '<path d="M20 22 L28 22" stroke-width="3"/>'
+    /* Pedale-Achse */
+    + '<circle cx="32" cy="38" r="2" fill="#00663A" stroke="none"/>'
+    + '<path d="M32 38 L36 32 M32 38 L28 44" stroke-width="2"/>'
     + '</svg>',
 
-  /* Gravelbike – Drop-Bar Lenker, dicke Reifen */
-  gravelbike: '<svg viewBox="0 0 64 64">'
-    + '<circle cx="16" cy="46" r="10" stroke-width="3.5"/>'
-    + '<circle cx="48" cy="46" r="10" stroke-width="3.5"/>'
-    + '<path d="M16 46 L26 28 L42 28 L48 46"/>'
-    + '<path d="M26 28 L34 20"/>'
-    + '<rect x="31" y="17" width="6" height="3" rx="1" fill="#00663A" stroke="none"/>'
-    /* Drop-Bar Lenker (typisch Gravel) */
-    + '<path d="M42 28 L40 18 L48 18 L52 22 L52 26"/>'
-    + '</svg>',
-
-  /* Mountainbike – Federgabel und breite Reifen */
-  mountainbike: '<svg viewBox="0 0 64 64">'
-    + '<circle cx="16" cy="46" r="10" stroke-width="3.5"/>'
-    + '<circle cx="48" cy="46" r="10" stroke-width="3.5"/>'
-    /* Stollen */
-    + '<circle cx="16" cy="36" r="1.5" fill="#00663A" stroke="none"/>'
-    + '<circle cx="6" cy="46" r="1.5" fill="#00663A" stroke="none"/>'
-    + '<circle cx="26" cy="46" r="1.5" fill="#00663A" stroke="none"/>'
-    + '<circle cx="48" cy="36" r="1.5" fill="#00663A" stroke="none"/>'
-    + '<circle cx="38" cy="46" r="1.5" fill="#00663A" stroke="none"/>'
-    + '<circle cx="58" cy="46" r="1.5" fill="#00663A" stroke="none"/>'
-    /* Rahmen */
-    + '<path d="M16 46 L26 28 L42 28 L46 46"/>'
-    + '<path d="M26 28 L34 20"/>'
-    + '<rect x="31" y="17" width="6" height="3" rx="1" fill="#00663A" stroke="none"/>'
-    /* Federgabel */
-    + '<path d="M42 28 L40 22 L48 22"/>'
-    + '<line x1="48" y1="46" x2="48" y2="32" stroke-width="3.5"/>'
-    + '</svg>',
-
-  /* Rennrad – schlank, Drop-Bar, sichtbare Speichen */
+  /* RENNRAD – schlank, klassischer Drop-Bar, hauchdünne Reifen, Speichen sichtbar */
   rennrad: '<svg viewBox="0 0 64 64">'
-    + '<circle cx="16" cy="46" r="9" stroke-width="2"/>'
-    + '<circle cx="48" cy="46" r="9" stroke-width="2"/>'
+    /* Reifen schlank */
+    + '<circle cx="14" cy="46" r="11" fill="none" stroke-width="1.6"/>'
+    + '<circle cx="50" cy="46" r="11" fill="none" stroke-width="1.6"/>'
     /* Speichen */
-    + '<line x1="16" y1="37" x2="16" y2="55" stroke-width="0.8"/>'
-    + '<line x1="7" y1="46" x2="25" y2="46" stroke-width="0.8"/>'
-    + '<line x1="48" y1="37" x2="48" y2="55" stroke-width="0.8"/>'
-    + '<line x1="39" y1="46" x2="57" y2="46" stroke-width="0.8"/>'
+    + '<line x1="14" y1="35" x2="14" y2="57" stroke-width="0.7"/>'
+    + '<line x1="3" y1="46" x2="25" y2="46" stroke-width="0.7"/>'
+    + '<line x1="6.2" y1="38.2" x2="21.8" y2="53.8" stroke-width="0.7"/>'
+    + '<line x1="6.2" y1="53.8" x2="21.8" y2="38.2" stroke-width="0.7"/>'
+    + '<line x1="50" y1="35" x2="50" y2="57" stroke-width="0.7"/>'
+    + '<line x1="39" y1="46" x2="61" y2="46" stroke-width="0.7"/>'
+    + '<line x1="42.2" y1="38.2" x2="57.8" y2="53.8" stroke-width="0.7"/>'
+    + '<line x1="42.2" y1="53.8" x2="57.8" y2="38.2" stroke-width="0.7"/>'
+    /* Naben */
+    + '<circle cx="14" cy="46" r="1.5" fill="#00663A" stroke="none"/>'
+    + '<circle cx="50" cy="46" r="1.5" fill="#00663A" stroke="none"/>'
     /* Schlanker Diamantrahmen */
-    + '<path d="M16 46 L26 24 L46 24 L48 46"/>'
-    + '<path d="M26 24 L34 18"/>'
-    + '<rect x="31" y="15" width="6" height="3" rx="1" fill="#00663A" stroke="none"/>'
-    /* Klassischer Drop-Bar Lenker */
-    + '<path d="M46 24 L42 16 Q42 13 46 13 L52 13 Q56 13 56 16 L52 24"/>'
+    + '<path d="M14 46 L24 24 L42 24 L50 46 M24 24 L33 18 L40 18 M33 18 L42 24" stroke-width="2.2"/>'
+    /* Sattel hoch */
+    + '<path d="M20 22 L28 22" stroke-width="2.8"/>'
+    /* DROP-BAR (gebogener Rennlenker, klar erkennbar als Drop) */
+    + '<path d="M40 16 Q44 12 48 14 L52 16 Q56 18 56 22 L52 26" stroke-width="2.5" fill="none"/>'
+    + '<path d="M40 18 L52 18" stroke-width="2.2"/>'
+    /* Pedalkurbel */
+    + '<circle cx="32" cy="38" r="2" fill="#00663A" stroke="none"/>'
+    + '<path d="M32 38 L37 32" stroke-width="2"/>'
+    + '<rect x="36" y="30" width="4" height="2.5" fill="#00663A" stroke="none"/>'
+    + '</svg>',
+
+  /* MOUNTAINBIKE – dicke Reifen mit STOLLEN, deutliche FEDERGABEL, Flat-Bar */
+  mountainbike: '<svg viewBox="0 0 64 64">'
+    /* Dicke Reifen */
+    + '<circle cx="14" cy="46" r="11" fill="none" stroke-width="3.5"/>'
+    + '<circle cx="50" cy="46" r="11" fill="none" stroke-width="3.5"/>'
+    /* STOLLEN deutlich auf den Reifen außen */
+    + '<g fill="#00663A" stroke="none">'
+    + '<rect x="13" y="33" width="2" height="2.5"/>'
+    + '<rect x="2" y="45" width="2.5" height="2"/>'
+    + '<rect x="13" y="56" width="2" height="2.5"/>'
+    + '<rect x="24" y="45" width="2.5" height="2"/>'
+    + '<rect x="6.5" y="38" width="2" height="2"/>'
+    + '<rect x="20" y="38" width="2" height="2"/>'
+    + '<rect x="6.5" y="52" width="2" height="2"/>'
+    + '<rect x="20" y="52" width="2" height="2"/>'
+    + '<rect x="49" y="33" width="2" height="2.5"/>'
+    + '<rect x="38" y="45" width="2.5" height="2"/>'
+    + '<rect x="49" y="56" width="2" height="2.5"/>'
+    + '<rect x="60" y="45" width="2.5" height="2"/>'
+    + '<rect x="42.5" y="38" width="2" height="2"/>'
+    + '<rect x="56" y="38" width="2" height="2"/>'
+    + '<rect x="42.5" y="52" width="2" height="2"/>'
+    + '<rect x="56" y="52" width="2" height="2"/>'
+    + '</g>'
+    /* Naben */
+    + '<circle cx="14" cy="46" r="1.5" fill="#00663A" stroke="none"/>'
+    + '<circle cx="50" cy="46" r="1.5" fill="#00663A" stroke="none"/>'
+    /* Robuster Rahmen */
+    + '<path d="M14 46 L24 24 L40 24 L46 46 M24 24 L33 18 L40 18" stroke-width="2.8"/>'
+    /* FEDERGABEL deutlich (Vorderrad-Stütze hat 2 Rohre) */
+    + '<path d="M50 46 L46 30" stroke-width="3.5"/>'
+    + '<path d="M46 30 L42 22" stroke-width="2.5"/>'
+    + '<rect x="44" y="22" width="6" height="3.5" fill="#00663A" stroke="none"/>'
+    /* Sattel */
+    + '<path d="M20 22 L28 22" stroke-width="3"/>'
+    /* FLAT-BAR Lenker (gerade, breit – typisch MTB) */
+    + '<path d="M37 22 L47 22" stroke-width="2.8"/>'
+    /* Pedalkurbel */
+    + '<circle cx="30" cy="38" r="2" fill="#00663A" stroke="none"/>'
+    + '<path d="M30 38 L35 32" stroke-width="2"/>'
+    + '<rect x="34" y="30" width="4" height="2.5" fill="#00663A" stroke="none"/>'
+    + '</svg>',
+
+  /* GRAVELBIKE – Hybrid: Drop-Bar wie Rennrad + Stollen-Reifen wie MTB */
+  gravelbike: '<svg viewBox="0 0 64 64">'
+    /* Reifen mittel-dick */
+    + '<circle cx="14" cy="46" r="11" fill="none" stroke-width="2.5"/>'
+    + '<circle cx="50" cy="46" r="11" fill="none" stroke-width="2.5"/>'
+    /* STOLLEN dezenter (kleiner als MTB) */
+    + '<g fill="#00663A" stroke="none">'
+    + '<rect x="13.3" y="34" width="1.4" height="1.8"/>'
+    + '<rect x="3" y="45.3" width="1.8" height="1.4"/>'
+    + '<rect x="13.3" y="56.2" width="1.4" height="1.8"/>'
+    + '<rect x="23.2" y="45.3" width="1.8" height="1.4"/>'
+    + '<rect x="49.3" y="34" width="1.4" height="1.8"/>'
+    + '<rect x="39" y="45.3" width="1.8" height="1.4"/>'
+    + '<rect x="49.3" y="56.2" width="1.4" height="1.8"/>'
+    + '<rect x="59.2" y="45.3" width="1.8" height="1.4"/>'
+    + '</g>'
+    /* Naben */
+    + '<circle cx="14" cy="46" r="1.5" fill="#00663A" stroke="none"/>'
+    + '<circle cx="50" cy="46" r="1.5" fill="#00663A" stroke="none"/>'
+    /* Klassischer Rennrad-Diamantrahmen */
+    + '<path d="M14 46 L24 24 L42 24 L50 46 M24 24 L33 18 L40 18 M33 18 L42 24" stroke-width="2.5"/>'
+    /* Sattel */
+    + '<path d="M20 22 L28 22" stroke-width="2.8"/>'
+    /* DROP-BAR (gebogener Rennlenker, gleich wie Rennrad) */
+    + '<path d="M40 16 Q44 12 48 14 L52 16 Q56 18 56 22 L52 26" stroke-width="2.5" fill="none"/>'
+    + '<path d="M40 18 L52 18" stroke-width="2.2"/>'
+    /* Pedalkurbel */
+    + '<circle cx="32" cy="38" r="2" fill="#00663A" stroke="none"/>'
+    + '<path d="M32 38 L37 32" stroke-width="2"/>'
+    + '<rect x="36" y="30" width="4" height="2.5" fill="#00663A" stroke="none"/>'
+    + '</svg>',
+
+  /* RUNDRADWEGE – Fahrrad mit kreisförmigem Pfeil drumherum (Rundkurs) */
+  rundrad: '<svg viewBox="0 0 64 64">'
+    /* Kreisförmiger Pfeil außen herum */
+    + '<path d="M32 6 A 26 26 0 1 1 12 14" fill="none" stroke-width="2.5"/>'
+    + '<path d="M28 4 L32 6 L30 11" stroke-width="2.5" fill="none"/>'
+    /* Mini-Fahrrad in der Mitte */
+    + '<circle cx="22" cy="44" r="6" fill="none" stroke-width="2"/>'
+    + '<circle cx="42" cy="44" r="6" fill="none" stroke-width="2"/>'
+    + '<path d="M22 44 L28 30 L38 30 L42 44 M28 30 L33 24 L38 24" stroke-width="2"/>'
+    + '<path d="M26 28 L32 28" stroke-width="2.2"/>'
+    + '<circle cx="22" cy="44" r="1.2" fill="#00663A" stroke="none"/>'
+    + '<circle cx="42" cy="44" r="1.2" fill="#00663A" stroke="none"/>'
+    + '</svg>',
+
+  /* STRECKENRADWEGE – Fahrrad mit linearem Pfeil rechts (von A nach B) */
+  streckenrad: '<svg viewBox="0 0 64 64">'
+    /* Geländelinie als Bodenmarkierung */
+    + '<path d="M2 56 Q12 50 22 54 T42 50 T62 54" fill="none" stroke-width="1.5" opacity="0.4"/>'
+    /* Standortpin links (Start) */
+    + '<path d="M8 14 C 4 14, 4 20, 8 24 C 12 20, 12 14, 8 14 Z" fill="#00663A" stroke="none"/>'
+    + '<circle cx="8" cy="17" r="1.5" fill="#FFFFFF" stroke="none"/>'
+    /* Standortpin rechts (Ziel) */
+    + '<path d="M56 14 C 52 14, 52 20, 56 24 C 60 20, 60 14, 56 14 Z" fill="#00663A" stroke="none"/>'
+    + '<circle cx="56" cy="17" r="1.5" fill="#FFFFFF" stroke="none"/>'
+    /* Pfeil-Pfad zwischen den Pins */
+    + '<path d="M14 18 Q24 12 32 18 T54 18" fill="none" stroke-width="2" stroke-dasharray="2,2"/>'
+    /* Fahrrad unten zentriert */
+    + '<circle cx="20" cy="46" r="8" fill="none" stroke-width="2.2"/>'
+    + '<circle cx="44" cy="46" r="8" fill="none" stroke-width="2.2"/>'
+    + '<circle cx="20" cy="46" r="1.4" fill="#00663A" stroke="none"/>'
+    + '<circle cx="44" cy="46" r="1.4" fill="#00663A" stroke="none"/>'
+    + '<path d="M20 46 L28 32 L40 32 L44 46 M28 32 L34 26 L40 26 M34 26 L40 32" stroke-width="2.2"/>'
+    + '<path d="M25 30 L31 30" stroke-width="2.4"/>'
     + '</svg>',
 
   // Wegmarkierung (für Ausflugsziele)
@@ -140,5 +238,4 @@ var ICONS = {
 /* Aliase für Konsistenz */
 ICONS.wandern = ICONS.wanderer2;  /* Hauptkategorie-Icon Tourismus */
 ICONS.wandernSimple = ICONS.berge; /* Subkat-Liste Wandern */
-ICONS.rundrad = ICONS.fahrrad;     /* Rundradwege = Standard */
-ICONS.streckenrad = ICONS.fahrrad; /* Streckenradwege = Standard */
+/* Rundrad und Streckenrad haben jetzt eigene Icons – siehe oben */

@@ -39,7 +39,16 @@ img { max-width: 100%; display: block; }
   display: flex; flex-direction: column;
   min-height: 100vh; min-height: 100dvh;
 }
-.app-header { background: var(--weiss); flex-shrink: 0; cursor: pointer; }
+.app-header {
+  background: var(--weiss);
+  flex-shrink: 0;
+  cursor: pointer;
+  /* HEADER ist immer oben fixiert (sticky), egal welche Seite */
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
 .app-header img { width: 100%; height: auto; display: block; }
 .app-main { flex: 1; display: flex; flex-direction: column; }
 
@@ -200,22 +209,24 @@ img { max-width: 100%; display: block; }
   60%  { opacity: 1; transform: scale(1.08); }
   100% { opacity: 1; transform: scale(1.0); }
 }
-.home-page .untertitel {
-  /* Wellen-Animation: jeder Buchstabe wird einzeln auf-/ab bewegt */
+
+/* Wellen-Animation: jeder Buchstabe wird einzeln auf-/ab bewegt */
+/* Funktioniert global – nicht mehr auf Home-Page beschränkt */
+.untertitel:has(.welle-text) {
   display: inline-block;
 }
-.home-page .welle-text {
+.welle-text {
   display: inline-block;
 }
-.home-page .welle-text span {
+.welle-text span {
   display: inline-block;
   opacity: 0;
-  animation: welle-letter 1.6s ease forwards;
+  animation: welle-letter 1.4s ease forwards;
 }
 @keyframes welle-letter {
-  0%   { opacity: 0; transform: translate(-12px, 8px); }
-  40%  { opacity: 1; transform: translate(0, -6px); }
-  70%  { transform: translate(0, 2px); }
+  0%   { opacity: 0; transform: translate(-10px, 6px); }
+  40%  { opacity: 1; transform: translate(0, -5px); }
+  70%  { transform: translate(0, 1px); }
   100% { opacity: 1; transform: translate(0, 0); }
 }
 
@@ -631,7 +642,8 @@ body.modal-offen { overflow: hidden; }
    ════════════════════════════════════════════════════════════════ */
 .sticky-region {
   position: sticky;
-  top: 0;
+  /* Direkt unter dem Banner-Header andocken */
+  top: var(--header-h, 0px);
   z-index: 50;
   background: var(--weiss);
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
@@ -642,6 +654,78 @@ body.modal-offen { overflow: hidden; }
 .sticky-region .section-intro { padding: 10px 16px 8px; }
 .sticky-region .section-intro .gruss { font-size: 18px; margin-bottom: 2px; }
 .sticky-region .section-intro .untertitel { font-size: 12px; }
+
+/* ════════════════════════════════════════════════════════════════
+   STICKY HEADER für DETAIL-Seiten (Wander-/Rad-Etappen)
+   Zurück-Button + Trail-Titel + Untertitel + Etappen-Titel +
+   Schwierigkeitspille bleiben beim Scrollen oben sichtbar
+   ════════════════════════════════════════════════════════════════ */
+.sticky-detail {
+  position: sticky;
+  /* Direkt unter dem Banner-Header andocken */
+  top: var(--header-h, 0px);
+  z-index: 50;
+  background: var(--weiss);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border-bottom: 2px solid var(--hellgruen-s);
+}
+.sticky-detail .nav-bar { padding: 8px 14px; }
+.sticky-detail .section-intro {
+  padding: 8px 16px 6px;
+}
+.sticky-detail .section-intro .gruss {
+  font-size: 22px;
+  margin-bottom: 2px;
+}
+.sticky-detail .section-intro .untertitel {
+  font-size: 12px;
+  line-height: 1.35;
+}
+.sticky-detail-titel {
+  padding: 0 16px 10px;
+  font-family: var(--font); font-weight: 700;
+  font-size: 15px; color: var(--dunkelgruen);
+  line-height: 1.3;
+}
+.sticky-detail .diff-gpx-row {
+  padding: 0 16px 10px;
+  margin-bottom: 0;
+}
+.sticky-detail .diff-pill {
+  padding: 5px 10px;
+  font-size: 11px;
+}
+.sticky-detail .btn-action {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+/* Tour-in-Vorbereitung Hinweis-Karte */
+.tour-vorbereitung {
+  background: linear-gradient(90deg, var(--gelb), var(--creme));
+  border-left: 4px solid var(--dunkelgruen);
+  padding: 10px 14px;
+  margin: 10px 0 4px;
+  font-family: var(--font); font-weight: 600;
+  font-size: 13px; color: var(--dunkelgruen);
+  display: flex; align-items: center; gap: 8px;
+}
+.tour-vorbereitung::before {
+  content: '⏳';
+  font-size: 18px;
+}
+.eintrag.in-vorbereitung {
+  opacity: 0.85;
+  background: var(--creme);
+}
+.eintrag.in-vorbereitung .eintrag-titel::after {
+  content: ' · in Vorbereitung';
+  font-weight: 600;
+  color: var(--hellgruen-p);
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
 /* ════════════════════════════════════════════════════════════════
    FILTER-LEISTE
@@ -708,6 +792,18 @@ body.modal-offen { overflow: hidden; }
   font-size: 12px; color: var(--grau-md);
 }
 .filter-treffer strong { color: var(--dunkelgruen); }
+.filter-treffer .treffer-extra {
+  display: inline-block;
+  margin-left: 4px;
+  background: var(--gelb);
+  color: var(--dunkelgruen);
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
 
 /* Untertitel auf Eintrag */
 .eintrag-sub {
@@ -735,3 +831,173 @@ body.modal-offen { overflow: hidden; }
 #modal-inhalt h3:first-child { margin-top: 0; }
 #modal-inhalt p { margin-bottom: 8px; }
 #modal-inhalt em { font-style: italic; color: var(--grau-md); }
+
+/* ════════════════════════════════════════════════════════════════
+   LINKLIST: Externe Links + Sub-Link-Cards
+   (Regionale Produkte, Mobilität & Verkehr, Museen)
+   ════════════════════════════════════════════════════════════════ */
+.linklist a.eintrag {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+.linklist a.eintrag:hover .eintrag-titel {
+  color: var(--hellgruen-p);
+}
+.linklist .eintrag-pfeil {
+  font-size: 18px;
+  color: var(--hellgruen-p);
+  font-weight: 700;
+}
+.linklist .link-card {
+  background: var(--creme);
+  border-left: 4px solid var(--hellgruen-s);
+  margin: 6px 14px;
+  border-radius: 4px;
+  padding: 10px 12px;
+}
+.linklist .link-card-titel {
+  font-family: var(--font); font-weight: 700;
+  font-size: 15px; color: var(--dunkelgruen);
+  margin-bottom: 6px;
+}
+.linklist .link-eintrag {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,102,58,0.15);
+  text-decoration: none;
+  color: var(--grau-dk);
+}
+.linklist .link-eintrag:last-child { border-bottom: 0; }
+.linklist .link-eintrag:hover .link-eintrag-titel {
+  color: var(--hellgruen-p);
+}
+.linklist .link-eintrag-titel {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+}
+.linklist .link-eintrag-pfeil {
+  color: var(--hellgruen-p);
+  font-weight: 700;
+  margin-left: 12px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   WW-LIT: Westerwälder Literaturtage
+   ════════════════════════════════════════════════════════════════ */
+.wwlit-eintrag {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+.wwlit-eintrag .wwlit-datum {
+  flex: 0 0 80px;
+  background: var(--gelb);
+  border-radius: 4px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.wwlit-eintrag .wwlit-tag {
+  font-family: var(--font); font-weight: 700;
+  font-size: 13px; color: var(--dunkelgruen);
+  text-align: center;
+  line-height: 1.2;
+}
+.wwlit-eintrag .wwlit-zeit {
+  font-size: 11px; color: var(--grau-md);
+  margin-top: 2px;
+}
+.wwlit-eintrag .wwlit-werk {
+  font-size: 13px;
+  color: var(--grau-md);
+  margin-top: 2px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TERMINE: Naturerlebnisse & Veranstaltungen
+   ════════════════════════════════════════════════════════════════ */
+.termine-filter {
+  padding: 6px 12px 8px;
+}
+.termine-filter .filter-gruppe {
+  margin-bottom: 5px;
+}
+.termine-filter .filter-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dunkelgruen);
+  margin-right: 6px;
+  display: inline-block;
+}
+
+/* Termin-Eintrag mit Datum-Badge links */
+.termin-eintrag {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+.termin-datum-badge {
+  flex: 0 0 70px;
+  background: var(--gelb);
+  border-radius: 4px;
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.termin-datum-text {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--dunkelgruen);
+  line-height: 1.25;
+}
+.termin-bezirk {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--dunkelgruen);
+  background: var(--weiss);
+  border-radius: 2px;
+  padding: 1px 4px;
+  margin-top: 3px;
+}
+
+/* Inline-Pillen in der Liste */
+.termin-frei {
+  display: inline-block;
+  background: var(--hellgruen-s);
+  color: var(--dunkelgruen);
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.termin-kids {
+  display: inline-block;
+  background: var(--gelb);
+  color: var(--dunkelgruen);
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Pillen im Detail-Sticky-Header */
+.termin-frei-pill {
+  background: var(--hellgruen-s) !important;
+  color: var(--dunkelgruen) !important;
+}
+.termin-kids-pill {
+  background: var(--gelb) !important;
+  color: var(--dunkelgruen) !important;
+}

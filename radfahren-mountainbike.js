@@ -143,7 +143,8 @@ var DATA_RADFAHREN_MOUNTAINBIKE = [
     "safetyNotes": "Bitte geht sorgsam mit der Natur um und nehmt Rücksicht auf andere Gäste und auf Wildtiere.\n\nAchtet zu eurem eigenen Schutz auf herabfallende Äste oder umfallende Bäume.",
     "tips": "Tolle Aussichten:\n\nPanoramaschaukel Oberraden\n\nSchauinsland Rengsdorf\n\nGrube Alexander",
     "start": "Waldfestplatz Rengsdorf",
-    "destination": "Waldfestplatz Rengsdorf"
+    "destination": "Waldfestplatz Rengsdorf",
+    "equipment": "Empfohlene MTB-Ausrüstung für den Westerwald:\n\n• Mountainbike mit gut funktionierender Federung (Hardtail oder Fully je nach Strecke)\n• Helm mit Visier; bei anspruchsvollen Strecken zusätzlich Knie-/Ellbogenschoner\n• Handschuhe mit Aufprallschutz\n• Trinkrucksack mit 1,5–2 L\n• Mini-Werkzeug, Ersatzschlauch, Reifenheber, CO2 oder Pumpe, Kettennieter\n• Wetterfeste, atmungsaktive Funktionskleidung in Lagen\n• Regenjacke und Windweste\n• GPS-Gerät mit GPX-Track (im dichten Wald oft besser als Smartphone)\n• Erste-Hilfe-Set\n• Notfallpfeife"
   },
   {
     "id": "mb-07",
@@ -164,7 +165,8 @@ var DATA_RADFAHREN_MOUNTAINBIKE = [
     "safetyNotes": "Da die Strecken auch teilweise von Wanderern, Joggern, Nordic-Walkern und Reitern genutzt werden, bitten wir um gegenseitige Rücksichtnahme.",
     "tips": "Bitte geht sorgsam mit der Natur um und nehmt Rücksicht auf andere Gäste und auf Wildtiere.\n\nAchtet zu eurem eigenen Schutz auf herabfallende Äste oder umfallende Bäume.",
     "start": "Marktplatz Straßenhaus",
-    "destination": "Marktplatz Straßenhaus"
+    "destination": "Marktplatz Straßenhaus",
+    "equipment": "Empfohlene MTB-Ausrüstung für den Westerwald:\n\n• Mountainbike mit gut funktionierender Federung (Hardtail oder Fully je nach Strecke)\n• Helm mit Visier; bei anspruchsvollen Strecken zusätzlich Knie-/Ellbogenschoner\n• Handschuhe mit Aufprallschutz\n• Trinkrucksack mit 1,5–2 L\n• Mini-Werkzeug, Ersatzschlauch, Reifenheber, CO2 oder Pumpe, Kettennieter\n• Wetterfeste, atmungsaktive Funktionskleidung in Lagen\n• Regenjacke und Windweste\n• GPS-Gerät mit GPX-Track (im dichten Wald oft besser als Smartphone)\n• Erste-Hilfe-Set\n• Notfallpfeife"
   },
   {
     "id": "mb-08",
@@ -185,7 +187,8 @@ var DATA_RADFAHREN_MOUNTAINBIKE = [
     "safetyNotes": "Bitte geht sorgsam mit der Natur um und nehmt Rücksicht auf andere Gäste und auf Wildtiere.\n\nAchtet zu eurem eigenen Schutz auf herabfallende Äste oder umfallende Bäume.",
     "tips": "Viele gute Restaurants und Cafés laden uns in Waldbreitbach zum genussvollen Ausklang des Tages ein. Sie sind alle auf der Karte vermerkt.\n\nAußerdem ist das Wiedtalbad in Hausen immer für eine Erfrischung gut!",
     "start": "Parkplatz Marktstraße Waldbreitbach",
-    "destination": "Parkplatz Marktstraße Waldbreitbach"
+    "destination": "Parkplatz Marktstraße Waldbreitbach",
+    "equipment": "Empfohlene MTB-Ausrüstung für den Westerwald:\n\n• Mountainbike mit gut funktionierender Federung (Hardtail oder Fully je nach Strecke)\n• Helm mit Visier; bei anspruchsvollen Strecken zusätzlich Knie-/Ellbogenschoner\n• Handschuhe mit Aufprallschutz\n• Trinkrucksack mit 1,5–2 L\n• Mini-Werkzeug, Ersatzschlauch, Reifenheber, CO2 oder Pumpe, Kettennieter\n• Wetterfeste, atmungsaktive Funktionskleidung in Lagen\n• Regenjacke und Windweste\n• GPS-Gerät mit GPX-Track (im dichten Wald oft besser als Smartphone)\n• Erste-Hilfe-Set\n• Notfallpfeife"
   },
   {
     "id": "mb-09",
@@ -206,6 +209,7 @@ var DATA_RADFAHREN_MOUNTAINBIKE = [
     "safetyNotes": "Bitte geht sorgsam mit der Natur um und nehmt Rücksicht auf andere Gäste und auf Wildtiere.\n\nAchtet zu eurem eigenen Schutz auf herabfallende Äste oder umfallende Bäume.",
     "tips": "Ein Abstecher zum Roßbacher Häubchen lohnt sich immer: Der abgetragene Vulkankegel lockt uns mit fantastischen Weitblicken ins Wiedtal und auf dem Gipfel sogar bis in die Eifel und ins Siebengebirge!",
     "start": "Parkplatz Marktstraße, 56588 Waldbreitbach",
-    "destination": "Parkplatz Marktstraße, 56588 Waldbreitbach"
+    "destination": "Parkplatz Marktstraße, 56588 Waldbreitbach",
+    "equipment": "Empfohlene MTB-Ausrüstung für den Westerwald:\n\n• Mountainbike mit gut funktionierender Federung (Hardtail oder Fully je nach Strecke)\n• Helm mit Visier; bei anspruchsvollen Strecken zusätzlich Knie-/Ellbogenschoner\n• Handschuhe mit Aufprallschutz\n• Trinkrucksack mit 1,5–2 L\n• Mini-Werkzeug, Ersatzschlauch, Reifenheber, CO2 oder Pumpe, Kettennieter\n• Wetterfeste, atmungsaktive Funktionskleidung in Lagen\n• Regenjacke und Windweste\n• GPS-Gerät mit GPX-Track (im dichten Wald oft besser als Smartphone)\n• Erste-Hilfe-Set\n• Notfallpfeife"
   }
 ];
