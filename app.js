@@ -23,6 +23,9 @@ window.addEventListener('DOMContentLoaded', function() {
   var hdrImg = document.querySelector('.app-header img');
   if (hdrImg) hdrImg.addEventListener('load', measureHeaderHeight);
 
+  // Pinch-Zoom für Dropdown-Inhalte aktivieren
+  initPinchZoom();
+
   // Footer-Modals
   document.querySelectorAll('[data-modal]').forEach(function(el) {
     el.addEventListener('click', function(e) {
@@ -41,6 +44,88 @@ function measureHeaderHeight() {
   if (!h) return;
   var px = Math.round(h.getBoundingClientRect().height);
   document.documentElement.style.setProperty('--header-h', px + 'px');
+}
+
+// ════════════════════════════════════════════════════════════════
+// PINCH-ZOOM für Dropdown-Inhalte
+// Zwei-Finger-Geste auf .dropdown-inhalt skaliert font-size dieses
+// Containers (NICHT das ganze Layout). Zeilenumbrüche bleiben sauber,
+// weil nur font-size wächst.
+// Bedienung:
+//   • Zwei Finger auseinanderziehen → Schrift größer
+//   • Zwei Finger zusammenführen   → Schrift kleiner
+//   • Bereich: 100% (default) bis 220% / 80%
+//   • Doppeltipp setzt zurück
+// Pro Dropdown wird der individuelle Skalierungsfaktor merken
+// (data-zoom-Attribut). Das Resetten beim Schließen ist nicht nötig –
+// es bleibt erhalten, bis der Container neu gerendert wird.
+// ════════════════════════════════════════════════════════════════
+var PINCH_MIN = 0.8;
+var PINCH_MAX = 2.2;
+var PINCH_BASE_FONT = 15; // muss zu CSS .dropdown-inhalt passen
+
+function initPinchZoom() {
+  // Touch-Listener am gesamten App-Container, dann delegieren
+  var app = document.getElementById('app') || document.body;
+  if (app.__pinchInit) return;
+  app.__pinchInit = true;
+
+  var state = null;
+
+  app.addEventListener('touchstart', function(e) {
+    if (e.touches.length !== 2) return;
+    var ziel = findPinchTarget(e.target);
+    if (!ziel) return;
+    e.preventDefault();
+    var d = pinchDist(e.touches[0], e.touches[1]);
+    var startSkala = parseFloat(ziel.getAttribute('data-zoom') || '1');
+    state = { ziel: ziel, startDist: d, startSkala: startSkala };
+  }, { passive: false });
+
+  app.addEventListener('touchmove', function(e) {
+    if (!state || e.touches.length !== 2) return;
+    e.preventDefault();
+    var d = pinchDist(e.touches[0], e.touches[1]);
+    var faktor = d / state.startDist;
+    var neueSkala = Math.max(PINCH_MIN, Math.min(PINCH_MAX, state.startSkala * faktor));
+    setPinchZoom(state.ziel, neueSkala);
+  }, { passive: false });
+
+  app.addEventListener('touchend', function(e) {
+    if (state && e.touches.length < 2) state = null;
+  });
+
+  // Doppel-Tipp zum Zurücksetzen
+  var letzterTap = 0;
+  app.addEventListener('touchend', function(e) {
+    var jetzt = Date.now();
+    if (jetzt - letzterTap < 300) {
+      var ziel = findPinchTarget(e.target);
+      if (ziel && ziel.getAttribute('data-zoom') && ziel.getAttribute('data-zoom') !== '1') {
+        setPinchZoom(ziel, 1);
+      }
+    }
+    letzterTap = jetzt;
+  });
+}
+
+function findPinchTarget(el) {
+  while (el && el !== document.body) {
+    if (el.classList && el.classList.contains('dropdown-inhalt')) return el;
+    el = el.parentNode;
+  }
+  return null;
+}
+
+function pinchDist(t1, t2) {
+  var dx = t2.clientX - t1.clientX;
+  var dy = t2.clientY - t1.clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+
+function setPinchZoom(el, skala) {
+  el.setAttribute('data-zoom', skala.toFixed(2));
+  el.style.fontSize = (PINCH_BASE_FONT * skala).toFixed(1) + 'px';
 }
 
 window.addEventListener('hashchange', router);
@@ -192,8 +277,7 @@ var KATEGORIEN = {
       {slug:'ausflugsziele',   label:'Ausflugsziele',   meta:'POIs in der Region',icon:ICONS.markierung},
       {slug:'badeseen',        label:'Badeseen',        meta:'Naturbadestellen',  icon:ICONS.welle},
       {slug:'unterkuenfte',    label:'Unterkünfte',     meta:'Hotels & Pensionen',icon:ICONS.haus},
-      {slug:'naturerlebnisse', label:'Naturerlebnisse', meta:'Geführte Touren & Workshops', icon:ICONS.berge},
-      {slug:'veranstaltungen', label:'Veranstaltungen', meta:'Termine in der Region', icon:ICONS.kalender}
+      {slug:'veranstaltungen', label:'Veranstaltungen', meta:'Alle Termine in der Region', icon:ICONS.kalender}
     ]
   },
   'regional': {
@@ -209,8 +293,7 @@ var KATEGORIEN = {
     titel:'Kunst & Kultur', untertitel:'Museen, Veranstaltungen und Festivals.',
     subs:[
       {slug:'museen',          label:'Museen',          meta:'14 Sammlungen & Ausstellungen', icon:ICONS.krug},
-      {slug:'veranstaltungen', label:'Kunst & Kultur',  meta:'Übersicht auf wir-westerwaelder.de', icon:ICONS.kalender},
-      {slug:'literaturtage',   label:'Westerwälder Literaturtage', meta:'28 Lesungen 2026', icon:ICONS.buch}
+      {slug:'veranstaltungen', label:'Kunst & Kultur',  meta:'Übersicht auf wir-westerwaelder.de', icon:ICONS.kalender}
     ]
   },
   'mobilitaet': {
@@ -273,22 +356,76 @@ var LISTEN = {
       {label:'Rennrad',         meta:'Asphaltierte Strecken', sub:'rennrad',        icon:ICONS.rennrad}
     ]
   },
-  'tourismus-ausflugsziele': {datenName:'DATA_AUSFLUGSZIELE', titel:'Ausflugsziele', breadcrumb:'Tourismus &amp; Freizeit › <strong>Ausflugsziele</strong>', zurueck:'kategorie/tourismus', untertitel:'Sehenswertes in der Region.',  detailKey:'ausfl', max:30},
+  'tourismus-ausflugsziele': {
+    datenName:'DATA_AUSFLUGSZIELE',
+    titel:'Ausflugsziele',
+    breadcrumb:'Tourismus &amp; Freizeit › <strong>Ausflugsziele</strong>',
+    zurueck:'kategorie/tourismus',
+    untertitel:'Sehenswertes in der Region.',
+    detailKey:'ausfl',
+    renderTyp:'gefiltert',
+    filterLabel:'Kategorie',
+    filterTypen:[
+      {key:'alle',         label:'Alle'},
+      {key:'gaesteführung',label:'Gästeführung'},
+      {key:'wandertour',   label:'Wandertour'},
+      {key:'radtour',      label:'Radtour'},
+      {key:'kultur',       label:'Kultur & Tradition'},
+      {key:'tickets',      label:'Tickets'},
+      {key:'sonstige',     label:'Sonstige'}
+    ],
+    typErkenner: function(item) {
+      var t = (item.topic || item.mainTopic || '').toLowerCase();
+      if (t.indexOf('gästeführung') >= 0 || t.indexOf('gaesteführung') >= 0) return 'gaesteführung';
+      if (t.indexOf('wandertour') >= 0 || t.indexOf('wanderung') >= 0) return 'wandertour';
+      if (t.indexOf('radtour') >= 0 || t.indexOf('radfahr') >= 0) return 'radtour';
+      if (t.indexOf('kultur') >= 0 || t.indexOf('tradition') >= 0) return 'kultur';
+      if (t.indexOf('eintrittsticket') >= 0 || t.indexOf('ticket') >= 0) return 'tickets';
+      return 'sonstige';
+    }
+  },
   'tourismus-badeseen':      {datenName:'DATA_BADESEEN_NEU',  titel:'Badeseen',     breadcrumb:'Tourismus &amp; Freizeit › <strong>Badeseen</strong>',     zurueck:'kategorie/tourismus', untertitel:'Erfrischung und Naturerlebnis.', detailKey:'badesee'},
-  'tourismus-unterkuenfte':  {datenName:'DATA_UNTERKUENFTE',  titel:'Unterkünfte',  breadcrumb:'Tourismus &amp; Freizeit › <strong>Unterkünfte</strong>',  zurueck:'kategorie/tourismus', untertitel:'Hotels, Pensionen und mehr.',     detailKey:'unterkunft', max:30},
-  'tourismus-naturerlebnisse': {datenName:'DATA_NATURERLEBNISSE', titel:'Naturerlebnisse', breadcrumb:'Tourismus &amp; Freizeit › <strong>Naturerlebnisse</strong>', zurueck:'kategorie/tourismus', untertitel:'Geführte Touren, Workshops und Naturpädagogik.', detailKey:'natur', renderTyp:'termine', terminTyp:'natur'},
-  'tourismus-veranstaltungen': {datenName:'DATA_VERANSTALTUNGEN', titel:'Veranstaltungen', breadcrumb:'Tourismus &amp; Freizeit › <strong>Veranstaltungen</strong>', zurueck:'kategorie/tourismus', untertitel:'Aktuelle Termine in der Region.', detailKey:'event', renderTyp:'termine', terminTyp:'event'},
+  'tourismus-unterkuenfte': {
+    datenName:'DATA_UNTERKUENFTE',
+    titel:'Unterkünfte',
+    breadcrumb:'Tourismus &amp; Freizeit › <strong>Unterkünfte</strong>',
+    zurueck:'kategorie/tourismus',
+    untertitel:'Hotels, Pensionen, Ferienwohnungen, Camping und mehr.',
+    detailKey:'unterkunft',
+    renderTyp:'gefiltert',
+    filterLabel:'Typ',
+    filterTypen:[
+      {key:'alle',     label:'Alle'},
+      {key:'hotel',    label:'Hotel'},
+      {key:'ferien',   label:'Ferienwohnung'},
+      {key:'pension',  label:'Pension'},
+      {key:'gasthof',  label:'Gasthof'},
+      {key:'camping',  label:'Camping'},
+      {key:'sonstige', label:'Sonstige'}
+    ],
+    typErkenner: function(item) {
+      var n = (item.name || '').toLowerCase();
+      if (n.indexOf('hotel') >= 0) return 'hotel';
+      if (n.indexOf('ferienwohn') >= 0 || n.indexOf('ferienhaus') >= 0 || n.indexOf('apartment') >= 0 || n.indexOf('appartement') >= 0) return 'ferien';
+      if (n.indexOf('pension') >= 0) return 'pension';
+      if (n.indexOf('gasthof') >= 0 || n.indexOf('gasthaus') >= 0) return 'gasthof';
+      if (n.indexOf('camping') >= 0 || n.indexOf('zeltplatz') >= 0 || n.indexOf('campingpark') >= 0) return 'camping';
+      return 'sonstige';
+    }
+  },
+  'tourismus-veranstaltungen': {datenName:'DATA_VERANSTALTUNGEN_ALLE', titel:'Veranstaltungen', breadcrumb:'Tourismus &amp; Freizeit › <strong>Veranstaltungen</strong>', zurueck:'kategorie/tourismus', untertitel:'Alle Termine in der Region.', detailKey:'event', renderTyp:'termine'},
 
   // KUNST & KULTUR
-  'kultur-museen': {datenName:'DATA_KULTUR_MUSEEN', titel:'Museen', breadcrumb:'Kunst &amp; Kultur › <strong>Museen</strong>', zurueck:'kategorie/kultur', untertitel:'Sammlungen und Ausstellungen.', detailKey:'museum', renderTyp:'externalLinks'},
+  'kultur-museen': {datenName:'DATA_KULTUR_MUSEEN', titel:'Museen', breadcrumb:'Kunst &amp; Kultur › <strong>Museen</strong>', zurueck:'kategorie/kultur', untertitel:'Sammlungen und Ausstellungen.', detailKey:'museum', renderTyp:'museenInline'},
   'kultur-veranstaltungen': {datenName:'DATA_KULTUR_VERANSTALTUNGEN', titel:'Kunst & Kultur', breadcrumb:'Kunst &amp; Kultur › <strong>Übersicht</strong>', zurueck:'kategorie/kultur', untertitel:'Aktuelle Termine und Übersicht.', detailKey:'museum', renderTyp:'externalLinks'},
-  'kultur-literaturtage': {datenName:'DATA_WW_LIT', titel:'Westerwälder Literaturtage', breadcrumb:'Kunst &amp; Kultur › <strong>ww-Lit 2026</strong>', zurueck:'kategorie/kultur', untertitel:'28 Lesungen quer durch den Westerwald.', detailKey:'wwlit', renderTyp:'wwLit'},
 
   // REGIONALE PRODUKTE
-  'regional-einkaufsfuehrer': {linkData:'einkaufsfuehrer', titel:'Regionaler Einkaufsführer', breadcrumb:'Regionale Produkte › <strong>Einkaufsführer</strong>', zurueck:'kategorie/regional', untertitel:'Direkt vom Erzeuger – aus dem Westerwald.', renderTyp:'subLinks'},
-  'regional-westerwald-box':  {linkData:'westerwald-box',  titel:'Westerwald Box',  breadcrumb:'Regionale Produkte › <strong>Westerwald Box</strong>',  zurueck:'kategorie/regional', untertitel:'Der Westerwald als Geschenkbox.', renderTyp:'subLinks'},
-  'regional-westerwaelder-ernte': {linkData:'westerwaelder-ernte', titel:'Westerwälder Ernte', breadcrumb:'Regionale Produkte › <strong>Westerwälder Ernte</strong>', zurueck:'kategorie/regional', untertitel:'Saisonkalender und Erzeuger.', renderTyp:'subLinks'},
-  'regional-naturgenuss':     {linkData:'naturgenuss',     titel:'Naturgenuss Partner', breadcrumb:'Regionale Produkte › <strong>Naturgenuss</strong>', zurueck:'kategorie/regional', untertitel:'Erzeuger & Produkte aus dem Westerwald.', renderTyp:'subLinks'},
+  'regional-einkaufsfuehrer': {titel:'Regionaler Einkaufsführer Westerwald', breadcrumb:'Regionale Produkte › <strong>Einkaufsführer</strong>', zurueck:'kategorie/regional', untertitel:'Direktvermarkter & Hofläden im Westerwald.', renderTyp:'iframe', iframeUrl:'https://wir-westerwaelder.de/fileadmin/Regionaler_Einkaufsf%C3%BChrer/Download/WW_Einkaufsf%C3%BChrer_2024_RZlow.pdf'},
+  'regional-westerwald-box':  {titel:'Westerwald Box',  breadcrumb:'Regionale Produkte › <strong>Westerwald Box</strong>',  zurueck:'kategorie/regional', untertitel:'Der Westerwald als Geschenkbox.', renderTyp:'inhaltSeite', inhaltKey:'westerwaldBox'},
+  'regional-westerwaelder-ernte': {titel:'Westerwälder Ernte', breadcrumb:'Regionale Produkte › <strong>Westerwälder Ernte</strong>', zurueck:'kategorie/regional', untertitel:'Saisonkalender und regionale Erzeuger.', renderTyp:'inhaltSeite', inhaltKey:'westerwaelderErnte'},
+  'regional-naturgenuss':     {linkData:'naturgenuss',     titel:'Naturgenuss Partner', breadcrumb:'Regionale Produkte › <strong>Naturgenuss</strong>', zurueck:'kategorie/regional', untertitel:'Erzeuger & Produkte aus dem Westerwald.', renderTyp:'naturgenussLinks'},
+  'regional-naturgenuss-erzeuger': {titel:'Naturgenuss Partner – Erzeuger & Produkte', breadcrumb:'Regionale Produkte › Naturgenuss › <strong>Erzeuger & Produkte</strong>', zurueck:'liste/regional-naturgenuss', untertitel:'PDF-Übersicht 05/2025.', renderTyp:'iframe', iframeUrl:'https://www.naturgenuss-partner.de/wp-content/uploads/2025/06/NaturgenussPartner_ErzeugerProdukte_05-2025-web.pdf'},
+  'regional-naturgenuss-broschuere': {titel:'Naturgenuss Broschüre', breadcrumb:'Regionale Produkte › Naturgenuss › <strong>Broschüre</strong>', zurueck:'liste/regional-naturgenuss', untertitel:'Magazin 2022.', renderTyp:'iframe', iframeUrl:'https://www.naturgenuss-partner.de/wp-content/uploads/2022/09/Naturgenuss-Magazin-2022.pdf'},
 
   // MOBILITÄT & VERKEHR
   'mobilitaet-bahn-bus':      {linkData:'bahn-bus',      titel:'Bahn & Bus', breadcrumb:'Mobilität &amp; Verkehr › <strong>Bahn & Bus</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Fahrpläne und ÖPNV-Verbindungen.', renderTyp:'subLinks'},
@@ -777,105 +914,47 @@ function renderWwLit(ziel, slug, l) {
 
 
 // ════════════════════════════════════════════════════════════════
-// TERMINE RENDERER (Naturerlebnisse, Veranstaltungen)
-// Mit Filtern: Datum, Bezirk (AK/WW/NR/Hessen), Kosten, Kinder
-// Filtert vergangene Termine raus.
+// TERMINE RENDERER (konsolidierte Veranstaltungen)
+// Quelle: DATA_VERANSTALTUNGEN_ALLE
+// Enthält Naturerlebnisse, Veranstaltungen (westerwald.info) und
+// Westerwälder Literaturtage in einheitlichem Schema.
+// Filter: Datum, Bezirk, Preis, Familienfreundlich
 // ════════════════════════════════════════════════════════════════
 
-// Town → Bezirk Mapping (für Veranstaltungen, da kein direkter landkreis-Code)
-var TOWN_BEZIRK = {
-  // Hessen (Hessischer Westerwald)
-  'Dillenburg':'Hessen', 'Haiger':'Hessen', 'Herborn':'Hessen',
-  'Greifenstein':'Hessen', 'Breitscheid':'Hessen', 'Eschenburg':'Hessen', 'Driedorf':'Hessen',
-  // Altenkirchen (AK)
-  'Altenkirchen':'AK', 'Betzdorf':'AK', 'Wissen':'AK', 'Daaden':'AK', 'Kirchen':'AK',
-  'Hamm-Sieg':'AK', 'Mudersbach':'AK', 'Brachbach':'AK', 'Steinebach/Sieg':'AK',
-  'Niederfischbach':'AK', 'Friesenhagen':'AK', 'Herdorf':'AK', 'Almersbach':'AK',
-  'Birkenbeul':'AK', 'Bitzen':'AK', 'Mittelhof':'AK', 'Oberwambach':'AK',
-  'Helmenzen':'AK', 'Mammelzen':'AK', 'Flammersfeld':'AK', 'Weyerbusch':'AK',
-  'Horhausen':'AK', 'Willroth':'AK', 'Burglahr':'AK', 'Kircheib':'AK',
-  // Westerwaldkreis (WW)
-  'Bad Marienberg':'WW', 'Hachenburg':'WW', 'Montabaur':'WW', 'Westerburg':'WW',
-  'Rennerod':'WW', 'Wallmerod':'WW', 'Selters':'WW', 'Ransbach-Baumbach':'WW',
-  'Höhr-Grenzhausen':'WW', 'Stahlhofen am Wiesensee':'WW', 'Salz':'WW', 'Atzelgift':'WW',
-  'Dreifelden':'WW', 'Streithausen':'WW', 'Enspel':'WW', 'Limbach':'WW',
-  'Westernohe':'WW', 'Brunken':'WW', 'Rothenbach':'WW', 'Friedewald':'WW',
-  'Irmtraut':'WW', 'Obererbach':'WW',
-  // Neuwied (NR)
-  'Neustadt/Wied':'NR', 'Waldbreitbach':'NR', 'Hausen/Wied':'NR', 'Roßbach/Wied':'NR',
-  'Asbach':'NR', 'Buchholz':'NR', 'Marienthal':'NR', 'Niederbreitbach':'NR',
-  'Rengsdorf':'NR', 'Ehlscheid':'NR', 'Anhausen':'NR', 'Bonefeld':'NR',
-  'Hümmerich':'NR', 'Melsbach':'NR', 'Oberhonnefeld-Gierend':'NR', 'Oberraden':'NR',
-  'Oberlahr':'NR', 'Straßenhaus':'NR', 'Seifen':'NR'
-};
-
-function getTerminBezirk(item, terminTyp) {
-  if (terminTyp === 'natur') return item.landkreis || ''; // Direkt aus Daten: AK/WW/NR
-  // Veranstaltungen: erst über town, dann über region als Fallback
-  var b = TOWN_BEZIRK[item.town];
-  if (b) return b;
-  if ((item.region||'').indexOf('Hessisch') >= 0) return 'Hessen';
-  return '';
-}
-
-function getTerminDatum(item, terminTyp) {
-  return terminTyp === 'natur' ? item.datum : item.date;
-}
-
-function getTerminTitel(item, terminTyp) {
-  return terminTyp === 'natur' ? (item.titel||'Termin') : (item.name||'Termin');
-}
-
-function isKostenfrei(item, terminTyp) {
-  if (terminTyp === 'natur') {
-    return (item.kosten||'').toLowerCase().indexOf('kostenfrei') >= 0
-        || (item.kosten||'').trim() === '0'
-        || (item.kosten||'').toLowerCase().indexOf('frei') >= 0;
-  }
-  // Veranstaltungen: price meist leer; "frei" oder "kostenlos" erkennen
-  var p = (item.price||'').toLowerCase();
-  return !p.trim() || p.indexOf('frei') >= 0 || p.indexOf('kostenlos') >= 0;
-}
-
-// Termin-Filter-State (eigener State, getrennt vom Tour-Filter)
+// Termin-Filter-State (eigener State)
 var TERMIN_FILTER = { datum: 'alle', bezirk: 'alle', kosten: 'alle', kids: 'alle' };
 window._aktuelleTermine = null;
 
-function termineFilterUI(terminTyp) {
+function termineFilterUI() {
   function pill(group, val, label) {
     var aktiv = TERMIN_FILTER[group] === val;
     return '<button class="filter-pill' + (aktiv ? ' aktiv' : '') + '" '
       + 'onclick="setzeTerminFilter(\'' + group + '\',\'' + val + '\')">' + label + '</button>';
   }
   var html = '<div class="filter-leiste termine-filter">';
-
   html += '<div class="filter-gruppe"><span class="filter-label">📅 Datum:</span>'
     + pill('datum','alle','Alle')
     + pill('datum','heute','Heute')
     + pill('datum','woche','Diese Woche')
     + pill('datum','monat','Dieser Monat')
     + '</div>';
-
-  html += '<div class="filter-gruppe"><span class="filter-label">📍 Bezirk:</span>'
+  // Region: in einer Zeile, kompakte Labels
+  html += '<div class="filter-gruppe filter-bezirk"><span class="filter-label">📍 Region:</span>'
     + pill('bezirk','alle','Alle')
     + pill('bezirk','AK','Altenkirchen')
-    + pill('bezirk','WW','Westerwaldkreis')
     + pill('bezirk','NR','Neuwied')
+    + pill('bezirk','WW','Westerwald')
     + pill('bezirk','Hessen','Hessen')
     + '</div>';
-
   html += '<div class="filter-gruppe"><span class="filter-label">💶 Preis:</span>'
     + pill('kosten','alle','Alle')
     + pill('kosten','frei','Kostenfrei')
     + pill('kosten','kostenpflichtig','Kostenpflichtig')
     + '</div>';
-
-  if (terminTyp === 'natur') {
-    html += '<div class="filter-gruppe"><span class="filter-label">👶 Kinder:</span>'
-      + pill('kids','alle','Alle')
-      + pill('kids','ja','Familienfreundlich')
-      + '</div>';
-  }
+  html += '<div class="filter-gruppe"><span class="filter-label">👶 Kinder:</span>'
+    + pill('kids','alle','Alle')
+    + pill('kids','ja','Familienfreundlich')
+    + '</div>';
   html += '</div>';
   return html;
 }
@@ -885,45 +964,42 @@ function setzeTerminFilter(group, val) {
   var l = window._aktuelleTermine;
   if (!l) return;
   var wrap = document.getElementById('filter-leiste-wrapper');
-  if (wrap) wrap.innerHTML = termineFilterUI(l.info.terminTyp);
+  if (wrap) wrap.innerHTML = termineFilterUI();
   var liste = document.getElementById('termine-liste');
   if (liste) liste.innerHTML = baueTermineListe(l.slug, l.info);
   aktualisiereTermineTreffer(l);
 }
 
-function termineFilterAnwenden(items, terminTyp) {
+function termineFilterAnwenden(items) {
   var heute = new Date();
   heute.setHours(0,0,0,0);
-  var heuteStr = heute.getFullYear() + '-' + String(heute.getMonth()+1).padStart(2,'0') + '-' + String(heute.getDate()).padStart(2,'0');
+  var pad = function(n) { return String(n).padStart(2,'0'); };
+  var heuteStr = heute.getFullYear() + '-' + pad(heute.getMonth()+1) + '-' + pad(heute.getDate());
 
   var sonntag = new Date(heute);
-  sonntag.setDate(heute.getDate() + (7 - heute.getDay()));
-  var sonntagStr = sonntag.getFullYear() + '-' + String(sonntag.getMonth()+1).padStart(2,'0') + '-' + String(sonntag.getDate()).padStart(2,'0');
+  // 0 = So, 1 = Mo, …, 6 = Sa → Tage bis Sonntag
+  var bisSonntag = (7 - heute.getDay()) % 7;
+  if (bisSonntag === 0 && heute.getDay() === 0) bisSonntag = 0;
+  sonntag.setDate(heute.getDate() + (heute.getDay() === 0 ? 0 : (7 - heute.getDay())));
+  var sonntagStr = sonntag.getFullYear() + '-' + pad(sonntag.getMonth()+1) + '-' + pad(sonntag.getDate());
   var monatsende = new Date(heute.getFullYear(), heute.getMonth()+1, 0);
-  var monatsendeStr = monatsende.getFullYear() + '-' + String(monatsende.getMonth()+1).padStart(2,'0') + '-' + String(monatsende.getDate()).padStart(2,'0');
+  var monatsendeStr = monatsende.getFullYear() + '-' + pad(monatsende.getMonth()+1) + '-' + pad(monatsende.getDate());
 
   return items.filter(function(item) {
-    var d = getTerminDatum(item, terminTyp) || '';
+    var d = item.datumIso || '';
     if (!d || d < heuteStr) return false;
-
     if (TERMIN_FILTER.datum === 'heute' && d !== heuteStr) return false;
-    if (TERMIN_FILTER.datum === 'woche' && (d > sonntagStr)) return false;
-    if (TERMIN_FILTER.datum === 'monat' && (d > monatsendeStr)) return false;
-
-    if (TERMIN_FILTER.bezirk !== 'alle') {
-      if (getTerminBezirk(item, terminTyp) !== TERMIN_FILTER.bezirk) return false;
-    }
-
-    if (TERMIN_FILTER.kosten === 'frei' && !isKostenfrei(item, terminTyp)) return false;
-    if (TERMIN_FILTER.kosten === 'kostenpflichtig' && isKostenfrei(item, terminTyp)) return false;
-
-    if (TERMIN_FILTER.kids === 'ja' && terminTyp === 'natur' && item.fuerKids !== 'Ja') return false;
-
+    if (TERMIN_FILTER.datum === 'woche' && d > sonntagStr) return false;
+    if (TERMIN_FILTER.datum === 'monat' && d > monatsendeStr) return false;
+    if (TERMIN_FILTER.bezirk !== 'alle' && item.bezirk !== TERMIN_FILTER.bezirk) return false;
+    if (TERMIN_FILTER.kosten === 'frei' && !item.kostenfrei) return false;
+    if (TERMIN_FILTER.kosten === 'kostenpflichtig' && item.kostenfrei) return false;
+    if (TERMIN_FILTER.kids === 'ja' && !item.fuerKids) return false;
     return true;
   });
 }
 
-function formatDatum(d) {
+function formatTerminDatum(d) {
   if (!d) return '';
   var teile = d.split('-');
   if (teile.length !== 3) return d;
@@ -934,12 +1010,11 @@ function formatDatum(d) {
 
 function baueTermineListe(slug, l) {
   var rohdaten = window[l.datenName] || [];
-  var terminTyp = l.terminTyp || 'natur';
-  var gefiltert = termineFilterAnwenden(rohdaten, terminTyp);
-
+  var gefiltert = termineFilterAnwenden(rohdaten);
   gefiltert.sort(function(a,b) {
-    var da = getTerminDatum(a,terminTyp), db = getTerminDatum(b,terminTyp);
-    if (da < db) return -1; if (da > db) return 1; return 0;
+    if (a.datumIso < b.datumIso) return -1;
+    if (a.datumIso > b.datumIso) return 1;
+    return (a.zeit||'').localeCompare(b.zeit||'');
   });
 
   if (!gefiltert.length) {
@@ -948,27 +1023,23 @@ function baueTermineListe(slug, l) {
 
   return gefiltert.map(function(item) {
     var idx = rohdaten.indexOf(item);
-    var datum = getTerminDatum(item, terminTyp);
-    var titel = getTerminTitel(item, terminTyp);
-    var bezirk = getTerminBezirk(item, terminTyp);
-    var ort = terminTyp === 'natur' ? (item.plzOrt||'') : (item.town||'');
-    var zeit = terminTyp === 'natur' ? (item.startzeit||'') : (item.time||'');
-    var kostenfrei = isKostenfrei(item, terminTyp);
-    var kids = (terminTyp === 'natur' && item.fuerKids === 'Ja');
-
     var meta = [];
-    if (zeit) meta.push('🕐 ' + escapeHtml(zeit));
-    if (ort) meta.push('📍 ' + escapeHtml(ort));
-    if (kostenfrei) meta.push('<span class="termin-frei">kostenfrei</span>');
-    if (kids) meta.push('<span class="termin-kids">👶 Familie</span>');
+    if (item.zeit) meta.push('🕐 ' + escapeHtml(item.zeit));
+    if (item.ort) meta.push('📍 ' + escapeHtml(item.ort));
+    if (item.kostenfrei) meta.push('<span class="termin-frei">kostenfrei</span>');
+    if (item.fuerKids) meta.push('<span class="termin-kids">👶 Familie</span>');
+    var quelleBadge = '';
+    if (item.quelle === 'lit')   quelleBadge = '<span class="termin-quelle quelle-lit">📚 ww-Lit</span>';
+    else if (item.quelle === 'natur') quelleBadge = '<span class="termin-quelle quelle-natur">🌿 Natur</span>';
+    if (quelleBadge) meta.unshift(quelleBadge);
 
     return '<button class="eintrag termin-eintrag" onclick="navigateTo(\'detail/' + l.detailKey + '/' + slug + '_' + idx + '\')">'
       + '<div class="termin-datum-badge">'
-        + '<div class="termin-datum-text">' + escapeHtml(formatDatum(datum)) + '</div>'
-        + (bezirk ? '<div class="termin-bezirk">' + escapeHtml(bezirk) + '</div>' : '')
+        + '<div class="termin-datum-text">' + escapeHtml(formatTerminDatum(item.datumIso)) + '</div>'
+        + (item.bezirk ? '<div class="termin-bezirk">' + escapeHtml(item.bezirk) + '</div>' : '')
       + '</div>'
       + '<div class="eintrag-text">'
-        + '<div class="eintrag-titel">' + escapeHtml(titel) + '</div>'
+        + '<div class="eintrag-titel">' + escapeHtml(item.titel) + '</div>'
         + (meta.length ? '<div class="eintrag-meta">' + meta.join(' · ') + '</div>' : '')
       + '</div>'
       + '<div class="eintrag-pfeil">&rsaquo;</div>'
@@ -978,11 +1049,11 @@ function baueTermineListe(slug, l) {
 
 function aktualisiereTermineTreffer(l) {
   var rohdaten = window[l.info.datenName] || [];
-  var terminTyp = l.info.terminTyp || 'natur';
   var heute = new Date(); heute.setHours(0,0,0,0);
-  var heuteStr = heute.getFullYear() + '-' + String(heute.getMonth()+1).padStart(2,'0') + '-' + String(heute.getDate()).padStart(2,'0');
-  var zukunft = rohdaten.filter(function(i) { return (getTerminDatum(i, terminTyp)||'') >= heuteStr; });
-  var g = termineFilterAnwenden(rohdaten, terminTyp);
+  var pad = function(n) { return String(n).padStart(2,'0'); };
+  var heuteStr = heute.getFullYear() + '-' + pad(heute.getMonth()+1) + '-' + pad(heute.getDate());
+  var zukunft = rohdaten.filter(function(i) { return (i.datumIso||'') >= heuteStr; });
+  var g = termineFilterAnwenden(rohdaten);
   var el = document.getElementById('filter-treffer');
   if (el) el.innerHTML = '<strong>' + g.length + '</strong> von <strong>' + zukunft.length + '</strong> kommenden Terminen';
 }
@@ -992,7 +1063,6 @@ function renderTermine(ziel, slug, l) {
   window._aktuelleTermine = { slug: slug, info: l };
 
   var rohdaten = window[l.datenName] || [];
-  var terminTyp = l.terminTyp || 'natur';
 
   if (!rohdaten.length) {
     ziel.innerHTML =
@@ -1006,19 +1076,21 @@ function renderTermine(ziel, slug, l) {
   }
 
   var heute = new Date(); heute.setHours(0,0,0,0);
-  var heuteStr = heute.getFullYear() + '-' + String(heute.getMonth()+1).padStart(2,'0') + '-' + String(heute.getDate()).padStart(2,'0');
-  var zukunft = rohdaten.filter(function(i) { return (getTerminDatum(i, terminTyp)||'') >= heuteStr; });
+  var pad = function(n) { return String(n).padStart(2,'0'); };
+  var heuteStr = heute.getFullYear() + '-' + pad(heute.getMonth()+1) + '-' + pad(heute.getDate());
+  var zukunft = rohdaten.filter(function(i) { return (i.datumIso||'') >= heuteStr; });
 
   ziel.innerHTML =
     '<div class="sticky-region">'
       + navBar(l.zurueck, l.breadcrumb)
       + intro(l.titel, l.untertitel)
-      + '<div id="filter-leiste-wrapper">' + termineFilterUI(terminTyp) + '</div>'
+      + '<div id="filter-leiste-wrapper">' + termineFilterUI() + '</div>'
     + '</div>'
     + '<div id="filter-treffer" class="filter-treffer"><strong>' + zukunft.length + '</strong> kommende Termine</div>'
     + '<div class="liste" id="termine-liste">' + baueTermineListe(slug, l) + '</div>'
     + '<div class="spacer"></div>';
 }
+
 
 
 function renderDatenListe(ziel, slug, l) {
@@ -1027,6 +1099,11 @@ function renderDatenListe(ziel, slug, l) {
   if (l.renderTyp === 'externalLinks') { renderExternalLinks(ziel, slug, l); return; }
   if (l.renderTyp === 'wwLit')         { renderWwLit(ziel, slug, l); return; }
   if (l.renderTyp === 'termine')       { renderTermine(ziel, slug, l); return; }
+  if (l.renderTyp === 'gefiltert')     { renderGefiltertListe(ziel, slug, l); return; }
+  if (l.renderTyp === 'inhaltSeite')   { renderInhaltSeite(ziel, slug, l); return; }
+  if (l.renderTyp === 'iframe')        { renderIframeSeite(ziel, slug, l); return; }
+  if (l.renderTyp === 'museenInline')  { renderMuseenInline(ziel, slug, l); return; }
+  if (l.renderTyp === 'naturgenussLinks') { renderNaturgenussLinks(ziel, slug, l); return; }
 
   // STANDARD: Ausflugsziele, Badeseen, Unterkünfte etc.
   var daten = window[l.datenName] || [];
@@ -1099,167 +1176,101 @@ function renderDetail(ziel, typ, schluessel) {
   else if (typ === 'ausfl')                    renderAusflDetail(ziel, item, info, zurueck);
   else if (typ === 'badesee')                  renderBadeseeDetail(ziel, item, info, zurueck);
   else if (typ === 'unterkunft')               renderUnterkunftDetail(ziel, item, info, zurueck);
-  else if (typ === 'museum' || typ === 'literatur') renderAusflDetail(ziel, item, info, zurueck);
-  else if (typ === 'wwlit')                    renderWwLitDetail(ziel, item, info, zurueck);
-  else if (typ === 'natur')                    renderTerminDetail(ziel, item, info, zurueck, 'natur');
-  else if (typ === 'event')                    renderTerminDetail(ziel, item, info, zurueck, 'event');
+  else if (typ === 'museum')                   renderMuseumDetail(ziel, item, info, zurueck);
+  else if (typ === 'literatur')                renderAusflDetail(ziel, item, info, zurueck);
+  else if (typ === 'event')                    renderTerminDetail(ziel, item, info, zurueck);
+  else if (typ === 'natur' || typ === 'wwlit') renderTerminDetail(ziel, item, info, zurueck);
   else ziel.innerHTML = navBar('home','') + intro('Detail','') + '<pre>' + JSON.stringify(item, null, 2) + '</pre>';
 }
 
+
 // ════════════════════════════════════════════════════════════════
-// WW-LIT DETAIL: Eine einzelne Lesung mit allen Informationen
+// TERMIN-DETAIL (konsolidiert: Naturerlebnis, Veranstaltung, Lit)
 // ════════════════════════════════════════════════════════════════
-function renderWwLitDetail(ziel, item, info, zurueck) {
+function renderTerminDetail(ziel, item, info, zurueck) {
+  var pills = '<div class="diff-gpx-row">';
+  if (item.datumIso) pills += '<span class="diff-pill diff-mittel-bg">' + escapeHtml(formatTerminDatum(item.datumIso));
+  if (item.zeit) pills += ' · ' + escapeHtml(item.zeit);
+  if (item.datumIso) pills += '</span>';
+  if (item.bezirk) {
+    var bezirkLabel = item.bezirk === 'AK' ? 'Altenkirchen' : item.bezirk === 'WW' ? 'Westerwald' : item.bezirk === 'NR' ? 'Neuwied' : item.bezirk;
+    pills += '<span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(bezirkLabel) + '</span>';
+  }
+  if (item.kostenfrei) pills += '<span class="diff-pill termin-frei-pill">kostenfrei</span>';
+  if (item.fuerKids) pills += '<span class="diff-pill termin-kids-pill">👶 Familie</span>';
+  if (item.quelle === 'lit') pills += '<span class="diff-pill quelle-lit">📚 ww-Lit</span>';
+  if (item.sourceUrl) pills += '<a class="btn-action btn-gpx" href="' + item.sourceUrl + '" target="_blank" rel="noopener">↗ Quelle</a>';
+  if (item.quelle === 'natur' && item.website) {
+    var url = item.website.indexOf('http') === 0 ? item.website : 'https://' + item.website;
+    pills += '<a class="btn-action btn-gpx" href="' + url + '" target="_blank" rel="noopener">🌐 Website</a>';
+  }
+  pills += '</div>';
+
   var html = '<div class="sticky-detail">'
     + navBar(zurueck, info.breadcrumb)
     + intro(info.titel, '')
-    + '<div class="sticky-detail-titel">' + escapeHtml(item.autor || '—') + '</div>'
-    + '<div class="diff-gpx-row">'
-      + (item.datum ? '<span class="diff-pill diff-mittel-bg">' + escapeHtml(item.datum) + (item.zeit ? ' · ' + escapeHtml(item.zeit) : '') + '</span>' : '')
-      + (item.sourceUrl ? '<a class="btn-action btn-gpx" href="' + item.sourceUrl + '" target="_blank" rel="noopener">↗ ww-lit.de</a>' : '')
-    + '</div>'
+    + '<div class="sticky-detail-titel">' + escapeHtml(item.titel) + '</div>'
+    + pills
     + '</div>';
 
   html += '<div class="detail-section">';
-  if (item.werk) html += '<div class="detail-subtitle"><strong>' + escapeHtml(item.werk) + '</strong>'
-    + (item.untertitel ? '<br><em>' + escapeHtml(item.untertitel) + '</em>' : '') + '</div>';
+  if (item.untertitel) html += '<div class="detail-subtitle"><em>' + escapeHtml(item.untertitel) + '</em></div>';
 
-  // Stats-Grid: Ort, Adresse, Preise
+  // Stats-Grid
   var stats = [];
-  if (item.ort)     stats.push('<div class="stat"><div class="stat-label">Ort</div><div class="stat-wert">' + escapeHtml(item.ort) + '</div></div>');
-  if (item.adresse) stats.push('<div class="stat"><div class="stat-label">Adresse</div><div class="stat-wert">' + escapeHtml(item.adresse) + '</div></div>');
-  if (item.preise)  stats.push('<div class="stat"><div class="stat-label">Preise</div><div class="stat-wert">' + escapeHtml(item.preise) + '</div></div>');
+  if (item.dauer) stats.push('<div class="stat"><div class="stat-label">Dauer</div><div class="stat-wert">' + escapeHtml(item.dauer) + '</div></div>');
+  if (item.kosten && !item.kostenfrei) {
+    var k = item.kosten;
+    if (/^\d+([,.]\d+)?$/.test(k)) k = k + ' €';
+    else if (/^\d+([,.]\d+)?\s*\/\s*\d+([,.]\d+)?$/.test(k)) k = k + ' €';
+    stats.push('<div class="stat"><div class="stat-label">Kosten</div><div class="stat-wert">' + escapeHtml(k) + '</div></div>');
+  }
+  if (item.anmeldung) stats.push('<div class="stat"><div class="stat-label">Anmeldung</div><div class="stat-wert">' + escapeHtml(item.anmeldung) + '</div></div>');
+  if (item.kategorie && item.quelle === 'event') stats.push('<div class="stat"><div class="stat-label">Kategorie</div><div class="stat-wert">' + escapeHtml(item.kategorie) + '</div></div>');
+  if (item.region) stats.push('<div class="stat"><div class="stat-label">Region</div><div class="stat-wert">' + escapeHtml(item.region) + '</div></div>');
   if (stats.length) html += '<div class="stats-grid">' + stats.join('') + '</div>';
 
-  // Dropdowns
+  // Dropdowns – kanonische Reihenfolge
   var first = true;
   if (item.beschreibung) { html += dropdown('Beschreibung', richText(item.beschreibung), first); first = false; }
-  if (item.mitwirkende)  { html += dropdown('Mitwirkende',  richText(item.mitwirkende),  first); first = false; }
-  if (item.sourceUrl) {
-    html += dropdown('Quelle',
-      '<p><a href="' + item.sourceUrl + '" target="_blank" rel="noopener">Diese Veranstaltung auf ww-lit.de ansehen</a></p>',
-      first);
-    first = false;
-  }
-  if (first) {
-    html += '<div class="hinweis">Detailtext wird ergänzt. Direkt auf ww-lit.de: '
-      + (item.sourceUrl ? '<a href="' + item.sourceUrl + '" target="_blank" rel="noopener">' + escapeHtml(item.sourceUrl) + '</a>' : '—')
-      + '</div>';
-  }
-  html += '</div><div class="spacer"></div>';
-  ziel.innerHTML = html;
-}
 
-// ════════════════════════════════════════════════════════════════
-// TERMIN-DETAIL: Naturerlebnis oder Veranstaltung
-// ════════════════════════════════════════════════════════════════
-function renderTerminDetail(ziel, item, info, zurueck, terminTyp) {
-  var titel    = getTerminTitel(item, terminTyp);
-  var datum    = getTerminDatum(item, terminTyp);
-  var bezirk   = getTerminBezirk(item, terminTyp);
-  var kostenfrei = isKostenfrei(item, terminTyp);
+  // Mitwirkende (nur Lit)
+  if (item.mitwirkende) { html += dropdown('Mitwirkende', richText(item.mitwirkende), first); first = false; }
 
-  var headerPills = '<div class="diff-gpx-row">';
-  if (datum) headerPills += '<span class="diff-pill diff-mittel-bg">' + escapeHtml(formatDatum(datum));
-  if (terminTyp === 'natur' && item.startzeit) headerPills += ' · ' + escapeHtml(item.startzeit);
-  if (terminTyp === 'event' && item.time)      headerPills += ' · ' + escapeHtml(item.time);
-  if (datum) headerPills += '</span>';
-  if (bezirk) {
-    var bezirkLabel = bezirk === 'AK' ? 'Altenkirchen' : bezirk === 'WW' ? 'Westerwaldkreis' : bezirk === 'NR' ? 'Neuwied' : bezirk;
-    headerPills += '<span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(bezirkLabel) + '</span>';
-  }
-  if (kostenfrei) headerPills += '<span class="diff-pill termin-frei-pill">kostenfrei</span>';
-  if (terminTyp === 'natur' && item.fuerKids === 'Ja')
-    headerPills += '<span class="diff-pill termin-kids-pill">👶 Familie</span>';
-  if (terminTyp === 'event' && item.sourceUrl)
-    headerPills += '<a class="btn-action btn-gpx" href="' + item.sourceUrl + '" target="_blank" rel="noopener">↗ westerwald.info</a>';
-  if (terminTyp === 'natur' && item.website) {
-    var url = item.website.indexOf('http') === 0 ? item.website : 'https://' + item.website;
-    headerPills += '<a class="btn-action btn-gpx" href="' + url + '" target="_blank" rel="noopener">🌐 Website</a>';
-  }
-  headerPills += '</div>';
-
-  var html = '<div class="sticky-detail">'
-    + navBar(zurueck, info.breadcrumb)
-    + intro(info.titel, '')
-    + '<div class="sticky-detail-titel">' + escapeHtml(titel) + '</div>'
-    + headerPills
-    + '</div>';
-
-  html += '<div class="detail-section">';
-
-  // Stats-Grid: wichtige Eckdaten
-  var stats = [];
-  if (terminTyp === 'natur') {
-    if (item.dauer)        stats.push('<div class="stat"><div class="stat-label">Dauer</div><div class="stat-wert">' + escapeHtml(item.dauer) + '</div></div>');
-    if (item.kosten && !kostenfrei) {
-      var k = item.kosten;
-      // Wenn nur eine Zahl oder „X / Y" mit Zahlen, „€" anhängen
-      if (/^\d+([,.]\d+)?$/.test(k)) k = k + ' €';
-      else if (/^\d+([,.]\d+)?\s*\/\s*\d+([,.]\d+)?$/.test(k)) k = k + ' €';
-      stats.push('<div class="stat"><div class="stat-label">Kosten</div><div class="stat-wert">' + escapeHtml(k) + '</div></div>');
-    }
-    if (item.anmeldung)    stats.push('<div class="stat"><div class="stat-label">Anmeldung</div><div class="stat-wert">' + escapeHtml(item.anmeldung) + '</div></div>');
-    if (item.fuerKids)     stats.push('<div class="stat"><div class="stat-label">Für Kinder</div><div class="stat-wert">' + escapeHtml(item.fuerKids) + '</div></div>');
-  } else {
-    if (item.category)     stats.push('<div class="stat"><div class="stat-label">Kategorie</div><div class="stat-wert">' + escapeHtml(item.category) + '</div></div>');
-    if (item.region)       stats.push('<div class="stat"><div class="stat-label">Region</div><div class="stat-wert">' + escapeHtml(item.region) + '</div></div>');
-    if (item.price)        stats.push('<div class="stat"><div class="stat-label">Preis</div><div class="stat-wert">' + escapeHtml(item.price) + '</div></div>');
-  }
-  if (stats.length) html += '<div class="stats-grid">' + stats.join('') + '</div>';
-
-  // Beschreibung-Dropdown
-  var beschreibung = terminTyp === 'natur' ? item.text : item.desc;
-  var first = true;
-  if (beschreibung) {
-    html += dropdown('Beschreibung', richText(beschreibung), first);
-    first = false;
-  }
-
-  // Ort-Dropdown (Adresse + Karte-Link)
+  // Ort & Adresse
   var ortInhalt = '';
-  if (terminTyp === 'natur') {
-    if (item.strasse) ortInhalt += '<p>' + escapeHtml(item.strasse) + '</p>';
-    if (item.plzOrt)  ortInhalt += '<p><strong>' + escapeHtml(item.plzOrt) + '</strong></p>';
-  } else {
-    if (item.place) ortInhalt += '<p>' + escapeHtml(item.place) + '</p>';
-    if (item.town)  ortInhalt += '<p><strong>' + escapeHtml(item.town) + '</strong></p>';
-    if (item.lat && item.lng) {
-      ortInhalt += '<p><a href="https://www.openstreetmap.org/?mlat=' + item.lat + '&mlon=' + item.lng + '#map=15/' + item.lat + '/' + item.lng
-        + '" target="_blank" rel="noopener">📍 Auf Karte zeigen</a></p>';
-    }
+  if (item.adresse) ortInhalt += '<p>' + escapeHtml(item.adresse) + '</p>';
+  if (item.plzOrt) ortInhalt += '<p><strong>' + escapeHtml(item.plzOrt) + '</strong></p>';
+  if (item.ort && !item.plzOrt) ortInhalt += '<p><strong>' + escapeHtml(item.ort) + '</strong></p>';
+  if (item.lat && item.lng) {
+    ortInhalt += '<p><a href="https://www.openstreetmap.org/?mlat=' + item.lat + '&mlon=' + item.lng + '#map=15/' + item.lat + '/' + item.lng + '" target="_blank" rel="noopener">📍 Auf Karte zeigen</a></p>';
   }
   if (ortInhalt) { html += dropdown('Ort & Adresse', ortInhalt, first); first = false; }
 
-  // Mitbringen / Beachten (nur natur)
-  if (terminTyp === 'natur') {
-    if (item.mitbringen) { html += dropdown('Mitbringen', richText(item.mitbringen), first); first = false; }
-    if (item.beachten)   { html += dropdown('Hinweise',   richText(item.beachten),   first); first = false; }
-  }
+  // Mitbringen / Beachten (Naturerlebnis)
+  if (item.mitbringen) { html += dropdown('Mitbringen', richText(item.mitbringen), first); first = false; }
+  if (item.beachten)   { html += dropdown('Hinweise',   richText(item.beachten),   first); first = false; }
 
-  // Veranstalter / Kontakt
-  var kontaktInhalt = '';
-  if (terminTyp === 'natur') {
-    if (item.leitung)         kontaktInhalt += '<p><strong>Leitung:</strong> ' + escapeHtml(item.leitung) + '</p>';
-    if (item.veranstalter)    kontaktInhalt += '<p><strong>Veranstalter:</strong> ' + escapeHtml(item.veranstalter) + '</p>';
-    if (item.telefon)         kontaktInhalt += '<p><strong>Telefon:</strong> <a href="tel:' + item.telefon.replace(/\s+/g,'') + '">' + escapeHtml(item.telefon) + '</a></p>';
-    if (item.email)           kontaktInhalt += '<p><strong>E-Mail:</strong> <a href="mailto:' + item.email + '">' + escapeHtml(item.email) + '</a></p>';
-    if (item.website) {
-      var w = item.website.indexOf('http') === 0 ? item.website : 'https://' + item.website;
-      kontaktInhalt += '<p><strong>Website:</strong> <a href="' + w + '" target="_blank" rel="noopener">' + escapeHtml(item.website) + '</a></p>';
-    }
-    if (item.anmeldungKontakt) kontaktInhalt += '<p><strong>Anmeldung:</strong> ' + escapeHtml(item.anmeldungKontakt) + '</p>';
-  } else {
-    if (item.organizer) kontaktInhalt += '<p><strong>Veranstalter:</strong> ' + escapeHtml(item.organizer) + '</p>';
-    if (item.sourceUrl) kontaktInhalt += '<p><a href="' + item.sourceUrl + '" target="_blank" rel="noopener">Diese Veranstaltung auf westerwald.info ansehen</a></p>';
+  // Veranstalter & Kontakt
+  var kontakt = '';
+  if (item.veranstalter) kontakt += '<p><strong>Veranstalter:</strong> ' + escapeHtml(item.veranstalter) + '</p>';
+  if (item.leitung)      kontakt += '<p><strong>Leitung:</strong> ' + escapeHtml(item.leitung) + '</p>';
+  if (item.telefon)      kontakt += '<p><strong>Telefon:</strong> <a href="tel:' + item.telefon.replace(/\s+/g,'') + '">' + escapeHtml(item.telefon) + '</a></p>';
+  if (item.email)        kontakt += '<p><strong>E-Mail:</strong> <a href="mailto:' + item.email + '">' + escapeHtml(item.email) + '</a></p>';
+  if (item.website && item.quelle !== 'lit') {
+    var w = item.website.indexOf('http') === 0 ? item.website : 'https://' + item.website;
+    kontakt += '<p><strong>Website:</strong> <a href="' + w + '" target="_blank" rel="noopener">' + escapeHtml(item.website) + '</a></p>';
   }
-  if (kontaktInhalt) { html += dropdown('Veranstalter & Kontakt', kontaktInhalt, first); first = false; }
+  if (item.anmeldungKontakt) kontakt += '<p><strong>Anmeldung:</strong> ' + escapeHtml(item.anmeldungKontakt) + '</p>';
+  if (item.sourceUrl)    kontakt += '<p><a href="' + item.sourceUrl + '" target="_blank" rel="noopener">Diese Veranstaltung an der Quelle ansehen</a></p>';
+  if (kontakt) { html += dropdown('Veranstalter & Kontakt', kontakt, first); first = false; }
 
   if (first) html += '<div class="hinweis">Weitere Details werden ergänzt.</div>';
 
   html += '</div><div class="spacer"></div>';
   ziel.innerHTML = html;
 }
+
 function escapeHtml(s) {
   if (s == null) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1718,6 +1729,304 @@ function renderUnterkunftDetail(ziel, item, info, zurueck) {
   if (!item.description && (!item.features || !item.features.length)) {
     html += '<div class="hinweis">Detail-Daten zu dieser Unterkunft werden noch befüllt.</div>';
   }
+  html += '</div><div class="spacer"></div>';
+  ziel.innerHTML = html;
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// AUSFLUGSZIELE / UNTERKÜNFTE: Liste mit Typ-Filter + Suche
+// ════════════════════════════════════════════════════════════════
+
+var GEFILTERT_STATE = { typ: 'alle', suche: '' };
+window._aktuelleGefiltert = null;
+
+function gefiltertFilterUI(l) {
+  var html = '<div class="filter-leiste gefiltert-filter">';
+  html += '<div class="filter-gruppe filter-bezirk">';
+  html += '<span class="filter-label">' + escapeHtml(l.filterLabel || 'Typ') + ':</span>';
+  for (var i = 0; i < l.filterTypen.length; i++) {
+    var t = l.filterTypen[i];
+    var aktiv = GEFILTERT_STATE.typ === t.key;
+    html += '<button class="filter-pill' + (aktiv ? ' aktiv' : '') + '" '
+      + 'onclick="setzeGefiltertFilter(\'' + t.key + '\')">' + escapeHtml(t.label) + '</button>';
+  }
+  html += '</div>';
+  html += '<div class="filter-gruppe filter-suche">';
+  html += '<input type="text" class="filter-such-input" placeholder="🔍 Suchen…" '
+    + 'value="' + escapeHtml(GEFILTERT_STATE.suche) + '" '
+    + 'oninput="setzeGefiltertSuche(this.value)">';
+  html += '</div>';
+  html += '</div>';
+  return html;
+}
+
+function setzeGefiltertFilter(key) {
+  GEFILTERT_STATE.typ = key;
+  refreshGefiltertView();
+}
+function setzeGefiltertSuche(val) {
+  GEFILTERT_STATE.suche = val || '';
+  refreshGefiltertView();
+}
+function refreshGefiltertView() {
+  var ctx = window._aktuelleGefiltert;
+  if (!ctx) return;
+  // Nur das Filter-Wrapper und die Liste neu rendern, nicht die ganze Seite
+  var filterWrap = document.getElementById('gefiltert-filter-wrap');
+  if (filterWrap) filterWrap.innerHTML = gefiltertFilterUI(ctx.info);
+  var listenEl = document.getElementById('gefiltert-liste');
+  if (listenEl) {
+    var html = baueGefiltertListe(ctx.slug, ctx.info);
+    listenEl.innerHTML = html.html;
+    var trefferEl = document.getElementById('gefiltert-treffer');
+    if (trefferEl) trefferEl.innerHTML = '<strong>' + html.gefiltertCount + '</strong> von <strong>' + html.gesamtCount + '</strong> Einträgen';
+  }
+}
+
+function gefiltertItemTyp(item, l) {
+  // l.typErkenner: function(item) → key (passend zu filterTypen[].key)
+  if (l.typErkenner) return l.typErkenner(item);
+  return 'sonstige';
+}
+
+function baueGefiltertListe(slug, l) {
+  var rohdaten = window[l.datenName] || [];
+  var suche = (GEFILTERT_STATE.suche || '').toLowerCase().trim();
+
+  var gefiltert = rohdaten.filter(function(item) {
+    if (GEFILTERT_STATE.typ !== 'alle') {
+      if (gefiltertItemTyp(item, l) !== GEFILTERT_STATE.typ) return false;
+    }
+    if (suche) {
+      var blob = ((item.name || '') + ' ' + (item.town || '') + ' ' + (item.region || '') + ' ' + (item.topic || '') + ' ' + (item.mainTopic || '')).toLowerCase();
+      if (blob.indexOf(suche) < 0) return false;
+    }
+    return true;
+  });
+
+  if (!gefiltert.length) {
+    return { html: '<div class="hinweis">Keine Einträge passen zu deiner Auswahl.</div>',
+             gefiltertCount: 0, gesamtCount: rohdaten.length };
+  }
+
+  // Sortieren alphabetisch
+  gefiltert.sort(function(a,b) {
+    return (a.name || '').localeCompare(b.name || '', 'de');
+  });
+
+  var html = gefiltert.map(function(item) {
+    var idx = rohdaten.indexOf(item);
+    var titel = item.name || 'Eintrag';
+    var ort = item.town || (item.contact && item.contact.town) || '';
+    var thema = item.topic || item.mainTopic || gefiltertItemTyp(item, l) || '';
+    var typLabel = '';
+    if (l.filterTypen && l.typErkenner) {
+      var tk = gefiltertItemTyp(item, l);
+      for (var i = 0; i < l.filterTypen.length; i++) {
+        if (l.filterTypen[i].key === tk && tk !== 'alle') { typLabel = l.filterTypen[i].label; break; }
+      }
+    }
+    var meta = [];
+    if (ort) meta.push('📍 ' + escapeHtml(ort));
+    if (thema && thema !== typLabel) meta.push(escapeHtml(thema));
+    return '<button class="eintrag" onclick="navigateTo(\'detail/' + l.detailKey + '/' + slug + '_' + idx + '\')">'
+      + (typLabel ? '<div class="eintrag-typ-badge">' + escapeHtml(typLabel) + '</div>' : '')
+      + '<div class="eintrag-text">'
+        + '<div class="eintrag-titel">' + escapeHtml(titel) + '</div>'
+        + (meta.length ? '<div class="eintrag-meta">' + meta.join(' · ') + '</div>' : '')
+      + '</div>'
+      + '<div class="eintrag-pfeil">&rsaquo;</div>'
+    + '</button>';
+  }).join('');
+
+  return { html: html, gefiltertCount: gefiltert.length, gesamtCount: rohdaten.length };
+}
+
+function renderGefiltertListe(ziel, slug, l) {
+  GEFILTERT_STATE = { typ: 'alle', suche: '' };
+  window._aktuelleGefiltert = { slug: slug, info: l };
+
+  var rohdaten = window[l.datenName] || [];
+  if (!rohdaten.length) {
+    ziel.innerHTML =
+      '<div class="sticky-region">'
+      + navBar(l.zurueck, l.breadcrumb)
+      + intro(l.titel, l.untertitel)
+      + '</div>'
+      + '<div class="hinweis">Daten noch nicht verfügbar.</div>'
+      + '<div class="spacer"></div>';
+    return;
+  }
+  var liste = baueGefiltertListe(slug, l);
+
+  ziel.innerHTML =
+    '<div class="sticky-region">'
+      + navBar(l.zurueck, l.breadcrumb)
+      + intro(l.titel, l.untertitel)
+      + '<div id="gefiltert-filter-wrap">' + gefiltertFilterUI(l) + '</div>'
+    + '</div>'
+    + '<div id="gefiltert-treffer" class="filter-treffer"><strong>' + liste.gefiltertCount + '</strong> von <strong>' + liste.gesamtCount + '</strong> Einträgen</div>'
+    + '<div class="liste" id="gefiltert-liste">' + liste.html + '</div>'
+    + '<div class="spacer"></div>';
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// INHALTS-SEITE (statischer HTML-Inhalt im App-Stil)
+// Für: Westerwald-Box, Westerwälder Ernte
+// ════════════════════════════════════════════════════════════════
+function renderInhaltSeite(ziel, slug, l) {
+  var inhalt = (window._INHALTE && window._INHALTE[l.inhaltKey]) || '';
+  ziel.innerHTML =
+    '<div class="sticky-region">'
+      + navBar(l.zurueck, l.breadcrumb)
+      + intro(l.titel, l.untertitel)
+    + '</div>'
+    + '<div class="detail-section inhalts-seite">' + (inhalt || '<div class="hinweis">Inhalt wird noch ergänzt.</div>') + '</div>'
+    + '<div class="spacer"></div>';
+}
+
+// ════════════════════════════════════════════════════════════════
+// IFRAME-SEITE (PDF oder externe Seite eingebettet)
+// Für: Einkaufsführer-PDF, Naturgenuss Partner/Broschüre
+// ════════════════════════════════════════════════════════════════
+function renderIframeSeite(ziel, slug, l) {
+  var iframeUrl = l.iframeUrl || '';
+  // Bei PDFs einen Google-Docs-Viewer-Fallback bieten – manche Mobile-Browser
+  // können PDFs nicht inline anzeigen.
+  var safe = encodeURIComponent(iframeUrl);
+  ziel.innerHTML =
+    '<div class="sticky-region">'
+      + navBar(l.zurueck, l.breadcrumb)
+      + intro(l.titel, l.untertitel)
+    + '</div>'
+    + '<div class="iframe-wrap">'
+      + '<iframe src="' + iframeUrl + '" class="inhalts-iframe" '
+      + 'allowfullscreen referrerpolicy="no-referrer"></iframe>'
+    + '</div>'
+    + '<div class="iframe-fallback">'
+      + 'Inhalte werden nicht angezeigt? <a href="' + iframeUrl + '" target="_blank" rel="noopener">In neuem Tab öffnen</a>'
+    + '</div>'
+    + '<div class="spacer"></div>';
+}
+
+// ════════════════════════════════════════════════════════════════
+// MUSEEN INLINE (alle Einträge mit Inhalt als Liste, kein externer Link)
+// ════════════════════════════════════════════════════════════════
+function renderMuseenInline(ziel, slug, l) {
+  var daten = window[l.datenName] || [];
+  if (!daten.length) {
+    ziel.innerHTML = '<div class="sticky-region">' + navBar(l.zurueck, l.breadcrumb) + intro(l.titel, l.untertitel) + '</div>'
+      + '<div class="hinweis">Museen-Daten werden noch ergänzt.</div><div class="spacer"></div>';
+    return;
+  }
+  var items = daten.map(function(m, idx) {
+    var ort = m.ort || m.town || '';
+    var meta = [];
+    if (ort) meta.push('📍 ' + escapeHtml(ort));
+    return '<button class="eintrag" onclick="navigateTo(\'detail/museum/' + slug + '_' + idx + '\')">'
+      + '<div class="eintrag-text">'
+        + '<div class="eintrag-titel">' + escapeHtml(m.name) + '</div>'
+        + (meta.length ? '<div class="eintrag-meta">' + meta.join(' · ') + '</div>' : '')
+      + '</div>'
+      + '<div class="eintrag-pfeil">&rsaquo;</div>'
+    + '</button>';
+  }).join('');
+  ziel.innerHTML =
+    '<div class="sticky-region">'
+      + navBar(l.zurueck, l.breadcrumb)
+      + intro(l.titel, l.untertitel)
+    + '</div>'
+    + '<div class="liste">' + items + '</div>'
+    + '<div class="spacer"></div>';
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// NATURGENUSS LINKS (zwei PDF-Untereinträge)
+// ════════════════════════════════════════════════════════════════
+function renderNaturgenussLinks(ziel, slug, l) {
+  var links = [
+    {label:'Erzeuger & Produkte (PDF, 2025)',  url:'#liste/regional-naturgenuss-erzeuger',  meta:'Übersicht aller Naturgenuss-Partner'},
+    {label:'Naturgenuss Broschüre (PDF, 2022)', url:'#liste/regional-naturgenuss-broschuere', meta:'Magazin der Naturgenuss-Initiative'}
+  ];
+  var items = links.map(function(lnk) {
+    return '<a class="eintrag" href="' + lnk.url + '">'
+      + '<div class="eintrag-text">'
+        + '<div class="eintrag-titel">' + escapeHtml(lnk.label) + '</div>'
+        + '<div class="eintrag-meta">' + escapeHtml(lnk.meta) + '</div>'
+      + '</div>'
+      + '<div class="eintrag-pfeil">&rsaquo;</div>'
+    + '</a>';
+  }).join('');
+  ziel.innerHTML =
+    '<div class="sticky-region">'
+      + navBar(l.zurueck, l.breadcrumb)
+      + intro(l.titel, l.untertitel)
+    + '</div>'
+    + '<div class="liste linklist">' + items + '</div>'
+    + '<div class="spacer"></div>';
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// MUSEUM-DETAIL: Inhalte direkt in der App
+// ════════════════════════════════════════════════════════════════
+function renderMuseumDetail(ziel, item, info, zurueck) {
+  var html = '<div class="sticky-detail">'
+    + navBar(zurueck, info.breadcrumb)
+    + intro(info.titel, '')
+    + '<div class="sticky-detail-titel">' + escapeHtml(item.name) + '</div>'
+    + '<div class="diff-gpx-row">';
+  if (item.ort) html += '<span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(item.ort) + '</span>';
+  if (item.sourceUrl) html += '<a class="btn-action btn-gpx" href="' + item.sourceUrl + '" target="_blank" rel="noopener">↗ Quelle</a>';
+  html += '</div></div>';
+
+  html += '<div class="detail-section">';
+
+  // Stats-Grid
+  var stats = [];
+  if (item.adresse) stats.push('<div class="stat"><div class="stat-label">Adresse</div><div class="stat-wert">' + escapeHtml(item.adresse) + '</div></div>');
+  if (item.telefon) stats.push('<div class="stat"><div class="stat-label">Telefon</div><div class="stat-wert"><a href="tel:' + item.telefon.replace(/\s+/g,'') + '">' + escapeHtml(item.telefon) + '</a></div></div>');
+  if (item.eintritt) stats.push('<div class="stat"><div class="stat-label">Eintritt</div><div class="stat-wert">' + escapeHtml(item.eintritt) + '</div></div>');
+  if (stats.length) html += '<div class="stats-grid">' + stats.join('') + '</div>';
+
+  // Dropdowns
+  var first = true;
+  if (item.beschreibung) { html += dropdown('Beschreibung', '<p>' + escapeHtml(item.beschreibung) + '</p>', first); first = false; }
+
+  if (item.schwerpunkte && item.schwerpunkte.length) {
+    var s = '<ul>' + item.schwerpunkte.map(function(x) { return '<li>' + escapeHtml(x) + '</li>'; }).join('') + '</ul>';
+    html += dropdown('Schwerpunkte', s, first);
+    first = false;
+  }
+
+  if (item.oeffnungszeiten) {
+    html += dropdown('Öffnungszeiten', '<p>' + escapeHtml(item.oeffnungszeiten) + '</p>', first);
+    first = false;
+  }
+
+  // Kontakt
+  var kontakt = '';
+  if (item.adresse) kontakt += '<p><strong>Adresse:</strong> ' + escapeHtml(item.adresse) + '</p>';
+  if (item.telefon) kontakt += '<p><strong>Telefon:</strong> <a href="tel:' + item.telefon.replace(/\s+/g,'') + '">' + escapeHtml(item.telefon) + '</a></p>';
+  if (item.email)   kontakt += '<p><strong>E-Mail:</strong> <a href="mailto:' + item.email + '">' + escapeHtml(item.email) + '</a></p>';
+  if (item.website) {
+    var w = item.website.indexOf('http') === 0 ? item.website : 'https://' + item.website;
+    kontakt += '<p><strong>Website:</strong> <a href="' + w + '" target="_blank" rel="noopener">' + escapeHtml(item.website) + '</a></p>';
+  }
+  if (kontakt) { html += dropdown('Kontakt & Anfahrt', kontakt, first); first = false; }
+
+  if (item.sourceUrl) {
+    html += dropdown('Weitere Informationen',
+      '<p>Diese Inhalte basieren auf den Daten der Tourismusplattform <a href="' + item.sourceUrl + '" target="_blank" rel="noopener">westerwald-sieg.de</a>. Bitte prüfen Sie aktuelle Öffnungszeiten und Eintrittspreise dort.</p>',
+      first);
+    first = false;
+  }
+
+  if (first) html += '<div class="hinweis">Inhalt wird ergänzt.</div>';
+
   html += '</div><div class="spacer"></div>';
   ziel.innerHTML = html;
 }

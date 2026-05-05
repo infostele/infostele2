@@ -944,7 +944,7 @@ body.modal-offen { overflow: hidden; }
 }
 .termin-datum-badge {
   flex: 0 0 70px;
-  background: var(--gelb);
+  background: var(--hellgruen-s);
   border-radius: 4px;
   padding: 6px 4px;
   display: flex;
@@ -984,8 +984,8 @@ body.modal-offen { overflow: hidden; }
 }
 .termin-kids {
   display: inline-block;
-  background: var(--gelb);
-  color: var(--dunkelgruen);
+  background: var(--hellgruen-p);
+  color: var(--weiss);
   padding: 1px 6px;
   border-radius: 2px;
   font-size: 10px;
@@ -998,6 +998,148 @@ body.modal-offen { overflow: hidden; }
   color: var(--dunkelgruen) !important;
 }
 .termin-kids-pill {
-  background: var(--gelb) !important;
-  color: var(--dunkelgruen) !important;
+  background: var(--hellgruen-p) !important;
+  color: var(--weiss) !important;
+}
+.termin-quelle {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.termin-quelle.quelle-lit {
+  background: var(--dunkelgruen);
+  color: var(--weiss);
+}
+.termin-quelle.quelle-natur {
+  background: var(--hellgruen-s);
+  color: var(--dunkelgruen);
+}
+.diff-pill.quelle-lit {
+  background: var(--dunkelgruen) !important;
+  color: var(--weiss) !important;
+}
+/* Region-Filter in einer Zeile */
+.filter-bezirk {
+  white-space: nowrap;
+  overflow-x: auto;
+}
+.filter-bezirk .filter-pill {
+  font-size: 10.5px;
+  padding: 4px 7px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PINCH-ZOOM für Dropdown-Inhalte
+   ════════════════════════════════════════════════════════════════ */
+.dropdown.offen .dropdown-inhalt {
+  /* Touch-Aktion: Browser darf normal scrollen, aber 2-Finger-Pinch
+     wird in JS abgefangen. */
+  touch-action: pan-y;
+}
+.dropdown-inhalt[data-zoom]:not([data-zoom="1"])::before {
+  content: '🔍 ' attr(data-zoom) '×';
+  position: absolute;
+  margin-top: -10px;
+  margin-left: -8px;
+  background: var(--dunkelgruen);
+  color: var(--weiss);
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  z-index: 5;
+}
+.dropdown { position: relative; }
+
+/* ════════════════════════════════════════════════════════════════
+   GEFILTERT-FILTER (Ausflugsziele, Unterkünfte)
+   ════════════════════════════════════════════════════════════════ */
+.gefiltert-filter {
+  padding: 8px 12px;
+}
+.gefiltert-filter .filter-gruppe.filter-bezirk {
+  margin-bottom: 6px;
+}
+.gefiltert-filter .filter-suche {
+  margin-top: 4px;
+}
+.filter-such-input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: var(--font);
+  border: 1px solid var(--grau-md);
+  border-radius: 4px;
+  background: var(--weiss);
+  box-sizing: border-box;
+}
+.filter-such-input:focus {
+  outline: none;
+  border-color: var(--hellgruen-p);
+}
+
+/* Eintrag-Typ-Badge (Hotel / Ferien / Camping etc.) */
+.eintrag-typ-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--hellgruen-s);
+  color: var(--dunkelgruen);
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 3px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   IFRAME-Seite (PDFs)
+   ════════════════════════════════════════════════════════════════ */
+.iframe-wrap {
+  width: 100%;
+  height: calc(100vh - var(--header-h, 0px) - 200px);
+  min-height: 480px;
+  background: var(--grau-lt);
+  position: relative;
+}
+.inhalts-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+.iframe-fallback {
+  text-align: center;
+  padding: 14px;
+  font-size: 13px;
+  color: var(--grau-md);
+  background: var(--creme);
+}
+.iframe-fallback a {
+  color: var(--hellgruen-p);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   INHALTS-Seite (Westerwald-Box, Westerwälder Ernte)
+   ════════════════════════════════════════════════════════════════ */
+.inhalts-seite > p:first-of-type {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--grau-dk);
+  margin-bottom: 18px;
+  padding: 0 4px;
+}
+.inhalts-seite h3 {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--dunkelgruen);
+  margin-top: 0;
+  margin-bottom: 12px;
+  padding: 0 4px;
 }
