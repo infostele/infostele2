@@ -71,6 +71,9 @@ function initPinchZoom() {
   app.__pinchInit = true;
 
   var state = null;
+  // Zeitstempel des letzten Pinch-Endes – verhindert, dass das gleichzeitige
+  // Hochheben beider Finger als „Doppeltipp“ fehlinterpretiert wird.
+  var letztesPinchEnde = 0;
 
   app.addEventListener('touchstart', function(e) {
     if (e.touches.length !== 2) return;
@@ -79,7 +82,7 @@ function initPinchZoom() {
     e.preventDefault();
     var d = pinchDist(e.touches[0], e.touches[1]);
     var startSkala = parseFloat(ziel.getAttribute('data-zoom') || '1');
-    state = { ziel: ziel, startDist: d, startSkala: startSkala };
+    state = { ziel: ziel, startDist: d, startSkala: startSkala, hatGezoomt: false };
   }, { passive: false });
 
   app.addEventListener('touchmove', function(e) {
@@ -88,25 +91,46 @@ function initPinchZoom() {
     var d = pinchDist(e.touches[0], e.touches[1]);
     var faktor = d / state.startDist;
     var neueSkala = Math.max(PINCH_MIN, Math.min(PINCH_MAX, state.startSkala * faktor));
+    // Nur als „echten“ Zoom werten, wenn die Distanz sich messbar geändert hat
+    if (Math.abs(faktor - 1) > 0.05) state.hatGezoomt = true;
     setPinchZoom(state.ziel, neueSkala);
   }, { passive: false });
 
   app.addEventListener('touchend', function(e) {
-    if (state && e.touches.length < 2) state = null;
-  });
+    if (!state) return;
+    // Sobald Finger-Anzahl unter 2 fällt, Pinch-Geste beenden – aber den
+    // Zoom-Wert behalten (war ja absichtlich vom User gesetzt).
+    if (e.touches.length < 2) {
+      if (state.hatGezoomt) {
+        // Sperre Doppeltap-Reset für 600 ms nach Pinch-Ende: das gleichzeitige
+        // Hochheben beider Finger erzeugt sonst zwei touchend-Events binnen
+        // weniger Millisekunden und triggert den Reset fälschlich.
+        letztesPinchEnde = Date.now();
+      }
+      state = null;
+    }
+  }, { passive: true });
 
   // Doppel-Tipp zum Zurücksetzen
   var letzterTap = 0;
   app.addEventListener('touchend', function(e) {
+    // Während/direkt nach einem Pinch nicht als Tap zählen
+    if (state) return;
+    if (Date.now() - letztesPinchEnde < 600) return;
+    // Nur Single-Finger-Taps werten
+    if (e.changedTouches && e.changedTouches.length > 1) return;
+
     var jetzt = Date.now();
     if (jetzt - letzterTap < 300) {
       var ziel = findPinchTarget(e.target);
       if (ziel && ziel.getAttribute('data-zoom') && ziel.getAttribute('data-zoom') !== '1') {
         setPinchZoom(ziel, 1);
       }
+      letzterTap = 0; // Reset, damit kein Triple-Tap
+    } else {
+      letzterTap = jetzt;
     }
-    letzterTap = jetzt;
-  });
+  }, { passive: true });
 }
 
 function findPinchTarget(el) {
@@ -172,19 +196,46 @@ function initSplash() {
 
 // ════════════════════════════════════════════════════════════════
 // COOKIE-GATE
+// Streng: Solange nicht aktiv akzeptiert wurde, läuft KEIN router(),
+// wird KEINE App gerendert. Die App wird nach dem Splash (3300ms)
+// nur dann angezeigt, wenn akzeptiert; sonst bleibt das Overlay.
 // ════════════════════════════════════════════════════════════════
 function initCookieGate() {
-  var akz = localStorage.getItem('ww_dsgvo_akzeptiert');
-  var ov = document.getElementById('cookie-overlay');
-  if (akz === '1') {
-    ov.style.display = 'none';
+  // Schlüssel mit Versionsnummer: bei Datenschutz-Änderungen kann der
+  // Schlüssel hochgezählt werden, damit Bestandsnutzer erneut zustimmen.
+  var KEY = 'ww_dsgvo_v9';
+  var akz = false;
+  try { akz = localStorage.getItem(KEY) === '1'; } catch (e) {}
+
+  var ov  = document.getElementById('cookie-overlay');
+  var btn = document.getElementById('cookie-akzeptieren');
+  var app = document.getElementById('app');
+
+  // App initial verstecken bis Cookie-Akzeptanz
+  if (app && !akz) app.style.visibility = 'hidden';
+
+  function freischalten() {
+    if (app) app.style.visibility = '';
     router();
-  } else {
-    setTimeout(function() { ov.style.display = 'flex'; }, 3700);
-    document.getElementById('cookie-akzeptieren').addEventListener('click', function() {
-      localStorage.setItem('ww_dsgvo_akzeptiert', '1');
-      ov.style.display = 'none';
-      router();
+  }
+
+  if (akz) {
+    if (ov) ov.style.display = 'none';
+    // Direkt nach dem Splash-Ende routen
+    setTimeout(freischalten, 3400);
+    return;
+  }
+
+  // Noch nicht akzeptiert: Overlay erscheint nach Splash-Ende
+  setTimeout(function() {
+    if (ov) ov.style.display = 'flex';
+  }, 3400);
+
+  if (btn) {
+    btn.addEventListener('click', function() {
+      try { localStorage.setItem(KEY, '1'); } catch (e) {}
+      if (ov) ov.style.display = 'none';
+      freischalten();
     });
   }
 }
@@ -383,8 +434,35 @@ var LISTEN = {
       {label:'Streckenradwege', meta:'Mehrtagestouren',       sub:'streckenradwege', icon:ICONS.streckenrad},
       {label:'Gravelbike',      meta:'Schotterstrecken',     sub:'gravelbike',      icon:ICONS.gravelbike},
       {label:'Mountainbike',    meta:'Trails & Singletracks', sub:'mountainbike',   icon:ICONS.mountainbike},
-      {label:'Rennrad',         meta:'Asphaltierte Strecken', sub:'rennrad',        icon:ICONS.rennrad}
+      {label:'Rennrad',         meta:'Asphaltierte Strecken', sub:'rennrad',        icon:ICONS.rennrad},
+      {label:'E-Bike Infrastruktur', meta:'Verleih, Werkstätten, Akku-Wechselstationen', sub:'ebike-infrastruktur', icon:ICONS.fahrrad}
     ]
+  },
+  'tourismus-radfahren-ebike-infrastruktur': {
+    datenName:'DATA_EBIKE_INFRASTRUKTUR',
+    titel:'E-Bike Infrastruktur',
+    breadcrumb:'Radfahren › <strong>E-Bike Infrastruktur</strong>',
+    zurueck:'liste/tourismus-radfahren',
+    untertitel:'Verleih, Werkstätten, Akku-Wechselstationen und Shops.',
+    detailKey:'ebike',
+    renderTyp:'gefiltert',
+    filterLabel:'Typ',
+    filterTypen:[
+      {key:'alle',     label:'Alle'},
+      {key:'akku',     label:'Akku-Wechselstation'},
+      {key:'verleih',  label:'Verleih'},
+      {key:'reparatur',label:'Reparatur'},
+      {key:'shop',     label:'Shop'},
+      {key:'sonstige', label:'Sonstige'}
+    ],
+    typErkenner: function(item) {
+      var t = (item.type || '').toLowerCase();
+      if (t.indexOf('akku') >= 0 || t.indexOf('ladestation') >= 0 || t.indexOf('wechselstation') >= 0 || t.indexOf('pedelec-stationen') >= 0) return 'akku';
+      if (t.indexOf('verleih') >= 0) return 'verleih';
+      if (t.indexOf('reparatur') >= 0 || t.indexOf('werkstatt') >= 0) return 'reparatur';
+      if (t.indexOf('shop') >= 0 || t.indexOf('geschäft') >= 0 || t.indexOf('geschaeft') >= 0) return 'shop';
+      return 'sonstige';
+    }
   },
   'tourismus-ausflugsziele': {
     datenName:'DATA_AUSFLUGSZIELE',
@@ -1225,6 +1303,7 @@ function renderDetail(ziel, typ, schluessel) {
   else if (typ === 'literatur')                renderAusflDetail(ziel, item, info, zurueck);
   else if (typ === 'event')                    renderTerminDetail(ziel, item, info, zurueck);
   else if (typ === 'natur' || typ === 'wwlit') renderTerminDetail(ziel, item, info, zurueck);
+  else if (typ === 'ebike')                    renderEbikeDetail(ziel, item, info, zurueck);
   else ziel.innerHTML = navBar('home','') + intro('Detail','') + '<pre>' + JSON.stringify(item, null, 2) + '</pre>';
 }
 
@@ -2100,10 +2179,34 @@ function baueBetriebeListe() {
 // ════════════════════════════════════════════════════════════════
 function renderIframeSeite(ziel, slug, l) {
   var iframeUrl = l.iframeUrl || '';
-  // PDFs werden über den Google-Docs-Viewer geladen, weil der Originalserver
-  // (z. B. wir-westerwaelder.de) X-Frame-Options/CSP gesetzt hat und damit
-  // das direkte Einbetten verhindert. Der Google-Viewer holt das PDF
-  // serverseitig und liefert es als einbettbare HTML-Vorschau aus.
+  // Mobile-Detection: iOS und Android können PDFs in iframes meist nicht
+  // zuverlässig anzeigen (Safari blockiert sie häufig komplett, Chrome auf
+  // Android öffnet stattdessen den Download). Auf diesen Geräten zeigen wir
+  // eine große Karte mit prominentem Öffnen-Button, der das PDF im
+  // System-Viewer (oder neuem Tab) öffnet. Auf Desktop/Tablet-Browsern
+  // bleibt das iframe als Vorschau.
+  var ua = (navigator.userAgent || '').toLowerCase();
+  var istMobil = /iphone|ipad|ipod|android|mobile/.test(ua);
+
+  if (istMobil) {
+    ziel.innerHTML =
+      '<div class="sticky-region">'
+        + navBar(l.zurueck, l.breadcrumb)
+        + intro(l.titel, l.untertitel)
+      + '</div>'
+      + '<div class="pdf-mobile-karte">'
+        + '<div class="pdf-mobile-icon">📄</div>'
+        + '<div class="pdf-mobile-titel">' + escapeHtml(l.titel) + '</div>'
+        + '<p class="pdf-mobile-hinweis">Auf dem Smartphone öffnet sich das PDF am besten direkt im PDF-Viewer deines Geräts.</p>'
+        + '<a class="btn-pdf-oeffnen-gross" href="' + iframeUrl + '" target="_blank" rel="noopener">📄 PDF jetzt öffnen</a>'
+        + '<p class="pdf-mobile-meta"><a href="' + iframeUrl + '" target="_blank" rel="noopener">' + escapeHtml(iframeUrl.replace(/^https?:\/\//,'').replace(/\/[^/]*$/, '/…')) + '</a></p>'
+      + '</div>'
+      + '<div class="spacer"></div>';
+    return;
+  }
+
+  // Desktop: iframe via Google-Docs-Viewer (der Originalserver setzt meist
+  // X-Frame-Options, also kein direktes Einbetten möglich).
   var safe = encodeURIComponent(iframeUrl);
   var viewerUrl = 'https://docs.google.com/viewer?url=' + safe + '&embedded=true';
   ziel.innerHTML =
@@ -2276,16 +2379,20 @@ function renderBetriebDetail(ziel, b, idx) {
       + '</div>';
   }
 
-  // 1. Beschreibung
-  var first = true;
-  if (b.beschreibung) {
-    html += dropdown('Beschreibung', '<p>' + escapeHtml(b.beschreibung) + '</p>', first);
-    first = false;
+  // Helper: leeres-Dropdown mit Hinweis-Text
+  function leererHinweis(txt) {
+    return '<p class="hinweis-leer"><em>' + txt + '</em></p>';
   }
 
-  // 2. Öffnungszeiten
+  // 1. BESCHREIBUNG (immer)
+  html += dropdown('Beschreibung',
+    b.beschreibung ? '<p>' + escapeHtml(b.beschreibung) + '</p>' : leererHinweis('Keine Beschreibung hinterlegt.'),
+    true);
+
+  // 2. ÖFFNUNGSZEITEN (immer)
+  var ozHtml;
   if (b.oeffnungszeiten && b.oeffnungszeiten.length) {
-    var ozHtml = '<table class="oeffnungszeiten-tab"><thead><tr><th>Tag</th><th>von</th><th>bis</th></tr></thead><tbody>';
+    ozHtml = '<table class="oeffnungszeiten-tab"><thead><tr><th>Tag</th><th>von</th><th>bis</th></tr></thead><tbody>';
     for (var i = 0; i < b.oeffnungszeiten.length; i++) {
       var oz = b.oeffnungszeiten[i];
       ozHtml += '<tr>';
@@ -2299,11 +2406,12 @@ function renderBetriebDetail(ziel, b, idx) {
       ozHtml += '</tr>';
     }
     ozHtml += '</tbody></table>';
-    html += dropdown('Öffnungszeiten', ozHtml, first);
-    first = false;
+  } else {
+    ozHtml = leererHinweis('Öffnungszeiten bitte direkt beim Betrieb erfragen.');
   }
+  html += dropdown('Öffnungszeiten', ozHtml, false);
 
-  // 3. Das Unternehmen
+  // 3. DAS UNTERNEHMEN (immer)
   var untHtml = '';
   if (b.inhaber)   untHtml += '<p><strong>Inhaber/Geschäftsführer:</strong><br>' + escapeHtml(b.inhaber) + '</p>';
   if (b.branche)   untHtml += '<p><strong>Branche:</strong><br>' + escapeHtml(b.branche) + '</p>';
@@ -2313,21 +2421,18 @@ function renderBetriebDetail(ziel, b, idx) {
     for (var p = 0; p < b.produkte.length; p++) untHtml += '<li>' + escapeHtml(b.produkte[p]) + '</li>';
     untHtml += '</ul>';
   }
-  if (untHtml) {
-    html += dropdown('Das Unternehmen', untHtml, first);
-    first = false;
-  }
+  if (!untHtml) untHtml = leererHinweis('Keine Angaben zum Unternehmen hinterlegt.');
+  html += dropdown('Das Unternehmen', untHtml, false);
 
-  // 4. Karriere (nur falls Ausbildungen)
+  // 4. KARRIERE (nur wenn Ausbildungen vorhanden – sonst weglassen)
   if (b.ausbildungen && b.ausbildungen.length) {
     var karHtml = '<p><strong>Ausbildungen:</strong></p><ul>';
     for (var a = 0; a < b.ausbildungen.length; a++) karHtml += '<li>' + escapeHtml(b.ausbildungen[a]) + '</li>';
     karHtml += '</ul>';
-    html += dropdown('Karriere', karHtml, first);
-    first = false;
+    html += dropdown('Karriere', karHtml, false);
   }
 
-  // 5. Standort
+  // 5. STANDORT (immer)
   var stdHtml = '';
   if (b.landkreis) stdHtml += '<p><strong>Landkreis:</strong><br>' + escapeHtml(b.landkreis) + '</p>';
   if (b.vg)        stdHtml += '<p><strong>Verbandsgemeinde:</strong><br>' + escapeHtml(b.vg) + '</p>';
@@ -2337,12 +2442,10 @@ function renderBetriebDetail(ziel, b, idx) {
   if (b.ortsteil)  ortLine += (ortLine ? ' / ' : '') + b.ortsteil;
   if (ortLine)     stdHtml += '<p><strong>Ort:</strong><br>' + escapeHtml(ortLine) + '</p>';
   if (b.strasse)   stdHtml += '<p><strong>Straße, Hausnummer:</strong><br>' + escapeHtml(b.strasse) + '</p>';
-  if (stdHtml) {
-    html += dropdown('Standort', stdHtml, first);
-    first = false;
-  }
+  if (!stdHtml)    stdHtml = leererHinweis('Standort wird derzeit nicht öffentlich angegeben.');
+  html += dropdown('Standort', stdHtml, false);
 
-  // 6. Weitere Informationen
+  // 6. WEITERE INFORMATIONEN (immer)
   var weitHtml = '';
   if (b.ansprechpartner) weitHtml += '<p><strong>Ansprechpartner:</strong><br>' + escapeHtml(b.ansprechpartner) + '</p>';
   if (b.email)           weitHtml += '<p><strong>E-Mail-Adresse:</strong><br><a href="mailto:' + escapeHtml(b.email) + '">' + escapeHtml(b.email) + '</a></p>';
@@ -2351,11 +2454,44 @@ function renderBetriebDetail(ziel, b, idx) {
   if (b.fax)             weitHtml += '<p><strong>Fax:</strong><br>' + escapeHtml(b.fax) + '</p>';
   if (b.website)         weitHtml += '<p><strong>Website:</strong><br><a href="' + escapeHtml(b.website) + '" target="_blank" rel="noopener">' + escapeHtml(b.website.replace(/^https?:\/\//,'')) + '</a></p>';
   if (b.sourceUrl)       weitHtml += '<p><a href="' + escapeHtml(b.sourceUrl) + '" target="_blank" rel="noopener">Eintrag bei Wir Westerwälder ↗</a></p>';
-  if (weitHtml) {
-    html += dropdown('Weitere Informationen', weitHtml, first);
+  if (!weitHtml)         weitHtml = leererHinweis('Keine zusätzlichen Kontaktdaten hinterlegt.');
+  html += dropdown('Weitere Informationen', weitHtml, false);
+
+  html += '</div><div class="spacer"></div>';
+  ziel.innerHTML = html;
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// E-BIKE INFRASTRUKTUR DETAIL
+// ════════════════════════════════════════════════════════════════
+function renderEbikeDetail(ziel, item, info, zurueck) {
+  var html = '<div class="sticky-detail">'
+    + navBar(zurueck, info.breadcrumb)
+    + intro(info.titel, '')
+    + '<div class="sticky-detail-titel">' + escapeHtml(item.name) + '</div>'
+    + '<div class="diff-gpx-row">';
+  if (item.ort)  html += '<span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(item.ort) + '</span>';
+  if (item.type) html += '<span class="diff-pill diff-mittel-bg">' + escapeHtml(item.type) + '</span>';
+  html += '</div></div>';
+
+  html += '<div class="detail-section">';
+  var first = true;
+
+  if (item.address) {
+    html += dropdown('Adresse', '<p>' + escapeHtml(item.address) + '</p>', first);
+    first = false;
+  }
+  if (item.type) {
+    html += dropdown('Art der Station', '<p>' + escapeHtml(item.type) + '</p>', first);
+    first = false;
+  }
+  if (item.ort && !item.address) {
+    html += dropdown('Standort', '<p>' + escapeHtml(item.ort) + '</p>', first);
     first = false;
   }
 
+  if (first) html += '<div class="hinweis">Weitere Details wurden nicht erfasst.</div>';
   html += '</div><div class="spacer"></div>';
   ziel.innerHTML = html;
 }

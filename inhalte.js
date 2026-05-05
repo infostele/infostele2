@@ -9,7 +9,6 @@ window._INHALTE = {
 westerwaldBox:
   '<div class="bilder-slider" data-slider-id="ww-box" '
 +   'data-images=\'['
-+     '{"url":"img/westerwaldbox-1.jpg","alt":"Westerwald-Box gefüllt mit regionalen Produkten"},'
 +     '{"url":"https://wir-westerwaelder.de/fileadmin/_processed_/3/2/csm_IMG-20240919-WA0000_a1e092edae.webp","alt":"Westerwald-Box Beispiel"},'
 +     '{"url":"https://wir-westerwaelder.de/fileadmin/_processed_/f/e/csm_IMG-20240919-WA0001_7d3e3754ec.webp","alt":"Westerwald-Box Beispiel"},'
 +     '{"url":"https://wir-westerwaelder.de/fileadmin/_processed_/b/f/csm_WW_Box_Ostern_Augst_e0b1441706.webp","alt":"WW-Box zu Ostern – Wällerhof Augst"},'

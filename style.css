@@ -1377,3 +1377,68 @@ body.modal-offen { overflow: hidden; }
   border-bottom: 1px solid var(--grau-lt, #e5e5e5);
 }
 .oeffnungszeiten-tab tr:last-child td { border-bottom: 0; }
+
+/* Hinweistext in leeren Dropdowns */
+.hinweis-leer {
+  color: var(--grau-md);
+  font-style: italic;
+  font-size: 14px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   PDF-Karte für mobile Geräte (statt iframe)
+   ════════════════════════════════════════════════════════════════ */
+.pdf-mobile-karte {
+  background: var(--weiss, #fff);
+  margin: 16px;
+  padding: 32px 20px;
+  border-radius: 6px;
+  border: 1px solid var(--grau-lt, #e5e5e5);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  text-align: center;
+}
+.pdf-mobile-icon {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+.pdf-mobile-titel {
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--dunkelgruen, #00663A);
+  margin-bottom: 12px;
+}
+.pdf-mobile-hinweis {
+  color: var(--grau-md, #777);
+  font-size: 14px;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+.btn-pdf-oeffnen-gross {
+  display: inline-block;
+  background: var(--hellgruen-p, #88C340);
+  color: var(--weiss, #fff) !important;
+  text-decoration: none;
+  padding: 16px 28px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 17px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+.btn-pdf-oeffnen-gross:hover,
+.btn-pdf-oeffnen-gross:active {
+  background: var(--dunkelgruen, #00663A);
+}
+.pdf-mobile-meta {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--grau-md, #777);
+  word-break: break-all;
+}
+.pdf-mobile-meta a {
+  color: var(--grau-md, #777);
+  text-decoration: underline;
+}
