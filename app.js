@@ -134,10 +134,40 @@ window.addEventListener('hashchange', router);
 // SPLASH
 // ════════════════════════════════════════════════════════════════
 function initSplash() {
+  // Choreographie: links Sprechblase „Hui Wäller?", dann zwinkern,
+  // dann rechts Sprechblase „Allemol!", dann ausblenden.
+  var bubble1 = document.getElementById('sprechblase-1');
+  var bubble2 = document.getElementById('sprechblase-2');
+  var lidL    = document.getElementById('lid-links');
+  var lidR    = document.getElementById('lid-rechts');
+  var overlay = document.getElementById('eichhoernchen-overlay');
+
+  function zwinker() {
+    if (!lidL || !lidR) return;
+    lidL.classList.remove('zwinkern');
+    lidR.classList.remove('zwinkern');
+    // Force-Reflow, damit die Animation neu startet
+    void lidL.offsetWidth;
+    lidL.classList.add('zwinkern');
+    lidR.classList.add('zwinkern');
+  }
+
+  // 1. Bubble links erscheint nach 400ms
+  setTimeout(function() { if (bubble1) bubble1.classList.add('sichtbar'); }, 400);
+  // 2. Zwinkern bei 1100ms
+  setTimeout(zwinker, 1100);
+  // 3. Bubble rechts erscheint nach 1800ms (links bleibt aber sichtbar)
+  setTimeout(function() { if (bubble2) bubble2.classList.add('sichtbar'); }, 1800);
+  // 4. Zwinkern bei 2400ms
+  setTimeout(zwinker, 2400);
+  // 5. Splash ausblenden bei 3300ms (übergibt an Cookie-Gate)
   setTimeout(function() {
-    var ov = document.getElementById('eichhoernchen-overlay');
-    if (ov) ov.style.display = 'none';
-  }, 3100);
+    if (overlay) overlay.classList.add('weg');
+  }, 3300);
+  // 6. DOM-Element komplett entfernen nach Fade-out
+  setTimeout(function() {
+    if (overlay) overlay.style.display = 'none';
+  }, 3800);
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -150,7 +180,7 @@ function initCookieGate() {
     ov.style.display = 'none';
     router();
   } else {
-    setTimeout(function() { ov.style.display = 'flex'; }, 3000);
+    setTimeout(function() { ov.style.display = 'flex'; }, 3700);
     document.getElementById('cookie-akzeptieren').addEventListener('click', function() {
       localStorage.setItem('ww_dsgvo_akzeptiert', '1');
       ov.style.display = 'none';
@@ -937,6 +967,7 @@ function termineFilterUI() {
     + pill('datum','heute','Heute')
     + pill('datum','woche','Diese Woche')
     + pill('datum','monat','Dieser Monat')
+    + pill('datum','jahr','Dieses Jahr')
     + '</div>';
   // Region: in einer Zeile, kompakte Labels
   html += '<div class="filter-gruppe filter-bezirk"><span class="filter-label">📍 Region:</span>'
@@ -984,6 +1015,7 @@ function termineFilterAnwenden(items) {
   var sonntagStr = sonntag.getFullYear() + '-' + pad(sonntag.getMonth()+1) + '-' + pad(sonntag.getDate());
   var monatsende = new Date(heute.getFullYear(), heute.getMonth()+1, 0);
   var monatsendeStr = monatsende.getFullYear() + '-' + pad(monatsende.getMonth()+1) + '-' + pad(monatsende.getDate());
+  var jahresende = heute.getFullYear() + '-12-31';
 
   return items.filter(function(item) {
     var d = item.datumIso || '';
@@ -991,6 +1023,7 @@ function termineFilterAnwenden(items) {
     if (TERMIN_FILTER.datum === 'heute' && d !== heuteStr) return false;
     if (TERMIN_FILTER.datum === 'woche' && d > sonntagStr) return false;
     if (TERMIN_FILTER.datum === 'monat' && d > monatsendeStr) return false;
+    if (TERMIN_FILTER.datum === 'jahr'  && d > jahresende) return false;
     if (TERMIN_FILTER.bezirk !== 'alle' && item.bezirk !== TERMIN_FILTER.bezirk) return false;
     if (TERMIN_FILTER.kosten === 'frei' && !item.kostenfrei) return false;
     if (TERMIN_FILTER.kosten === 'kostenpflichtig' && item.kostenfrei) return false;
@@ -1146,6 +1179,18 @@ function renderDatenListe(ziel, slug, l) {
 // DETAIL-SEITE
 // ════════════════════════════════════════════════════════════════
 function renderDetail(ziel, typ, schluessel) {
+  // Spezialfall Westerwald-Box-Betriebe: schluessel ist nur die Zahl
+  if (typ === 'wwbox') {
+    var bIdx = parseInt(schluessel, 10);
+    var bData = window.DATA_WESTERWALDBOX_BETRIEBE || [];
+    if (!bData[bIdx]) {
+      ziel.innerHTML = navBar('home','') + intro('Nicht gefunden','') + '<div class="hinweis">Betrieb nicht verfügbar.</div>';
+      return;
+    }
+    renderBetriebDetail(ziel, bData[bIdx], bIdx);
+    return;
+  }
+
   var teile = schluessel.split('_');
   var listeSlug = teile.slice(0, -1).join('_');
   var idx = parseInt(teile[teile.length - 1], 10);
@@ -1275,9 +1320,50 @@ function escapeHtml(s) {
   if (s == null) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+// Bereinigt Plain-Text-Eigenheiten aus den importierten Datenquellen:
+//  - Zeilenanfangs-">" (Quote-Marker aus dem Quellsystem) entfernen
+//  - HTML-Entities wie &nbsp; in Unicode wandeln, BEVOR escapeHtml läuft
+//  - \r\n und einzelne \r vereinheitlichen
+//  - Mehrfach-Leerzeichen reduzieren
+function cleanupPlainText(s) {
+  if (s == null) return '';
+  var t = String(s);
+  // Zeilenenden vereinheitlichen
+  t = t.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  // HTML-Entities zu echten Zeichen (vor escapeHtml!)
+  t = t.replace(/&nbsp;/gi, '\u00A0')
+       .replace(/&amp;/gi, '&')
+       .replace(/&lt;/gi, '<')
+       .replace(/&gt;/gi, '>')
+       .replace(/&quot;/gi, '"')
+       .replace(/&#39;/gi, "'")
+       .replace(/&ndash;/gi, '–')
+       .replace(/&mdash;/gi, '—')
+       .replace(/&hellip;/gi, '…');
+  // Quote-Marker am Zeilenanfang ENTFERNEN (auch wenn mehrfach hintereinander).
+  // Beispiele aus den Daten: ">Im Rahmen…", ">>Eine Tour…", "> > >Hinweise: > > >"
+  t = t.replace(/^[\s]*(?:>+\s*)+/gm, '');           // Zeilenanfang: alle > entfernen
+  // Inline: nach Whitespace einer/mehrere ">" gefolgt von beliebigem Zeichen → entfernen
+  // (Vorsicht: nicht in URLs oder echten HTML-Tags – aber die landen hier nicht her, weil
+  //  cleanupPlainText nur für Plain-Text-Felder aufgerufen wird via linkifyAndBreak.)
+  t = t.replace(/(\s)(?:>+\s*)+/g, '$1');
+  t = t.replace(/(?:\s)(?:>\s*)+$/gm, '');           // Trailing > am Zeilenende
+  // &nbsp;-Reste, die eingebettet zwischen Wörtern stehen, sollten ein normales
+  // Leerzeichen ersetzen (verhindert "Wort\u00A0\u00A0Wort"):
+  t = t.replace(/\u00A0{2,}/g, ' ');
+  // Mischung aus NBSP + normalen Leerzeichen → einzelnes normales Leerzeichen
+  t = t.replace(/[\u00A0 \t]{2,}/g, ' ');
+  // Mehr als 2 aufeinanderfolgende Newlines reduzieren
+  t = t.replace(/\n{3,}/g, '\n\n');
+  return t.trim();
+}
+
 function linkifyAndBreak(s) {
   if (!s) return '';
-  var html = escapeHtml(s);
+  var clean = cleanupPlainText(s);
+  if (!clean) return '';
+  var html = escapeHtml(clean);
   html = html.replace(/(https?:\/\/[^\s)]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
   html = html.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
   return '<p>' + html + '</p>';
@@ -1292,11 +1378,9 @@ function richText(s) {
   // HTML-Erkennung: enthält Tags wie <strong>, <p>, <br>, <ul> etc.
   var hasHtml = /<(?:strong|em|b|i|u|p|br|ul|ol|li|a\s|h[1-6]|div|span|table|tr|td|th)\b[^>]*>|<br\s*\/?>/i.test(t);
   if (hasHtml) {
-    // Schon HTML – nur Plain-URLs verlinken (sofern nicht bereits in <a>)
-    // Einfache Heuristik: Wenn URL nicht in href steht, wird sie verlinkt
+    // Schon HTML – aber &nbsp; und Co. lassen wir stehen (sind valides HTML)
     var html = t.replace(/(^|[^"'>=])(https?:\/\/[^\s<)"']+)/g,
       '$1<a href="$2" target="_blank" rel="noopener">$2</a>');
-    // Wenn der Text nicht mit einem Block-Element beginnt, in <p> wrappen
     if (!/^\s*<(?:p|div|ul|ol|h[1-6]|table)\b/i.test(html)) {
       html = '<p>' + html + '</p>';
     }
@@ -1885,6 +1969,129 @@ function renderInhaltSeite(ziel, slug, l) {
     + '</div>'
     + '<div class="detail-section inhalts-seite">' + (inhalt || '<div class="hinweis">Inhalt wird noch ergänzt.</div>') + '</div>'
     + '<div class="spacer"></div>';
+
+  // Bilderslider initialisieren (sofern vorhanden)
+  var sliders = ziel.querySelectorAll('.bilder-slider');
+  for (var i = 0; i < sliders.length; i++) initSlider(sliders[i]);
+
+  // Betriebs-Liste in Westerwald-Box einhängen
+  var betriebeListe = ziel.querySelector('#ww-box-betriebe-liste');
+  if (betriebeListe && window.DATA_WESTERWALDBOX_BETRIEBE) {
+    betriebeListe.innerHTML = baueBetriebeListe();
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// BILDERSLIDER (vanilla JS, swipe-fähig)
+// Erwartet: <div class="bilder-slider" data-images='[{url,alt},...]'>
+//   <div class="slider-bilder"></div>
+//   <button class="slider-prev"></button><button class="slider-next"></button>
+//   <div class="slider-punkte"></div><div class="slider-counter"></div>
+// </div>
+// ════════════════════════════════════════════════════════════════
+function initSlider(slider) {
+  var dataAttr = slider.getAttribute('data-images');
+  if (!dataAttr) return;
+  var bilder;
+  try { bilder = JSON.parse(dataAttr); } catch (e) { return; }
+  if (!bilder || !bilder.length) return;
+
+  var bilderDiv = slider.querySelector('.slider-bilder');
+  var punkteDiv = slider.querySelector('.slider-punkte');
+  var counterDiv = slider.querySelector('.slider-counter');
+  var prevBtn = slider.querySelector('.slider-prev');
+  var nextBtn = slider.querySelector('.slider-next');
+
+  // Bilder einsetzen
+  var html = '';
+  for (var i = 0; i < bilder.length; i++) {
+    html += '<img class="slider-bild" data-idx="' + i + '" '
+         + 'src="' + escapeHtml(bilder[i].url) + '" '
+         + 'alt="' + escapeHtml(bilder[i].alt || '') + '" '
+         + 'loading="lazy">';
+  }
+  if (bilderDiv) bilderDiv.innerHTML = html;
+
+  // Punkte
+  if (punkteDiv) {
+    var punkteHtml = '';
+    for (var j = 0; j < bilder.length; j++) {
+      punkteHtml += '<button class="slider-punkt" data-idx="' + j + '" aria-label="Bild ' + (j+1) + '"></button>';
+    }
+    punkteDiv.innerHTML = punkteHtml;
+  }
+
+  var aktiv = 0;
+  var anzahl = bilder.length;
+
+  function zeige(idx) {
+    if (idx < 0) idx = anzahl - 1;
+    if (idx >= anzahl) idx = 0;
+    aktiv = idx;
+    if (bilderDiv) bilderDiv.style.transform = 'translateX(-' + (idx * 100) + '%)';
+    if (counterDiv) counterDiv.textContent = (idx + 1) + ' / ' + anzahl;
+    if (punkteDiv) {
+      var punkte = punkteDiv.querySelectorAll('.slider-punkt');
+      for (var k = 0; k < punkte.length; k++) {
+        punkte[k].classList.toggle('aktiv', k === idx);
+      }
+    }
+  }
+
+  if (prevBtn) prevBtn.addEventListener('click', function() { zeige(aktiv - 1); });
+  if (nextBtn) nextBtn.addEventListener('click', function() { zeige(aktiv + 1); });
+  if (punkteDiv) {
+    punkteDiv.addEventListener('click', function(e) {
+      var btn = e.target.closest && e.target.closest('.slider-punkt');
+      if (btn) zeige(parseInt(btn.getAttribute('data-idx'), 10));
+    });
+  }
+
+  // Touch-Swipe
+  var startX = null, deltaX = 0;
+  slider.addEventListener('touchstart', function(e) {
+    if (e.touches.length !== 1) return;
+    startX = e.touches[0].clientX;
+    deltaX = 0;
+  }, { passive: true });
+  slider.addEventListener('touchmove', function(e) {
+    if (startX === null) return;
+    deltaX = e.touches[0].clientX - startX;
+  }, { passive: true });
+  slider.addEventListener('touchend', function() {
+    if (startX !== null && Math.abs(deltaX) > 40) {
+      zeige(deltaX < 0 ? aktiv + 1 : aktiv - 1);
+    }
+    startX = null;
+    deltaX = 0;
+  });
+
+  zeige(0);
+}
+
+function baueBetriebeListe() {
+  var d = window.DATA_WESTERWALDBOX_BETRIEBE || [];
+  var html = '';
+  for (var i = 0; i < d.length; i++) {
+    var b = d[i];
+    var ortText = (b.plz || '') + (b.plz && b.ort ? ' ' : '') + (b.ort || '');
+    var meta = [];
+    if (ortText) meta.push('📍 ' + escapeHtml(ortText));
+    if (b.branche) meta.push(escapeHtml(b.branche));
+    var logoHtml = '';
+    if (b.logo) {
+      logoHtml = '<img class="betrieb-logo" src="' + escapeHtml(b.logo) + '" alt="Logo ' + escapeHtml(b.name) + '" loading="lazy" onerror="this.style.display=\'none\'">';
+    }
+    html += '<button class="eintrag betrieb-eintrag" onclick="navigateTo(\'detail/wwbox/' + i + '\')">'
+      + (logoHtml || '<div class="betrieb-logo-platzhalter">' + escapeHtml(b.name.charAt(0)) + '</div>')
+      + '<div class="eintrag-text">'
+        + '<div class="eintrag-titel">' + escapeHtml(b.name) + '</div>'
+        + (meta.length ? '<div class="eintrag-meta">' + meta.join(' · ') + '</div>' : '')
+      + '</div>'
+      + '<div class="eintrag-pfeil">&rsaquo;</div>'
+    + '</button>';
+  }
+  return html;
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1893,20 +2100,26 @@ function renderInhaltSeite(ziel, slug, l) {
 // ════════════════════════════════════════════════════════════════
 function renderIframeSeite(ziel, slug, l) {
   var iframeUrl = l.iframeUrl || '';
-  // Bei PDFs einen Google-Docs-Viewer-Fallback bieten – manche Mobile-Browser
-  // können PDFs nicht inline anzeigen.
+  // PDFs werden über den Google-Docs-Viewer geladen, weil der Originalserver
+  // (z. B. wir-westerwaelder.de) X-Frame-Options/CSP gesetzt hat und damit
+  // das direkte Einbetten verhindert. Der Google-Viewer holt das PDF
+  // serverseitig und liefert es als einbettbare HTML-Vorschau aus.
   var safe = encodeURIComponent(iframeUrl);
+  var viewerUrl = 'https://docs.google.com/viewer?url=' + safe + '&embedded=true';
   ziel.innerHTML =
     '<div class="sticky-region">'
       + navBar(l.zurueck, l.breadcrumb)
       + intro(l.titel, l.untertitel)
+      + '<div class="iframe-aktionen">'
+        + '<a class="btn-action btn-pdf-oeffnen" href="' + iframeUrl + '" target="_blank" rel="noopener">📄 PDF in neuem Tab öffnen</a>'
+      + '</div>'
     + '</div>'
     + '<div class="iframe-wrap">'
-      + '<iframe src="' + iframeUrl + '" class="inhalts-iframe" '
-      + 'allowfullscreen referrerpolicy="no-referrer"></iframe>'
+      + '<iframe src="' + viewerUrl + '" class="inhalts-iframe" '
+      + 'allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>'
     + '</div>'
     + '<div class="iframe-fallback">'
-      + 'Inhalte werden nicht angezeigt? <a href="' + iframeUrl + '" target="_blank" rel="noopener">In neuem Tab öffnen</a>'
+      + 'PDF wird nicht angezeigt? <a href="' + iframeUrl + '" target="_blank" rel="noopener">Direkt öffnen ↗</a>'
     + '</div>'
     + '<div class="spacer"></div>';
 }
@@ -2026,6 +2239,122 @@ function renderMuseumDetail(ziel, item, info, zurueck) {
   }
 
   if (first) html += '<div class="hinweis">Inhalt wird ergänzt.</div>';
+
+  html += '</div><div class="spacer"></div>';
+  ziel.innerHTML = html;
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// BETRIEB-DETAIL: Hofläden, Direktvermarkter (Westerwald-Box-Anbieter)
+// Einheitliches Schema: Beschreibung, Öffnungszeiten, Unternehmen,
+// Karriere, Standort, Weitere Informationen
+// ════════════════════════════════════════════════════════════════
+function renderBetriebDetail(ziel, b, idx) {
+  var zurueck = 'liste/regional-westerwald-box';
+  var info = { breadcrumb: 'Regionale Produkte › Westerwald-Box › <strong>' + escapeHtml(b.name) + '</strong>', titel: 'Westerwald-Box' };
+
+  var html = '<div class="sticky-detail">'
+    + navBar(zurueck, info.breadcrumb)
+    + intro(info.titel, '')
+    + '<div class="sticky-detail-titel">' + escapeHtml(b.name) + '</div>'
+    + '<div class="diff-gpx-row">';
+  if (b.ort) {
+    var ortStr = (b.plz ? b.plz + ' ' : '') + b.ort;
+    html += '<span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(ortStr) + '</span>';
+  }
+  if (b.branche) html += '<span class="diff-pill diff-mittel-bg">' + escapeHtml(b.branche) + '</span>';
+  if (b.website) html += '<a class="btn-action btn-gpx" href="' + escapeHtml(b.website) + '" target="_blank" rel="noopener">🌐 Website</a>';
+  html += '</div></div>';
+
+  html += '<div class="detail-section">';
+
+  // Logo (groß) oben
+  if (b.logo) {
+    html += '<div class="betrieb-logo-gross-wrap">'
+      + '<img class="betrieb-logo-gross" src="' + escapeHtml(b.logo) + '" alt="Logo ' + escapeHtml(b.name) + '" loading="lazy" onerror="this.parentNode.style.display=\'none\'">'
+      + '</div>';
+  }
+
+  // 1. Beschreibung
+  var first = true;
+  if (b.beschreibung) {
+    html += dropdown('Beschreibung', '<p>' + escapeHtml(b.beschreibung) + '</p>', first);
+    first = false;
+  }
+
+  // 2. Öffnungszeiten
+  if (b.oeffnungszeiten && b.oeffnungszeiten.length) {
+    var ozHtml = '<table class="oeffnungszeiten-tab"><thead><tr><th>Tag</th><th>von</th><th>bis</th></tr></thead><tbody>';
+    for (var i = 0; i < b.oeffnungszeiten.length; i++) {
+      var oz = b.oeffnungszeiten[i];
+      ozHtml += '<tr>';
+      ozHtml += '<td>' + escapeHtml(oz.tag) + '</td>';
+      if (oz.hinweis) {
+        ozHtml += '<td colspan="2"><em>' + escapeHtml(oz.hinweis) + '</em></td>';
+      } else {
+        ozHtml += '<td>' + escapeHtml(oz.von || '') + (oz.von ? ' Uhr' : '') + '</td>';
+        ozHtml += '<td>' + escapeHtml(oz.bis || '') + (oz.bis ? ' Uhr' : '') + '</td>';
+      }
+      ozHtml += '</tr>';
+    }
+    ozHtml += '</tbody></table>';
+    html += dropdown('Öffnungszeiten', ozHtml, first);
+    first = false;
+  }
+
+  // 3. Das Unternehmen
+  var untHtml = '';
+  if (b.inhaber)   untHtml += '<p><strong>Inhaber/Geschäftsführer:</strong><br>' + escapeHtml(b.inhaber) + '</p>';
+  if (b.branche)   untHtml += '<p><strong>Branche:</strong><br>' + escapeHtml(b.branche) + '</p>';
+  if (b.gruendung) untHtml += '<p><strong>Gründung:</strong><br>' + escapeHtml(b.gruendung) + '</p>';
+  if (b.produkte && b.produkte.length) {
+    untHtml += '<p><strong>Produkte:</strong></p><ul>';
+    for (var p = 0; p < b.produkte.length; p++) untHtml += '<li>' + escapeHtml(b.produkte[p]) + '</li>';
+    untHtml += '</ul>';
+  }
+  if (untHtml) {
+    html += dropdown('Das Unternehmen', untHtml, first);
+    first = false;
+  }
+
+  // 4. Karriere (nur falls Ausbildungen)
+  if (b.ausbildungen && b.ausbildungen.length) {
+    var karHtml = '<p><strong>Ausbildungen:</strong></p><ul>';
+    for (var a = 0; a < b.ausbildungen.length; a++) karHtml += '<li>' + escapeHtml(b.ausbildungen[a]) + '</li>';
+    karHtml += '</ul>';
+    html += dropdown('Karriere', karHtml, first);
+    first = false;
+  }
+
+  // 5. Standort
+  var stdHtml = '';
+  if (b.landkreis) stdHtml += '<p><strong>Landkreis:</strong><br>' + escapeHtml(b.landkreis) + '</p>';
+  if (b.vg)        stdHtml += '<p><strong>Verbandsgemeinde:</strong><br>' + escapeHtml(b.vg) + '</p>';
+  var ortLine = '';
+  if (b.plz)       ortLine = b.plz;
+  if (b.ort)       ortLine += (ortLine ? ' ' : '') + b.ort;
+  if (b.ortsteil)  ortLine += (ortLine ? ' / ' : '') + b.ortsteil;
+  if (ortLine)     stdHtml += '<p><strong>Ort:</strong><br>' + escapeHtml(ortLine) + '</p>';
+  if (b.strasse)   stdHtml += '<p><strong>Straße, Hausnummer:</strong><br>' + escapeHtml(b.strasse) + '</p>';
+  if (stdHtml) {
+    html += dropdown('Standort', stdHtml, first);
+    first = false;
+  }
+
+  // 6. Weitere Informationen
+  var weitHtml = '';
+  if (b.ansprechpartner) weitHtml += '<p><strong>Ansprechpartner:</strong><br>' + escapeHtml(b.ansprechpartner) + '</p>';
+  if (b.email)           weitHtml += '<p><strong>E-Mail-Adresse:</strong><br><a href="mailto:' + escapeHtml(b.email) + '">' + escapeHtml(b.email) + '</a></p>';
+  if (b.telefon)         weitHtml += '<p><strong>Telefonnummer:</strong><br><a href="tel:' + escapeHtml(b.telefon.replace(/\s+/g,'')) + '">' + escapeHtml(b.telefon) + '</a></p>';
+  if (b.mobil)           weitHtml += '<p><strong>Mobilnummer:</strong><br><a href="tel:' + escapeHtml(b.mobil.replace(/\s+/g,'')) + '">' + escapeHtml(b.mobil) + '</a></p>';
+  if (b.fax)             weitHtml += '<p><strong>Fax:</strong><br>' + escapeHtml(b.fax) + '</p>';
+  if (b.website)         weitHtml += '<p><strong>Website:</strong><br><a href="' + escapeHtml(b.website) + '" target="_blank" rel="noopener">' + escapeHtml(b.website.replace(/^https?:\/\//,'')) + '</a></p>';
+  if (b.sourceUrl)       weitHtml += '<p><a href="' + escapeHtml(b.sourceUrl) + '" target="_blank" rel="noopener">Eintrag bei Wir Westerwälder ↗</a></p>';
+  if (weitHtml) {
+    html += dropdown('Weitere Informationen', weitHtml, first);
+    first = false;
+  }
 
   html += '</div><div class="spacer"></div>';
   ziel.innerHTML = html;

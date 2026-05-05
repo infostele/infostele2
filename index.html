@@ -13,58 +13,75 @@
      EICHHÖRNCHEN-SPLASH (3 Sekunden)
      ═══════════════════════════════════════════════════════════════ -->
 <div id="eichhoernchen-overlay">
-  <svg id="eichhoernchen-svg" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
-    <!-- Schwanz (buschig) -->
-    <path d="M30 75 Q15 60 18 40 Q22 18 38 22 Q50 26 50 45"
-          fill="#C8742A" stroke="#8B4A18" stroke-width="2.5" stroke-linejoin="round"/>
-    <path d="M28 70 Q20 55 24 42 Q30 28 40 32" fill="none"
-          stroke="#8B4A18" stroke-width="1.5" opacity="0.5"/>
+  <div id="eichhoernchen-szene">
+    <div class="sprechblase sprechblase-links" id="sprechblase-1">
+      Hui Wäller?
+    </div>
+    <div class="sprechblase sprechblase-rechts" id="sprechblase-2">
+      Allemol!
+    </div>
+    <svg id="eichhoernchen-svg" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
+      <!-- Schwanz (buschig) -->
+      <path d="M30 75 Q15 60 18 40 Q22 18 38 22 Q50 26 50 45"
+            fill="#C8742A" stroke="#8B4A18" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M28 70 Q20 55 24 42 Q30 28 40 32" fill="none"
+            stroke="#8B4A18" stroke-width="1.5" opacity="0.5"/>
 
-    <!-- Körper -->
-    <ellipse cx="65" cy="80" rx="22" ry="28" fill="#C8742A" stroke="#8B4A18" stroke-width="2.5"/>
+      <!-- Körper -->
+      <ellipse cx="65" cy="80" rx="22" ry="28" fill="#C8742A" stroke="#8B4A18" stroke-width="2.5"/>
 
-    <!-- Bauchfell (heller) -->
-    <ellipse cx="65" cy="86" rx="13" ry="18" fill="#F5DAB6"/>
+      <!-- Bauchfell (heller) -->
+      <ellipse cx="65" cy="86" rx="13" ry="18" fill="#F5DAB6"/>
 
-    <!-- Hinterbein -->
-    <ellipse cx="55" cy="105" rx="10" ry="6" fill="#C8742A" stroke="#8B4A18" stroke-width="2"/>
+      <!-- Hinterbein -->
+      <ellipse cx="55" cy="105" rx="10" ry="6" fill="#C8742A" stroke="#8B4A18" stroke-width="2"/>
 
-    <!-- Vorderbeine mit Eichel -->
-    <ellipse cx="68" cy="92" rx="6" ry="12" fill="#C8742A" stroke="#8B4A18" stroke-width="2"/>
+      <!-- Vorderbeine mit Eichel -->
+      <ellipse cx="68" cy="92" rx="6" ry="12" fill="#C8742A" stroke="#8B4A18" stroke-width="2"/>
 
-    <!-- Eichel -->
-    <ellipse cx="72" cy="100" rx="6" ry="7" fill="#A0522D" stroke="#5C2C0A" stroke-width="1.5"/>
-    <path d="M66 98 Q72 92 78 98" fill="#5C2C0A"/>
-    <line x1="72" y1="92" x2="72" y2="89" stroke="#5C2C0A" stroke-width="1.2"/>
+      <!-- Eichel -->
+      <ellipse cx="72" cy="100" rx="6" ry="7" fill="#A0522D" stroke="#5C2C0A" stroke-width="1.5"/>
+      <path d="M66 98 Q72 92 78 98" fill="#5C2C0A"/>
+      <line x1="72" y1="92" x2="72" y2="89" stroke="#5C2C0A" stroke-width="1.2"/>
 
-    <!-- Kopf -->
-    <circle cx="68" cy="50" r="20" fill="#C8742A" stroke="#8B4A18" stroke-width="2.5"/>
+      <!-- Kopf -->
+      <circle cx="68" cy="50" r="20" fill="#C8742A" stroke="#8B4A18" stroke-width="2.5"/>
 
-    <!-- Ohren mit Quasten -->
-    <path d="M55 35 L52 22 L60 32 Z" fill="#C8742A" stroke="#8B4A18" stroke-width="2"/>
-    <path d="M81 35 L84 22 L76 32 Z" fill="#C8742A" stroke="#8B4A18" stroke-width="2"/>
-    <circle cx="52" cy="22" r="2.5" fill="#8B4A18"/>
-    <circle cx="84" cy="22" r="2.5" fill="#8B4A18"/>
+      <!-- Ohren mit Quasten -->
+      <path d="M55 35 L52 22 L60 32 Z" fill="#C8742A" stroke="#8B4A18" stroke-width="2"/>
+      <path d="M81 35 L84 22 L76 32 Z" fill="#C8742A" stroke="#8B4A18" stroke-width="2"/>
+      <circle cx="52" cy="22" r="2.5" fill="#8B4A18"/>
+      <circle cx="84" cy="22" r="2.5" fill="#8B4A18"/>
 
-    <!-- Augen -->
-    <circle cx="60" cy="48" r="3" fill="#1a1a1a"/>
-    <circle cx="76" cy="48" r="3" fill="#1a1a1a"/>
-    <circle cx="61" cy="47" r="1" fill="#fff"/>
-    <circle cx="77" cy="47" r="1" fill="#fff"/>
+      <!-- Augen (offen, animiert) -->
+      <g id="auge-links">
+        <circle cx="60" cy="48" r="3" fill="#1a1a1a" id="pupille-links"/>
+        <circle cx="61" cy="47" r="1" fill="#fff"/>
+      </g>
+      <g id="auge-rechts">
+        <circle cx="76" cy="48" r="3" fill="#1a1a1a" id="pupille-rechts"/>
+        <circle cx="77" cy="47" r="1" fill="#fff"/>
+      </g>
 
-    <!-- Schnauze -->
-    <ellipse cx="68" cy="58" rx="6" ry="5" fill="#F5DAB6"/>
-    <circle cx="68" cy="56" r="1.8" fill="#1a1a1a"/>
-    <line x1="68" y1="58" x2="68" y2="62" stroke="#1a1a1a" stroke-width="1.2"/>
-    <path d="M68 62 Q64 64 62 62 M68 62 Q72 64 74 62" stroke="#1a1a1a" stroke-width="1.2" fill="none"/>
+      <!-- Augenlider (für Zwinkern – initial unsichtbar) -->
+      <rect id="lid-links" x="56" y="44" width="8" height="0" fill="#C8742A"
+            stroke="#8B4A18" stroke-width="0.8" opacity="0"/>
+      <rect id="lid-rechts" x="72" y="44" width="8" height="0" fill="#C8742A"
+            stroke="#8B4A18" stroke-width="0.8" opacity="0"/>
 
-    <!-- Schnurrhaare -->
-    <line x1="58" y1="58" x2="48" y2="56" stroke="#5C2C0A" stroke-width="0.8"/>
-    <line x1="58" y1="60" x2="48" y2="60" stroke="#5C2C0A" stroke-width="0.8"/>
-    <line x1="78" y1="58" x2="88" y2="56" stroke="#5C2C0A" stroke-width="0.8"/>
-    <line x1="78" y1="60" x2="88" y2="60" stroke="#5C2C0A" stroke-width="0.8"/>
-  </svg>
-  <div id="eichhoernchen-text">Hui Wäller? Allemol!</div>
+      <!-- Schnauze -->
+      <ellipse cx="68" cy="58" rx="6" ry="5" fill="#F5DAB6"/>
+      <circle cx="68" cy="56" r="1.8" fill="#1a1a1a"/>
+      <line x1="68" y1="58" x2="68" y2="62" stroke="#1a1a1a" stroke-width="1.2"/>
+      <path d="M68 62 Q64 64 62 62 M68 62 Q72 64 74 62" stroke="#1a1a1a" stroke-width="1.2" fill="none"/>
+
+      <!-- Schnurrhaare -->
+      <line x1="58" y1="58" x2="48" y2="56" stroke="#5C2C0A" stroke-width="0.8"/>
+      <line x1="58" y1="60" x2="48" y2="60" stroke="#5C2C0A" stroke-width="0.8"/>
+      <line x1="78" y1="58" x2="88" y2="56" stroke="#5C2C0A" stroke-width="0.8"/>
+      <line x1="78" y1="60" x2="88" y2="60" stroke="#5C2C0A" stroke-width="0.8"/>
+    </svg>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════
@@ -173,6 +190,7 @@ window._WASSERZEICHEN = '<div class="hero-wm" aria-hidden="true">'
 <script src="veranstaltungen-konsolidiert.js"></script>
 <script src="regionale-produkte.js"></script>
 <script src="inhalte.js"></script>
+<script src="westerwaldbox-betriebe.js"></script>
 <script src="mobilitaet-verkehr.js"></script>
 
 <!-- LEGAL TEXTE -->

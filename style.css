@@ -53,36 +53,102 @@ img { max-width: 100%; display: block; }
 .app-main { flex: 1; display: flex; flex-direction: column; }
 
 /* ══════════════════════════════════════════════════════════════
-   EICHHÖRNCHEN-SPLASH
+   EICHHÖRNCHEN-SPLASH mit Sprechblasen
    ══════════════════════════════════════════════════════════════ */
 #eichhoernchen-overlay {
   position: fixed; inset: 0;
   background: var(--weiss);
   z-index: 9000;
-  display: flex; flex-direction: column;
+  display: flex;
   align-items: center; justify-content: center;
-  gap: 18px;
-  animation: eich-fadeout 0.5s ease 2.5s forwards;
+  /* Wird per JS-Klasse "weg" entfernt – keine reine Zeit-Animation, weil
+     wir die Choreographie der Sprechblasen abwarten müssen */
+  transition: opacity 0.4s ease;
+}
+#eichhoernchen-overlay.weg {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+#eichhoernchen-szene {
+  position: relative;
+  width: 280px;
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 #eichhoernchen-svg {
   width: 130px; height: 130px;
-  animation: eich-bounce 1s ease-in-out infinite;
-}
-#eichhoernchen-text {
-  font-family: var(--font); font-weight: 700; font-style: italic;
-  font-size: 22px; color: var(--dunkelgruen);
-  opacity: 0;
-  animation: eich-fadein 0.6s ease 0.6s forwards;
+  animation: eich-bounce 1.4s ease-in-out infinite;
+  z-index: 2;
 }
 @keyframes eich-bounce {
   0%, 100% { transform: translateY(0) rotate(-3deg); }
-  50%      { transform: translateY(-12px) rotate(3deg); }
+  50%      { transform: translateY(-10px) rotate(3deg); }
 }
-@keyframes eich-fadein {
-  to { opacity: 1; }
+
+/* Sprechblasen */
+.sprechblase {
+  position: absolute;
+  top: 0;
+  background: var(--weiss);
+  border: 2px solid var(--dunkelgruen);
+  color: var(--dunkelgruen);
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 18px;
+  padding: 8px 14px;
+  border-radius: 18px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  z-index: 3;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
 }
-@keyframes eich-fadeout {
-  to { opacity: 0; visibility: hidden; }
+.sprechblase::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  width: 14px;
+  height: 14px;
+  background: var(--weiss);
+  border-right: 2px solid var(--dunkelgruen);
+  border-bottom: 2px solid var(--dunkelgruen);
+  transform: rotate(45deg);
+}
+.sprechblase-links {
+  left: 0;
+  top: 5px;
+}
+.sprechblase-links::after {
+  right: 18px;
+}
+.sprechblase-rechts {
+  right: 0;
+  top: 5px;
+  background: var(--hellgruen-s);
+  border-color: var(--dunkelgruen);
+}
+.sprechblase-rechts::after {
+  left: 18px;
+  background: var(--hellgruen-s);
+}
+.sprechblase.sichtbar {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Augenlid-Animation: per JS getriggert */
+#lid-links.zwinkern, #lid-rechts.zwinkern {
+  animation: zwinker 0.4s ease;
+}
+@keyframes zwinker {
+  0%   { opacity: 0; height: 0; }
+  40%  { opacity: 1; height: 7px; }
+  60%  { opacity: 1; height: 7px; }
+  100% { opacity: 0; height: 0; }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1143,3 +1209,171 @@ body.modal-offen { overflow: hidden; }
   margin-bottom: 12px;
   padding: 0 4px;
 }
+
+/* PDF-Aktion: prominenter Öffnen-Button im Sticky-Header */
+.iframe-aktionen {
+  padding: 8px 12px;
+  background: var(--weiss);
+  border-top: 1px solid var(--grau-lt);
+}
+.btn-pdf-oeffnen {
+  display: inline-block;
+  background: var(--hellgruen-p);
+  color: var(--weiss) !important;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 13px;
+}
+.btn-pdf-oeffnen:hover {
+  background: var(--dunkelgruen);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BILDERSLIDER (Westerwald-Box)
+   ════════════════════════════════════════════════════════════════ */
+.bilder-slider {
+  position: relative;
+  width: 100%;
+  background: #000;
+  margin-bottom: 18px;
+  overflow: hidden;
+  border-radius: 4px;
+  user-select: none;
+  touch-action: pan-y;
+}
+.slider-bilder {
+  display: flex;
+  width: 100%;
+  transition: transform 0.4s ease;
+  align-items: center;
+}
+.slider-bild {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 280px;
+  object-fit: contain;
+  display: block;
+  background: #f5f5f5;
+}
+.slider-pfeil {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  border: 0;
+  width: 40px; height: 60px;
+  font-size: 32px;
+  cursor: pointer;
+  z-index: 2;
+  font-family: var(--font);
+  font-weight: 700;
+  line-height: 1;
+}
+.slider-pfeil:hover { background: rgba(0,0,0,0.75); }
+.slider-prev { left: 0; border-radius: 0 4px 4px 0; }
+.slider-next { right: 0; border-radius: 4px 0 0 4px; }
+.slider-punkte {
+  position: absolute;
+  bottom: 8px;
+  left: 0; right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 2;
+}
+.slider-punkt {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.slider-punkt.aktiv { background: var(--hellgruen-p, #88C340); }
+.slider-counter {
+  position: absolute;
+  top: 8px; right: 8px;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 3px;
+  z-index: 2;
+  font-family: var(--font);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BETRIEBE-LISTE und LOGO
+   ════════════════════════════════════════════════════════════════ */
+.betriebe-liste {
+  margin-top: 8px;
+}
+.betrieb-eintrag {
+  align-items: center;
+}
+.betrieb-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  margin-right: 12px;
+  flex-shrink: 0;
+  background: var(--weiss, #fff);
+  border-radius: 3px;
+}
+.betrieb-logo-platzhalter {
+  width: 44px;
+  height: 44px;
+  background: var(--hellgruen-s, #C8E6A4);
+  color: var(--dunkelgruen, #00663A);
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+  border-radius: 3px;
+}
+
+/* Großes Logo auf der Detail-Seite eines Betriebs */
+.betrieb-logo-gross-wrap {
+  text-align: center;
+  margin: 0 0 16px;
+  padding: 12px;
+  background: var(--weiss, #fff);
+  border: 1px solid var(--grau-lt, #e5e5e5);
+  border-radius: 4px;
+}
+.betrieb-logo-gross {
+  max-width: 220px;
+  max-height: 110px;
+  width: auto;
+  height: auto;
+  display: inline-block;
+}
+
+/* Öffnungszeiten-Tabelle */
+.oeffnungszeiten-tab {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.oeffnungszeiten-tab th {
+  background: var(--hellgruen-s, #C8E6A4);
+  color: var(--dunkelgruen, #00663A);
+  padding: 6px 8px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--grau-lt, #e5e5e5);
+}
+.oeffnungszeiten-tab td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--grau-lt, #e5e5e5);
+}
+.oeffnungszeiten-tab tr:last-child td { border-bottom: 0; }
