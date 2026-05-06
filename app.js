@@ -195,45 +195,32 @@ function initSplash() {
 }
 
 // ════════════════════════════════════════════════════════════════
-// COOKIE-GATE
-// Streng: Solange nicht aktiv akzeptiert wurde, läuft KEIN router(),
-// wird KEINE App gerendert. Die App wird nach dem Splash (3300ms)
-// nur dann angezeigt, wenn akzeptiert; sonst bleibt das Overlay.
+// COOKIE-GATE / DATENSCHUTZ-AKZEPTANZ
+// Strikt: bei JEDEM Öffnen der App muss neu akzeptiert werden.
+// Es wird NICHTS gespeichert – kein localStorage, kein Cookie.
+// Solange nicht aktiv akzeptiert wurde, läuft KEIN router() und
+// wird KEINE App gerendert.
 // ════════════════════════════════════════════════════════════════
 function initCookieGate() {
-  // Schlüssel mit Versionsnummer: bei Datenschutz-Änderungen kann der
-  // Schlüssel hochgezählt werden, damit Bestandsnutzer erneut zustimmen.
-  var KEY = 'ww_dsgvo_v9';
-  var akz = false;
-  try { akz = localStorage.getItem(KEY) === '1'; } catch (e) {}
-
   var ov  = document.getElementById('cookie-overlay');
   var btn = document.getElementById('cookie-akzeptieren');
   var app = document.getElementById('app');
 
-  // App initial verstecken bis Cookie-Akzeptanz
-  if (app && !akz) app.style.visibility = 'hidden';
+  // App initial verstecken bis Akzeptanz
+  if (app) app.style.visibility = 'hidden';
 
   function freischalten() {
     if (app) app.style.visibility = '';
     router();
   }
 
-  if (akz) {
-    if (ov) ov.style.display = 'none';
-    // Direkt nach dem Splash-Ende routen
-    setTimeout(freischalten, 3400);
-    return;
-  }
-
-  // Noch nicht akzeptiert: Overlay erscheint nach Splash-Ende
+  // Overlay erscheint nach Splash-Ende
   setTimeout(function() {
     if (ov) ov.style.display = 'flex';
   }, 3400);
 
   if (btn) {
     btn.addEventListener('click', function() {
-      try { localStorage.setItem(KEY, '1'); } catch (e) {}
       if (ov) ov.style.display = 'none';
       freischalten();
     });
@@ -249,13 +236,63 @@ function oeffneModal(name) {
   if (name === 'impressum')        { inhalt = window._IMPRESSUM_HTML || ''; titel = 'Impressum'; }
   else if (name === 'datenschutz') { inhalt = window._DATENSCHUTZ_HTML || ''; titel = 'Datenschutzerklärung'; }
   else if (name === 'barrierefreiheit') {
-    inhalt = '<h3>Erklärung zur Barrierefreiheit</h3>'
-      + '<p>Diese App ist bestrebt, ihre Inhalte für alle Nutzerinnen und Nutzer zugänglich zu gestalten – im Einklang mit den Anforderungen des Behindertengleichstellungsgesetzes (BGG) und der Barrierefreie-Informationstechnik-Verordnung (BITV 2.0).</p>'
-      + '<h3>Stand der Vereinbarkeit</h3>'
-      + '<p>Diese App wurde fortlaufend für mobile Endgeräte und Bildschirmleser optimiert. Hinweise auf Barrieren werden gerne aufgenommen.</p>'
-      + '<h3>Feedback und Kontakt</h3>'
-      + '<p>Sind Ihnen Mängel beim barrierefreien Zugang aufgefallen? <a href="mailto:info@wir-westerwaelder.de">info@wir-westerwaelder.de</a></p>';
-    titel = 'Erklärung zur Barrierefreiheit';
+    var aktiv = document.body.classList.contains('barrierefrei');
+    inhalt =
+      '<div class="bf-toggle-box">'
+        + '<h3>Barrierefreier Modus</h3>'
+        + '<p>Wenn du den barrierefreien Modus einschaltest, werden alle Schriften deutlich vergrößert, Kontraste erhöht, Animationen reduziert und Tasten/Links besser sichtbar. Touch-Ziele werden mindestens 48&times;48 Pixel groß.</p>'
+        + '<button class="bf-toggle-btn ' + (aktiv ? 'bf-an' : '') + '" onclick="toggleBarrierefrei()">'
+          + '<span class="bf-toggle-status">' + (aktiv ? '✓ AN' : 'AUS') + '</span>'
+          + '<span class="bf-toggle-label">Barrierefreier Modus</span>'
+        + '</button>'
+        + '<p class="bf-toggle-hinweis"><em>Hinweis: Der Modus wird beim nächsten App-Start zurückgesetzt – Dein Datenschutz hat Vorrang.</em></p>'
+      + '</div>'
+      + '<h3>Erklärung zur Barrierefreiheit</h3>'
+      + '<p>Die Wir Westerwälder gAöR ist bestrebt, ihre App im Einklang mit den nationalen Rechtsvorschriften zur Umsetzung der Richtlinie (EU) 2016/2102 des Europäischen Parlaments und des Rates barrierefrei zugänglich zu machen.</p>'
+      + '<p>Diese Erklärung zur Barrierefreiheit gilt für die Web-App <strong>„Guck ma, Westerwald"</strong>.</p>'
+
+      + '<h3>Stand der Vereinbarkeit mit den Anforderungen</h3>'
+      + '<p>Diese App ist mit der Barrierefreie-Informationstechnik-Verordnung (BITV 2.0) und den Web Content Accessibility Guidelines (WCAG) 2.1 Level AA <strong>weitgehend vereinbar</strong>. Folgende Maßnahmen sind umgesetzt:</p>'
+      + '<ul>'
+        + '<li>Semantisches HTML mit klarer Überschriften-Hierarchie</li>'
+        + '<li>Tastatur-Bedienbarkeit aller interaktiven Elemente</li>'
+        + '<li>Mindestkontrast 4,5:1 für alle Texte</li>'
+        + '<li>Skalierbare Schriftgrößen (Pinch-to-Zoom in Inhaltsbereichen)</li>'
+        + '<li>Optionaler barrierefreier Modus mit erhöhter Lesbarkeit (siehe oben)</li>'
+        + '<li>Aussagekräftige Linktexte und ARIA-Labels</li>'
+        + '<li>Alternativtexte für Logos und dekorative Bilder</li>'
+        + '<li>Fokus-Indikatoren für die Tastatur-Navigation</li>'
+      + '</ul>'
+
+      + '<h3>Nicht barrierefreie Inhalte</h3>'
+      + '<p>Die folgenden Inhalte sind aus den genannten Gründen nicht oder nur eingeschränkt barrierefrei:</p>'
+      + '<ul>'
+        + '<li><strong>Eingebettete externe PDF-Dokumente</strong> (z. B. Einkaufsführer, Naturgenuss-Broschüre): Diese werden durch externe Drittanbieter bereitgestellt und können nicht durch die App barrierefrei aufbereitet werden.</li>'
+        + '<li><strong>Eingebettete Webseiten Dritter</strong> (z. B. westerwald.info, Westerwaldbus, VRM): Diese Inhalte unterliegen der Verantwortung der jeweiligen Anbieter.</li>'
+        + '<li><strong>Logos der Direktvermarkter</strong>: Diese werden direkt vom Anbieter wir-westerwaelder.de geladen und enthalten keine ausführlichen Alt-Texte.</li>'
+      + '</ul>'
+
+      + '<h3>Erstellung dieser Erklärung</h3>'
+      + '<p>Diese Erklärung wurde am 06. Mai 2026 erstellt. Sie beruht auf einer Selbstbewertung.</p>'
+
+      + '<h3>Feedback und Kontaktangaben</h3>'
+      + '<p>Sind Ihnen Mängel beim barrierefreien Zugang zu Inhalten dieser App aufgefallen? Bitte teilen Sie uns dies mit. Wir bemühen uns, festgestellte Barrieren zeitnah zu beheben.</p>'
+      + '<p><strong>Kontakt:</strong><br>'
+        + 'Wir Westerwälder gAöR<br>'
+        + 'Königsberger Str. 40, 56269 Dierdorf<br>'
+        + 'E-Mail: <a href="mailto:info@wir-westerwaelder.de">info@wir-westerwaelder.de</a><br>'
+        + 'Telefon: <a href="tel:+49268995929-40">02689 95929-40</a></p>'
+
+      + '<h3>Schlichtungsverfahren</h3>'
+      + '<p>Beim Beauftragten der Bundesregierung für die Belange von Menschen mit Behinderungen kann ein Schlichtungsverfahren nach § 16 BGG beantragt werden:</p>'
+      + '<p>Schlichtungsstelle nach dem Behindertengleichstellungsgesetz<br>'
+        + 'bei dem Beauftragten der Bundesregierung für die Belange von Menschen mit Behinderungen<br>'
+        + 'Mauerstraße 53<br>'
+        + '10117 Berlin<br>'
+        + 'Telefon: 030 18 527-2805<br>'
+        + 'E-Mail: <a href="mailto:info@schlichtungsstelle-bgg.de">info@schlichtungsstelle-bgg.de</a><br>'
+        + 'Internet: <a href="https://www.schlichtungsstelle-bgg.de" target="_blank" rel="noopener">www.schlichtungsstelle-bgg.de</a></p>';
+    titel = 'Barrierefreiheit';
   }
   if (!inhalt) return;
   document.getElementById('modal-titel').textContent = titel;
@@ -268,6 +305,16 @@ function schliesseModal() {
   document.getElementById('modal-overlay').classList.remove('aktiv');
   document.body.classList.remove('modal-offen');
 }
+
+// ════════════════════════════════════════════════════════════════
+// BARRIEREFREIER MODUS – Toggle (kein localStorage, gilt nur für Session)
+// ════════════════════════════════════════════════════════════════
+function toggleBarrierefrei() {
+  var aktiv = document.body.classList.toggle('barrierefrei');
+  // Modal neu rendern, damit der Knopf-Status aktualisiert wird
+  oeffneModal('barrierefreiheit');
+}
+window.toggleBarrierefrei = toggleBarrierefrei;
 
 // ════════════════════════════════════════════════════════════════
 // ROUTER
@@ -465,61 +512,23 @@ var LISTEN = {
     }
   },
   'tourismus-ausflugsziele': {
-    datenName:'DATA_AUSFLUGSZIELE',
     titel:'Ausflugsziele',
     breadcrumb:'Tourismus &amp; Freizeit › <strong>Ausflugsziele</strong>',
     zurueck:'kategorie/tourismus',
-    untertitel:'Sehenswertes in der Region.',
-    detailKey:'ausfl',
-    renderTyp:'gefiltert',
-    filterLabel:'Kategorie',
-    filterTypen:[
-      {key:'alle',         label:'Alle'},
-      {key:'gaesteführung',label:'Gästeführung'},
-      {key:'wandertour',   label:'Wandertour'},
-      {key:'radtour',      label:'Radtour'},
-      {key:'kultur',       label:'Kultur & Tradition'},
-      {key:'tickets',      label:'Tickets'},
-      {key:'sonstige',     label:'Sonstige'}
-    ],
-    typErkenner: function(item) {
-      var t = (item.topic || item.mainTopic || '').toLowerCase();
-      if (t.indexOf('gästeführung') >= 0 || t.indexOf('gaesteführung') >= 0) return 'gaesteführung';
-      if (t.indexOf('wandertour') >= 0 || t.indexOf('wanderung') >= 0) return 'wandertour';
-      if (t.indexOf('radtour') >= 0 || t.indexOf('radfahr') >= 0) return 'radtour';
-      if (t.indexOf('kultur') >= 0 || t.indexOf('tradition') >= 0) return 'kultur';
-      if (t.indexOf('eintrittsticket') >= 0 || t.indexOf('ticket') >= 0) return 'tickets';
-      return 'sonstige';
-    }
+    untertitel:'Sehenswertes in der Region (Live-Daten von westerwald.info).',
+    renderTyp:'iframe',
+    iframeUrl:'https://www.westerwald.info/tosc5/infrastruktur?limINFOSYSTEMSUBTOPICS=a1716a20-0da0-4cd6-b473-febf29b39eea,f7fe9672-2fdc-4105-bbc7-40bb170afef3#/pois',
+    iframeTyp:'webseite'
   },
   'tourismus-badeseen':      {datenName:'DATA_BADESEEN_NEU',  titel:'Badeseen',     breadcrumb:'Tourismus &amp; Freizeit › <strong>Badeseen</strong>',     zurueck:'kategorie/tourismus', untertitel:'Erfrischung und Naturerlebnis.', detailKey:'badesee'},
   'tourismus-unterkuenfte': {
-    datenName:'DATA_UNTERKUENFTE',
     titel:'Unterkünfte',
     breadcrumb:'Tourismus &amp; Freizeit › <strong>Unterkünfte</strong>',
     zurueck:'kategorie/tourismus',
-    untertitel:'Hotels, Pensionen, Ferienwohnungen, Camping und mehr.',
-    detailKey:'unterkunft',
-    renderTyp:'gefiltert',
-    filterLabel:'Typ',
-    filterTypen:[
-      {key:'alle',     label:'Alle'},
-      {key:'hotel',    label:'Hotel'},
-      {key:'ferien',   label:'Ferienwohnung'},
-      {key:'pension',  label:'Pension'},
-      {key:'gasthof',  label:'Gasthof'},
-      {key:'camping',  label:'Camping'},
-      {key:'sonstige', label:'Sonstige'}
-    ],
-    typErkenner: function(item) {
-      var n = (item.name || '').toLowerCase();
-      if (n.indexOf('hotel') >= 0) return 'hotel';
-      if (n.indexOf('ferienwohn') >= 0 || n.indexOf('ferienhaus') >= 0 || n.indexOf('apartment') >= 0 || n.indexOf('appartement') >= 0) return 'ferien';
-      if (n.indexOf('pension') >= 0) return 'pension';
-      if (n.indexOf('gasthof') >= 0 || n.indexOf('gasthaus') >= 0) return 'gasthof';
-      if (n.indexOf('camping') >= 0 || n.indexOf('zeltplatz') >= 0 || n.indexOf('campingpark') >= 0) return 'camping';
-      return 'sonstige';
-    }
+    untertitel:'Hotels, Pensionen, Ferienwohnungen, Camping (Live-Daten von westerwald.info).',
+    renderTyp:'iframe',
+    iframeUrl:'https://www.westerwald.info/tosc5/unterkuenfte/#/unterkuenfte',
+    iframeTyp:'webseite'
   },
   'tourismus-veranstaltungen': {datenName:'DATA_VERANSTALTUNGEN_ALLE', titel:'Veranstaltungen', breadcrumb:'Tourismus &amp; Freizeit › <strong>Veranstaltungen</strong>', zurueck:'kategorie/tourismus', untertitel:'Alle Termine in der Region.', detailKey:'event', renderTyp:'termine'},
 
@@ -538,7 +547,36 @@ var LISTEN = {
   // MOBILITÄT & VERKEHR
   'mobilitaet-bahn-bus':      {linkData:'bahn-bus',      titel:'Bahn & Bus', breadcrumb:'Mobilität &amp; Verkehr › <strong>Bahn & Bus</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Fahrpläne und ÖPNV-Verbindungen.', renderTyp:'subLinks'},
   'mobilitaet-mitfahrbank':   {linkData:'mitfahrbank',   titel:'Mitfahrerbänke', breadcrumb:'Mobilität &amp; Verkehr › <strong>Mitfahrerbänke</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Standorte in der Region.', renderTyp:'subLinks'},
-  'mobilitaet-fahrgemeinschaften': {linkData:'fahrgemeinschaften', titel:'Fahrgemeinschaften', breadcrumb:'Mobilität &amp; Verkehr › <strong>Fahrgemeinschaften</strong>', zurueck:'kategorie/mobilitaet', untertitel:'ADAC Pendlernetz – App für Mitfahrgelegenheiten.', renderTyp:'subLinks'}
+  'mobilitaet-fahrgemeinschaften': {linkData:'fahrgemeinschaften', titel:'Fahrgemeinschaften', breadcrumb:'Mobilität &amp; Verkehr › <strong>Fahrgemeinschaften</strong>', zurueck:'kategorie/mobilitaet', untertitel:'ADAC Pendlernetz – App für Mitfahrgelegenheiten.', renderTyp:'subLinks'},
+
+  // Eingebettete Fahrplan-Anbieter (über iframe statt externer Link)
+  'mobilitaet-bahn-bus-westerwaldbus': {
+    titel:'Westerwaldbus (Kreis AK)',
+    breadcrumb:'Mobilität &amp; Verkehr › Bahn & Bus › <strong>Westerwaldbus</strong>',
+    zurueck:'liste/mobilitaet-bahn-bus',
+    untertitel:'Fahrpläne der Verkehrsbetriebe Westerwaldkreis & Altenkirchen.',
+    renderTyp:'iframe',
+    iframeUrl:'https://www.westerwaldbus.de/fahrplaene',
+    iframeTyp:'webseite'
+  },
+  'mobilitaet-bahn-bus-oepnv-ww': {
+    titel:'ÖPNV Westerwaldkreis',
+    breadcrumb:'Mobilität &amp; Verkehr › Bahn & Bus › <strong>ÖPNV Westerwaldkreis</strong>',
+    zurueck:'liste/mobilitaet-bahn-bus',
+    untertitel:'Aktuelle Linien und Fahrpläne im Westerwaldkreis.',
+    renderTyp:'iframe',
+    iframeUrl:'https://www.westerwaldkreis.de/oepnv.html',
+    iframeTyp:'webseite'
+  },
+  'mobilitaet-bahn-bus-vrm': {
+    titel:'VRM Fahrplanauskunft',
+    breadcrumb:'Mobilität &amp; Verkehr › Bahn & Bus › <strong>VRM Fahrplanauskunft</strong>',
+    zurueck:'liste/mobilitaet-bahn-bus',
+    untertitel:'Verkehrsverbund Rhein-Mosel: Fahrpläne und Verbindungen.',
+    renderTyp:'iframe',
+    iframeUrl:'https://www.vrminfo.de/fahrplanauskunft/',
+    iframeTyp:'webseite'
+  }
 };
 
 // Sammlung der Sub-Link-Datensätze für die Linklisten-Render-Funktion
@@ -552,6 +590,13 @@ var SUB_LINKS = {
   'bahn-bus':              { lookup: 'mobilitaet', names: ['Westerwaldbus (Kreis AK)', 'ÖPNV Westerwaldkreis', 'VRM Fahrplanauskunft'] },
   'mitfahrbank':           { lookup: 'mobilitaet', name: 'Mitfahrerbänke' },
   'fahrgemeinschaften':    { lookup: 'mobilitaet', name: 'ADAC Pendlernetz App' }
+};
+
+// Mapping: Sub-Name → interne App-Route (für iframe-Anzeige statt externen Link)
+var SUB_INTERNAL_ROUTES = {
+  'Westerwaldbus (Kreis AK)':  'liste/mobilitaet-bahn-bus-westerwaldbus',
+  'ÖPNV Westerwaldkreis':      'liste/mobilitaet-bahn-bus-oepnv-ww',
+  'VRM Fahrplanauskunft':      'liste/mobilitaet-bahn-bus-vrm'
 };
 
 var WANDER_DATEN = {
@@ -924,8 +969,18 @@ function renderSubLinks(ziel, slug, l) {
 
   html += '<div class="liste linklist">';
   passend.forEach(function(sub) {
-    if (sub.url) {
-      // Einfacher Direktlink
+    var internalRoute = SUB_INTERNAL_ROUTES[sub.name];
+    if (sub.url && internalRoute) {
+      // Sub hat eine interne iframe-Route → als Button (nicht externer Link)
+      html += '<button class="eintrag" onclick="navigateTo(\'' + internalRoute + '\')">'
+        + '<div class="eintrag-text">'
+        + '<div class="eintrag-titel">' + escapeHtml(sub.name) + '</div>'
+        + '<div class="eintrag-meta">' + escapeHtml(sub.url.replace(/^https?:\/\//,'').replace(/\/$/,'')) + '</div>'
+        + '</div>'
+        + '<div class="eintrag-pfeil">&rsaquo;</div>'
+        + '</button>';
+    } else if (sub.url) {
+      // Einfacher Direktlink (extern)
       html += '<a class="eintrag" href="' + sub.url + '" target="_blank" rel="noopener">'
         + '<div class="eintrag-text">'
         + '<div class="eintrag-titel">' + escapeHtml(sub.name) + '</div>'
@@ -1846,20 +1901,29 @@ function renderBadeseeDetail(ziel, item, info, zurueck) {
     + intro(info.titel, '')
     + '<div class="detail-section">'
     + '<h2 class="detail-titel">' + escapeHtml(item.name) + '</h2>';
-  if (item.ort) html += '<div class="diff-gpx-row"><span class="diff-pill diff-leicht-bg">' + escapeHtml(item.ort) + '</span></div>';
+  if (item.ort) html += '<div class="diff-gpx-row"><span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(item.ort) + '</span></div>';
   if (item.kurz) html += dropdown('Kurzinfo', txt(item.kurz), true);
   if (item.detail) html += dropdown('Beschreibung', txt(item.detail));
+
+  // Vollständige Adresse: Straße, PLZ + Ort, Telefon, E-Mail, Web
   var kontakt = '';
-  if (item.strasse) kontakt += escapeHtml(item.strasse) + '<br>';
-  if (item.plz)     kontakt += escapeHtml(item.plz) + '<br>';
-  if (item.tel)     kontakt += '<strong>Telefon:</strong> ' + escapeHtml(item.tel) + '<br>';
-  if (item.mail)    kontakt += '<strong>E-Mail:</strong> <a href="mailto:' + item.mail + '">' + item.mail + '</a><br>';
+  // Adresse als Block
+  var adresse = '';
+  if (item.strasse) adresse += escapeHtml(item.strasse) + '<br>';
+  if (item.plz || item.ort) {
+    adresse += (item.plz ? escapeHtml(item.plz) + ' ' : '') + (item.ort ? escapeHtml(item.ort) : '') + '<br>';
+  }
+  if (adresse) kontakt += '<p><strong>Adresse:</strong><br>' + adresse + '</p>';
+  if (item.tel)  kontakt += '<p><strong>Telefon:</strong> <a href="tel:' + escapeHtml(item.tel.replace(/\s+/g,'')) + '">' + escapeHtml(item.tel) + '</a></p>';
+  if (item.mail) kontakt += '<p><strong>E-Mail:</strong> <a href="mailto:' + escapeHtml(item.mail) + '">' + escapeHtml(item.mail) + '</a></p>';
   if (item.links && item.links.length) {
     item.links.forEach(function(l) {
-      kontakt += '<strong>Web:</strong> <a href="' + l + '" target="_blank" rel="noopener">' + l + '</a><br>';
+      kontakt += '<p><strong>Web:</strong> <a href="' + escapeHtml(l) + '" target="_blank" rel="noopener">' + escapeHtml(l.replace(/^https?:\/\//,'').replace(/\/$/,'')) + '</a></p>';
     });
   }
-  if (kontakt) html += dropdown('Kontakt', '<p>' + kontakt + '</p>');
+  if (!kontakt) kontakt = '<p class="hinweis-leer"><em>Kontaktdaten bitte beim örtlichen Tourismusbüro erfragen.</em></p>';
+  html += dropdown('Kontakt', kontakt);
+
   html += '</div><div class="spacer"></div>';
   ziel.innerHTML = html;
 }
@@ -2179,15 +2243,53 @@ function baueBetriebeListe() {
 // ════════════════════════════════════════════════════════════════
 function renderIframeSeite(ziel, slug, l) {
   var iframeUrl = l.iframeUrl || '';
-  // Mobile-Detection: iOS und Android können PDFs in iframes meist nicht
-  // zuverlässig anzeigen (Safari blockiert sie häufig komplett, Chrome auf
-  // Android öffnet stattdessen den Download). Auf diesen Geräten zeigen wir
-  // eine große Karte mit prominentem Öffnen-Button, der das PDF im
-  // System-Viewer (oder neuem Tab) öffnet. Auf Desktop/Tablet-Browsern
-  // bleibt das iframe als Vorschau.
+  var iframeTyp = l.iframeTyp || 'pdf'; // 'pdf' (default) oder 'webseite'
   var ua = (navigator.userAgent || '').toLowerCase();
   var istMobil = /iphone|ipad|ipod|android|mobile/.test(ua);
 
+  // ── WEBSEITE ────────────────────────────────────────────────────
+  if (iframeTyp === 'webseite') {
+    if (istMobil) {
+      // Mobile: schöne Karte mit "In neuem Tab öffnen"-Button.
+      // Externe Web-Apps wie westerwald.info sind im iframe auf Mobile
+      // schwer zu bedienen (Touch-Konflikte, scrollen, kleine Buttons).
+      ziel.innerHTML =
+        '<div class="sticky-region">'
+          + navBar(l.zurueck, l.breadcrumb)
+          + intro(l.titel, l.untertitel)
+        + '</div>'
+        + '<div class="pdf-mobile-karte">'
+          + '<div class="pdf-mobile-icon">🌐</div>'
+          + '<div class="pdf-mobile-titel">' + escapeHtml(l.titel) + '</div>'
+          + '<p class="pdf-mobile-hinweis">Auf dem Smartphone funktioniert die externe Webseite am besten in einem eigenen Tab.</p>'
+          + '<a class="btn-pdf-oeffnen-gross" href="' + iframeUrl + '" target="_blank" rel="noopener">🌐 Seite jetzt öffnen</a>'
+          + '<p class="pdf-mobile-meta">Inhalt von <a href="' + iframeUrl + '" target="_blank" rel="noopener">' + escapeHtml(iframeUrl.replace(/^https?:\/\//,'').split('/')[0]) + '</a></p>'
+        + '</div>'
+        + '<div class="spacer"></div>';
+      return;
+    }
+    // Desktop: iframe direkt einbetten
+    ziel.innerHTML =
+      '<div class="sticky-region">'
+        + navBar(l.zurueck, l.breadcrumb)
+        + intro(l.titel, l.untertitel)
+        + '<div class="iframe-aktionen">'
+          + '<a class="btn-action btn-pdf-oeffnen" href="' + iframeUrl + '" target="_blank" rel="noopener">🌐 In neuem Tab öffnen</a>'
+        + '</div>'
+      + '</div>'
+      + '<div class="iframe-wrap">'
+        + '<iframe src="' + iframeUrl + '" class="inhalts-iframe" '
+        + 'allowfullscreen referrerpolicy="no-referrer-when-downgrade" '
+        + 'sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>'
+      + '</div>'
+      + '<div class="iframe-fallback">'
+        + 'Inhalt wird nicht angezeigt? <a href="' + iframeUrl + '" target="_blank" rel="noopener">Direkt öffnen ↗</a>'
+      + '</div>'
+      + '<div class="spacer"></div>';
+    return;
+  }
+
+  // ── PDF (default) ───────────────────────────────────────────────
   if (istMobil) {
     ziel.innerHTML =
       '<div class="sticky-region">'
@@ -2205,7 +2307,7 @@ function renderIframeSeite(ziel, slug, l) {
     return;
   }
 
-  // Desktop: iframe via Google-Docs-Viewer (der Originalserver setzt meist
+  // Desktop PDF: iframe via Google-Docs-Viewer (Originalserver setzt
   // X-Frame-Options, also kein direktes Einbetten möglich).
   var safe = encodeURIComponent(iframeUrl);
   var viewerUrl = 'https://docs.google.com/viewer?url=' + safe + '&embedded=true';

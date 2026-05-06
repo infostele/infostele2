@@ -1442,3 +1442,271 @@ body.modal-offen { overflow: hidden; }
   color: var(--grau-md, #777);
   text-decoration: underline;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   BARRIEREFREIER MODUS
+   Aktiviert über body.barrierefrei
+   ──────────────────────────────────────────────────────────────────
+   Konzept: Hochkontrast (schwarz/weiß), 1.5x Schrift, klare Fokus-
+   Indikatoren, größere Touch-Ziele, reduzierte Animationen, klar
+   erkennbare Links durch Unterstreichung.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Toggle-Button im Modal */
+.bf-toggle-box {
+  background: #f0f8f4;
+  border-left: 4px solid var(--dunkelgruen, #00663A);
+  padding: 16px;
+  margin-bottom: 24px;
+  border-radius: 0 4px 4px 0;
+}
+.bf-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--weiss, #fff);
+  border: 2px solid var(--dunkelgruen, #00663A);
+  padding: 14px 20px;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--dunkelgruen, #00663A);
+  cursor: pointer;
+  border-radius: 4px;
+  margin: 12px 0;
+  width: 100%;
+  text-align: left;
+}
+.bf-toggle-btn:hover {
+  background: #e8f3ec;
+}
+.bf-toggle-btn.bf-an {
+  background: var(--dunkelgruen, #00663A);
+  color: var(--weiss, #fff);
+}
+.bf-toggle-status {
+  display: inline-block;
+  padding: 4px 12px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 3px;
+  font-size: 14px;
+  letter-spacing: 1px;
+  min-width: 50px;
+  text-align: center;
+}
+.bf-toggle-btn.bf-an .bf-toggle-status {
+  background: rgba(255,255,255,0.2);
+}
+.bf-toggle-label {
+  flex: 1;
+}
+.bf-toggle-hinweis {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--grau-dk, #333);
+}
+
+/* ────────────────────────────────────────────────────────────────
+   AKTIV-Stil: alle Anpassungen
+   ──────────────────────────────────────────────────────────────── */
+body.barrierefrei {
+  font-size: 18px; /* +20% Basis */
+}
+
+/* Schriftgrößen-Skalierung 1.4x bis 1.6x */
+body.barrierefrei .eintrag-titel,
+body.barrierefrei .subkat-label,
+body.barrierefrei .kachel-label,
+body.barrierefrei .dropdown-titel {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+body.barrierefrei .eintrag-meta,
+body.barrierefrei .subkat-meta,
+body.barrierefrei .kachel-meta {
+  font-size: 16px;
+  line-height: 1.5;
+}
+body.barrierefrei .dropdown-inhalt,
+body.barrierefrei .dropdown-inhalt p,
+body.barrierefrei .dropdown-inhalt li,
+body.barrierefrei .detail-section p,
+body.barrierefrei .inhalts-seite p,
+body.barrierefrei .inhalts-seite li {
+  font-size: 17px !important;
+  line-height: 1.7 !important;
+}
+body.barrierefrei h1, body.barrierefrei h2, body.barrierefrei h3 {
+  line-height: 1.3;
+}
+body.barrierefrei .intro h1,
+body.barrierefrei .intro .titel {
+  font-size: 26px;
+}
+body.barrierefrei .untertitel {
+  font-size: 16px;
+}
+
+/* Größere Touch-Ziele (mind. 48px hoch) */
+body.barrierefrei .eintrag,
+body.barrierefrei .subkat,
+body.barrierefrei .kachel,
+body.barrierefrei .filter-pill,
+body.barrierefrei .dropdown-header,
+body.barrierefrei .btn-action,
+body.barrierefrei #cookie-akzeptieren,
+body.barrierefrei .nav-zurueck,
+body.barrierefrei .modal-schliessen {
+  min-height: 48px;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+/* Hochkontrast: alle Texte schwarz auf weiß */
+body.barrierefrei {
+  color: #000 !important;
+  background: #fff !important;
+}
+body.barrierefrei .eintrag,
+body.barrierefrei .subkat,
+body.barrierefrei .kachel,
+body.barrierefrei .dropdown,
+body.barrierefrei .detail-section,
+body.barrierefrei .pdf-mobile-karte {
+  background: #fff !important;
+  border: 2px solid #000 !important;
+  color: #000 !important;
+}
+body.barrierefrei .eintrag-titel,
+body.barrierefrei .subkat-label,
+body.barrierefrei .kachel-label,
+body.barrierefrei .dropdown-titel,
+body.barrierefrei .detail-titel,
+body.barrierefrei .sticky-detail-titel,
+body.barrierefrei .intro h1,
+body.barrierefrei .intro .titel,
+body.barrierefrei h1, body.barrierefrei h2, body.barrierefrei h3 {
+  color: #000 !important;
+}
+body.barrierefrei .eintrag-meta,
+body.barrierefrei .subkat-meta,
+body.barrierefrei .kachel-meta,
+body.barrierefrei .untertitel,
+body.barrierefrei .breadcrumb {
+  color: #222 !important;
+}
+
+/* Pillen mit klarem Schwarz-Rahmen */
+body.barrierefrei .filter-pill,
+body.barrierefrei .diff-pill {
+  background: #fff !important;
+  color: #000 !important;
+  border: 2px solid #000 !important;
+}
+body.barrierefrei .filter-pill.aktiv,
+body.barrierefrei .diff-pill.diff-mittel-bg {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+/* Buttons mit klar abgegrenztem Rahmen */
+body.barrierefrei .btn-action,
+body.barrierefrei .btn-pdf-oeffnen,
+body.barrierefrei .btn-pdf-oeffnen-gross,
+body.barrierefrei #cookie-akzeptieren {
+  background: #000 !important;
+  color: #fff !important;
+  border: 3px solid #000 !important;
+  font-weight: 700 !important;
+}
+body.barrierefrei .btn-action:hover,
+body.barrierefrei .btn-pdf-oeffnen:hover,
+body.barrierefrei .btn-pdf-oeffnen-gross:hover,
+body.barrierefrei #cookie-akzeptieren:hover {
+  background: #fff !important;
+  color: #000 !important;
+}
+
+/* Alle Links unterstrichen, gut sichtbare Farbe */
+body.barrierefrei a {
+  color: #003d80 !important;
+  text-decoration: underline !important;
+  text-decoration-thickness: 2px !important;
+  text-underline-offset: 2px !important;
+}
+body.barrierefrei a:hover, body.barrierefrei a:focus {
+  background: #003d80 !important;
+  color: #fff !important;
+}
+
+/* Klare Fokus-Indikatoren für Tastatur-Navigation */
+body.barrierefrei *:focus,
+body.barrierefrei *:focus-visible {
+  outline: 4px solid #ff6600 !important;
+  outline-offset: 2px !important;
+  z-index: 100 !important;
+  position: relative;
+}
+
+/* Reduzierte Animationen */
+body.barrierefrei * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Footer höher und klarer */
+body.barrierefrei .footer,
+body.barrierefrei #app-footer {
+  background: #000 !important;
+  color: #fff !important;
+  padding: 20px !important;
+  font-size: 16px !important;
+}
+body.barrierefrei .footer a,
+body.barrierefrei #app-footer a {
+  color: #fff !important;
+}
+
+/* Sticky-Header mit klarer Trennlinie */
+body.barrierefrei .sticky-region,
+body.barrierefrei .sticky-detail {
+  background: #fff !important;
+  border-bottom: 3px solid #000 !important;
+}
+
+/* Splash und Cookie-Overlay weniger animiert */
+body.barrierefrei #eichhoernchen-svg,
+body.barrierefrei .sprechblase {
+  animation: none !important;
+}
+body.barrierefrei #cookie-overlay {
+  background: rgba(0,0,0,0.85);
+}
+body.barrierefrei #cookie-box {
+  border: 4px solid #000;
+}
+
+/* Modal selbst auch barrierefrei stylen */
+body.barrierefrei #modal-box {
+  border: 4px solid #000;
+}
+body.barrierefrei #modal-titel {
+  color: #000 !important;
+  font-size: 24px;
+}
+body.barrierefrei #modal-inhalt {
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+/* Eintrag-Pfeile größer und sichtbarer */
+body.barrierefrei .eintrag-pfeil,
+body.barrierefrei .subkat-pfeil,
+body.barrierefrei .nav-zurueck::before {
+  font-size: 28px;
+  font-weight: 700;
+  color: #000;
+}
