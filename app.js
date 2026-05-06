@@ -534,7 +534,15 @@ var LISTEN = {
 
   // KUNST & KULTUR
   'kultur-museen': {datenName:'DATA_KULTUR_MUSEEN', titel:'Museen', breadcrumb:'Kunst &amp; Kultur › <strong>Museen</strong>', zurueck:'kategorie/kultur', untertitel:'Sammlungen und Ausstellungen.', detailKey:'museum', renderTyp:'museenInline'},
-  'kultur-veranstaltungen': {datenName:'DATA_KULTUR_VERANSTALTUNGEN', titel:'Kunst & Kultur', breadcrumb:'Kunst &amp; Kultur › <strong>Übersicht</strong>', zurueck:'kategorie/kultur', untertitel:'Aktuelle Termine und Übersicht.', detailKey:'museum', renderTyp:'externalLinks'},
+  'kultur-veranstaltungen': {
+    titel:'Kunst & Kultur',
+    breadcrumb:'Kunst &amp; Kultur › <strong>Übersicht</strong>',
+    zurueck:'kategorie/kultur',
+    untertitel:'Aktuelle Termine und Übersicht von Wir Westerwälder.',
+    renderTyp:'iframe',
+    iframeUrl:'https://wir-westerwaelder.de/kunst-kultur/',
+    iframeTyp:'webseite'
+  },
 
   // REGIONALE PRODUKTE
   'regional-einkaufsfuehrer': {titel:'Regionaler Einkaufsführer Westerwald', breadcrumb:'Regionale Produkte › <strong>Einkaufsführer</strong>', zurueck:'kategorie/regional', untertitel:'Direktvermarkter & Hofläden im Westerwald.', renderTyp:'iframe', iframeUrl:'https://wir-westerwaelder.de/fileadmin/Regionaler_Einkaufsf%C3%BChrer/Download/WW_Einkaufsf%C3%BChrer_2024_RZlow.pdf'},
@@ -1100,7 +1108,7 @@ function termineFilterUI() {
     + pill('datum','heute','Heute')
     + pill('datum','woche','Diese Woche')
     + pill('datum','monat','Dieser Monat')
-    + pill('datum','jahr','Dieses Jahr')
+    + pill('datum','jahr','Aktuelles Jahr')
     + '</div>';
   // Region: in einer Zeile, kompakte Labels
   html += '<div class="filter-gruppe filter-bezirk"><span class="filter-label">📍 Region:</span>'
@@ -2268,24 +2276,46 @@ function renderIframeSeite(ziel, slug, l) {
         + '<div class="spacer"></div>';
       return;
     }
-    // Desktop: iframe direkt einbetten
+    // Desktop: Strategie "Karte + optionaler iframe":
+    //   - Oben immer sichtbar: Karte mit großem "Seite öffnen"-Button.
+    //     Damit hat der User auch dann ein klares Ziel, wenn der iframe
+    //     vom Anbieter via X-Frame-Options blockiert wird.
+    //   - Darunter: Versuch, die Seite eingebettet zu zeigen. Wenn das
+    //     vom Anbieter erlaubt ist, sieht der User zusätzlich die echte
+    //     Vorschau. Wenn nicht, bleibt der iframe-Bereich entweder leer
+    //     oder er wird per Heuristik nach 3.5s ausgeblendet.
+    var iframeId = 'iframe-' + Math.random().toString(36).slice(2);
+    var hostname = iframeUrl.replace(/^https?:\/\//,'').split('/')[0];
+
     ziel.innerHTML =
       '<div class="sticky-region">'
         + navBar(l.zurueck, l.breadcrumb)
         + intro(l.titel, l.untertitel)
-        + '<div class="iframe-aktionen">'
-          + '<a class="btn-action btn-pdf-oeffnen" href="' + iframeUrl + '" target="_blank" rel="noopener">🌐 In neuem Tab öffnen</a>'
-        + '</div>'
       + '</div>'
-      + '<div class="iframe-wrap">'
-        + '<iframe src="' + iframeUrl + '" class="inhalts-iframe" '
+      // Karte oben — immer sichtbar
+      + '<div class="iframe-info-karte">'
+        + '<div class="iframe-info-text">'
+          + '<strong>Inhalt von ' + escapeHtml(hostname) + '</strong>'
+          + '<span class="iframe-info-hinweis">Falls die eingebettete Vorschau unten leer bleibt, kannst du die Seite hier in einem neuen Tab öffnen:</span>'
+        + '</div>'
+        + '<a class="btn-pdf-oeffnen-gross btn-info-karte" href="' + iframeUrl + '" target="_blank" rel="noopener">🌐 Seite öffnen</a>'
+      + '</div>'
+      // iframe-Versuch
+      + '<div class="iframe-wrap iframe-versuch" id="' + iframeId + '-wrap">'
+        + '<div class="iframe-lade-hinweis">Versuche, die Seite einzubetten …</div>'
+        + '<iframe id="' + iframeId + '" src="' + iframeUrl + '" class="inhalts-iframe" '
         + 'allowfullscreen referrerpolicy="no-referrer-when-downgrade" '
         + 'sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"></iframe>'
       + '</div>'
-      + '<div class="iframe-fallback">'
-        + 'Inhalt wird nicht angezeigt? <a href="' + iframeUrl + '" target="_blank" rel="noopener">Direkt öffnen ↗</a>'
-      + '</div>'
       + '<div class="spacer"></div>';
+
+    // Lade-Hinweis nach 3.5s ausblenden, egal ob iframe geladen ist oder nicht
+    setTimeout(function() {
+      var wrap = document.getElementById(iframeId + '-wrap');
+      if (!wrap) return;
+      var hinweis = wrap.querySelector('.iframe-lade-hinweis');
+      if (hinweis) hinweis.style.display = 'none';
+    }, 3500);
     return;
   }
 

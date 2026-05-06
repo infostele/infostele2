@@ -1710,3 +1710,69 @@ body.barrierefrei .nav-zurueck::before {
   font-weight: 700;
   color: #000;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   IFRAME-INFO-KARTE (Desktop, oberhalb des iframe-Versuchs)
+   Immer sichtbar, damit der User auch dann ein Ziel hat,
+   wenn der Anbieter das Embedding via X-Frame-Options blockiert.
+   ════════════════════════════════════════════════════════════════ */
+.iframe-info-karte {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f0f8f4;
+  border-left: 4px solid var(--dunkelgruen, #00663A);
+  padding: 16px 20px;
+  margin: 12px 16px;
+  border-radius: 0 4px 4px 0;
+}
+.iframe-info-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--dunkelgruen, #00663A);
+  font-size: 14px;
+}
+.iframe-info-text strong {
+  font-size: 15px;
+}
+.iframe-info-hinweis {
+  color: var(--grau-dk, #333);
+  font-size: 13px;
+}
+.btn-info-karte {
+  flex-shrink: 0;
+  font-size: 14px !important;
+  padding: 12px 18px !important;
+  letter-spacing: 0 !important;
+}
+.iframe-versuch {
+  position: relative;
+  min-height: 60vh;
+  background: #f5f5f5;
+}
+.iframe-lade-hinweis {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--grau-md, #777);
+  font-size: 14px;
+  background: rgba(255,255,255,0.9);
+  padding: 8px 16px;
+  border-radius: 20px;
+  z-index: 1;
+  pointer-events: none;
+}
+@media (max-width: 600px) {
+  .iframe-info-karte {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .btn-info-karte {
+    width: 100%;
+    text-align: center;
+  }
+}
