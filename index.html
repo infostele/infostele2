@@ -6,6 +6,63 @@
 <meta name="theme-color" content="#88C340">
 <title>Guck ma, Westerwald</title>
 <link rel="stylesheet" href="style.css">
+<style>
+/* ════════════════════════════════════════════════════════════════
+   PDF-COVER-KARTE (Mobile: Cover-Bild mit "Klicken"-Button-Overlay)
+   Für: Einkaufsführer, Naturgenuss Erzeuger/Broschüre/Saisonprodukte
+   ════════════════════════════════════════════════════════════════ */
+.pdf-cover-wrap {
+  margin: 16px auto 24px;
+  max-width: 480px;
+  padding: 0 16px;
+}
+.pdf-cover-link {
+  display: block;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18),
+              0 1px 4px rgba(0, 0, 0, 0.12);
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.pdf-cover-link:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+.pdf-cover-bild {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.pdf-cover-button {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  background: #1d6b3e;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95em;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45),
+              0 2px 6px rgba(0, 0, 0, 0.30);
+  transition: background 0.15s ease;
+}
+.pdf-cover-link:hover .pdf-cover-button {
+  background: #145130;
+}
+.pdf-cover-meta {
+  font-size: 0.85em;
+  color: #666;
+  text-align: center;
+  margin: 12px 0 0;
+}
+</style>
 </head>
 <body>
 
