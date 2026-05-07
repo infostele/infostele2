@@ -545,13 +545,13 @@ var LISTEN = {
   },
 
   // REGIONALE PRODUKTE
-  'regional-einkaufsfuehrer': {titel:'Regionaler Einkaufsführer Westerwald', breadcrumb:'Regionale Produkte › <strong>Einkaufsführer</strong>', zurueck:'kategorie/regional', untertitel:'Direktvermarkter & Hofläden im Westerwald.', renderTyp:'iframe', iframeUrl:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/einkaufsfuehrer.pdf'},
+  'regional-einkaufsfuehrer': {titel:'Regionaler Einkaufsführer Westerwald', breadcrumb:'Regionale Produkte › <strong>Einkaufsführer</strong>', zurueck:'kategorie/regional', untertitel:'Direktvermarkter & Hofläden im Westerwald.', renderTyp:'iframe', iframeUrl:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/einkaufsfuehrer.pdf', coverBild:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/startbild_einkaufsfuehrer.jpg'},
   'regional-westerwald-box':  {titel:'Westerwald Box',  breadcrumb:'Regionale Produkte › <strong>Westerwald Box</strong>',  zurueck:'kategorie/regional', untertitel:'Der Westerwald als Geschenkbox.', renderTyp:'inhaltSeite', inhaltKey:'westerwaldBox'},
   'regional-westerwaelder-ernte': {titel:'Westerwälder Ernte', breadcrumb:'Regionale Produkte › <strong>Westerwälder Ernte</strong>', zurueck:'kategorie/regional', untertitel:'Saisonkalender und regionale Erzeuger.', renderTyp:'inhaltSeite', inhaltKey:'westerwaelderErnte'},
   'regional-naturgenuss':     {linkData:'naturgenuss',     titel:'Naturgenuss Partner', breadcrumb:'Regionale Produkte › <strong>Naturgenuss</strong>', zurueck:'kategorie/regional', untertitel:'Erzeuger & Produkte aus dem Westerwald.', renderTyp:'naturgenussLinks'},
-  'regional-naturgenuss-erzeuger': {titel:'Naturgenuss Partner – Erzeuger & Produkte', breadcrumb:'Regionale Produkte › Naturgenuss › <strong>Erzeuger & Produkte</strong>', zurueck:'liste/regional-naturgenuss', untertitel:'PDF-Übersicht 05/2025.', renderTyp:'iframe', iframeUrl:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/naturgenusspartner.pdf'},
-  'regional-naturgenuss-broschuere': {titel:'Naturgenuss Broschüre', breadcrumb:'Regionale Produkte › Naturgenuss › <strong>Broschüre</strong>', zurueck:'liste/regional-naturgenuss', untertitel:'Magazin 2022.', renderTyp:'iframe', iframeUrl:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/naturgenussmagazin.pdf'},
-  'regional-naturgenuss-saisonprodukte': {titel:'Naturgenuss Saisonprodukte', breadcrumb:'Regionale Produkte › Naturgenuss › <strong>Saisonprodukte</strong>', zurueck:'liste/regional-naturgenuss', untertitel:'Saisonale Produkte und Rezepte.', renderTyp:'iframe', iframeUrl:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/naturgenussrezepte.pdf'},
+  'regional-naturgenuss-erzeuger': {titel:'Naturgenuss Partner – Erzeuger & Produkte', breadcrumb:'Regionale Produkte › Naturgenuss › <strong>Erzeuger & Produkte</strong>', zurueck:'liste/regional-naturgenuss', untertitel:'PDF-Übersicht 05/2025.', renderTyp:'iframe', iframeUrl:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/naturgenusspartner.pdf', coverBild:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/startbild_naturgenusspartner.jpg'},
+  'regional-naturgenuss-broschuere': {titel:'Naturgenuss Broschüre', breadcrumb:'Regionale Produkte › Naturgenuss › <strong>Broschüre</strong>', zurueck:'liste/regional-naturgenuss', untertitel:'Magazin 2022.', renderTyp:'iframe', iframeUrl:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/naturgenussmagazin.pdf', coverBild:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/startbild_naturgenussmagazin.jpg'},
+  'regional-naturgenuss-saisonprodukte': {titel:'Naturgenuss Saisonprodukte', breadcrumb:'Regionale Produkte › Naturgenuss › <strong>Saisonprodukte</strong>', zurueck:'liste/regional-naturgenuss', untertitel:'Saisonale Produkte und Rezepte.', renderTyp:'iframe', iframeUrl:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/naturgenussrezepte.pdf', coverBild:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/startbild_naturgenussrezepte.jpg'},
 
   // MOBILITÄT & VERKEHR
   'mobilitaet-bahn-bus':      {linkData:'bahn-bus',      titel:'Bahn & Bus', breadcrumb:'Mobilität &amp; Verkehr › <strong>Bahn & Bus</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Fahrpläne und ÖPNV-Verbindungen.', renderTyp:'subLinks'},
@@ -2322,6 +2322,24 @@ function renderIframeSeite(ziel, slug, l) {
 
   // ── PDF (default) ───────────────────────────────────────────────
   if (istMobil) {
+    // Wenn Cover-Bild definiert: zeige es großflächig mit "Klicken"-Button-Overlay.
+    // Sonst Fallback auf die alte Icon-Karte.
+    if (l.coverBild) {
+      ziel.innerHTML =
+        '<div class="sticky-region">'
+          + navBar(l.zurueck, l.breadcrumb)
+          + intro(l.titel, l.untertitel)
+        + '</div>'
+        + '<div class="pdf-cover-wrap">'
+          + '<a class="pdf-cover-link" href="' + iframeUrl + '" target="_blank" rel="noopener" aria-label="' + escapeHtml(l.titel) + ' als PDF öffnen">'
+            + '<img class="pdf-cover-bild" src="' + l.coverBild + '" alt="' + escapeHtml(l.titel) + '" loading="lazy">'
+            + '<span class="pdf-cover-button">▶ Klicken</span>'
+          + '</a>'
+          + '<p class="pdf-cover-meta">PDF in neuem Tab öffnen</p>'
+        + '</div>'
+        + '<div class="spacer"></div>';
+      return;
+    }
     ziel.innerHTML =
       '<div class="sticky-region">'
         + navBar(l.zurueck, l.breadcrumb)
