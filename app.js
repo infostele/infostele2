@@ -2321,45 +2321,15 @@ function renderIframeSeite(ziel, slug, l) {
   }
 
   // ── PDF (default) ───────────────────────────────────────────────
-  if (istMobil) {
-    // Wenn Cover-Bild definiert: zeige es großflächig mit "Klicken"-Button-Overlay.
-    // Sonst Fallback auf die alte Icon-Karte.
-    if (l.coverBild) {
-      ziel.innerHTML =
-        '<div class="sticky-region">'
-          + navBar(l.zurueck, l.breadcrumb)
-          + intro(l.titel, l.untertitel)
-        + '</div>'
-        + '<div class="pdf-cover-wrap">'
-          + '<a class="pdf-cover-link" href="' + iframeUrl + '" target="_blank" rel="noopener" aria-label="' + escapeHtml(l.titel) + ' als PDF öffnen">'
-            + '<img class="pdf-cover-bild" src="' + l.coverBild + '" alt="' + escapeHtml(l.titel) + '" loading="lazy">'
-            + '<span class="pdf-cover-button">▶ Klicken</span>'
-          + '</a>'
-          + '<p class="pdf-cover-meta">PDF in neuem Tab öffnen</p>'
-        + '</div>'
-        + '<div class="spacer"></div>';
-      return;
-    }
-    ziel.innerHTML =
-      '<div class="sticky-region">'
-        + navBar(l.zurueck, l.breadcrumb)
-        + intro(l.titel, l.untertitel)
-      + '</div>'
-      + '<div class="pdf-mobile-karte">'
-        + '<div class="pdf-mobile-icon">📄</div>'
-        + '<div class="pdf-mobile-titel">' + escapeHtml(l.titel) + '</div>'
-        + '<p class="pdf-mobile-hinweis">Auf dem Smartphone öffnet sich das PDF am besten direkt im PDF-Viewer deines Geräts.</p>'
-        + '<a class="btn-pdf-oeffnen-gross" href="' + iframeUrl + '" target="_blank" rel="noopener">📄 PDF jetzt öffnen</a>'
-        + '<p class="pdf-mobile-meta"><a href="' + iframeUrl + '" target="_blank" rel="noopener">' + escapeHtml(iframeUrl.replace(/^https?:\/\//,'').replace(/\/[^/]*$/, '/…')) + '</a></p>'
-      + '</div>'
-      + '<div class="spacer"></div>';
-    return;
-  }
-
-  // Desktop PDF: iframe via Google-Docs-Viewer (Originalserver setzt
-  // X-Frame-Options, also kein direktes Einbetten möglich).
+  // Einheitlich auf Mobile + Desktop: Google-Docs-Viewer als iFrame.
+  // Originalserver liefert PDFs zwar mit korrektem Content-Type aus
+  // (jsDelivr), aber der Google-Viewer rendert auf allen Geräten
+  // konsistent mit Pagination/Zoom-Controls. Über dem iFrame steht
+  // immer ein "In neuem Tab öffnen"-Button als Fallback, falls die
+  // Vorschau auf einem Gerät nicht lädt (z. B. iOS Safari).
   var safe = encodeURIComponent(iframeUrl);
   var viewerUrl = 'https://docs.google.com/viewer?url=' + safe + '&embedded=true';
+  var iframeId = 'pdfvw-' + Math.random().toString(36).slice(2);
   ziel.innerHTML =
     '<div class="sticky-region">'
       + navBar(l.zurueck, l.breadcrumb)
@@ -2368,14 +2338,21 @@ function renderIframeSeite(ziel, slug, l) {
         + '<a class="btn-action btn-pdf-oeffnen" href="' + iframeUrl + '" target="_blank" rel="noopener">📄 PDF in neuem Tab öffnen</a>'
       + '</div>'
     + '</div>'
-    + '<div class="iframe-wrap">'
-      + '<iframe src="' + viewerUrl + '" class="inhalts-iframe" '
-      + 'allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>'
+    + '<div class="iframe-wrap iframe-wrap-pdf" id="' + iframeId + '-wrap">'
+      + '<div class="iframe-lade-hinweis">PDF wird geladen…</div>'
+      + '<iframe id="' + iframeId + '" src="' + viewerUrl + '" class="inhalts-iframe inhalts-iframe-pdf" '
+      + 'allowfullscreen referrerpolicy="no-referrer-when-downgrade" '
+      + 'onload="this.parentNode.classList.add(\'iframe-geladen\')"></iframe>'
     + '</div>'
     + '<div class="iframe-fallback">'
       + 'PDF wird nicht angezeigt? <a href="' + iframeUrl + '" target="_blank" rel="noopener">Direkt öffnen ↗</a>'
     + '</div>'
     + '<div class="spacer"></div>';
+  // Lade-Hinweis nach 6s ausblenden, falls onload nicht feuert
+  setTimeout(function() {
+    var wrap = document.getElementById(iframeId + '-wrap');
+    if (wrap) wrap.classList.add('iframe-geladen');
+  }, 6000);
 }
 
 // ════════════════════════════════════════════════════════════════
