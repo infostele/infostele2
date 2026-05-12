@@ -428,7 +428,7 @@ var KATEGORIEN = {
     titel:'Mobilität & Verkehr', untertitel:'So bist du in der Region unterwegs.',
     subs:[
       {slug:'bahn-bus',     label:'Bahn & Bus',    meta:'ÖPNV-Verbindungen',       icon:ICONS.bus},
-      {slug:'mitfahrbank',  label:'Mitfahrerbänke', meta:'Standorte in der Region', icon:ICONS.markierung},
+      {slug:'mitfahrbank',  label:'Westerwälder Mitfahrerbänke', meta:'Standorte in der Region', icon:ICONS.markierung},
       {slug:'fahrgemeinschaften', label:'Fahrgemeinschaften', meta:'ADAC Pendlernetz',    icon:ICONS.info}
     ]
   }
@@ -555,31 +555,31 @@ var LISTEN = {
 
   // MOBILITÄT & VERKEHR
   'mobilitaet-bahn-bus':      {linkData:'bahn-bus',      titel:'Bahn & Bus', breadcrumb:'Mobilität &amp; Verkehr › <strong>Bahn & Bus</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Fahrpläne und ÖPNV-Verbindungen.', renderTyp:'subLinks'},
-  'mobilitaet-mitfahrbank':   {linkData:'mitfahrbank',   titel:'Mitfahrerbänke', breadcrumb:'Mobilität &amp; Verkehr › <strong>Mitfahrerbänke</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Standorte in der Region.', renderTyp:'subLinks'},
+  'mobilitaet-mitfahrbank':   {titel:'Westerwälder Mitfahrerbänke', breadcrumb:'Mobilität &amp; Verkehr › <strong>Westerwälder Mitfahrerbänke</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Standorte in der Region.', renderTyp:'iframe', iframeUrl:'https://mitfahrerbank-ww.de/', iframeTyp:'webseite'},
   'mobilitaet-fahrgemeinschaften': {linkData:'fahrgemeinschaften', titel:'Fahrgemeinschaften', breadcrumb:'Mobilität &amp; Verkehr › <strong>Fahrgemeinschaften</strong>', zurueck:'kategorie/mobilitaet', untertitel:'ADAC Pendlernetz – App für Mitfahrgelegenheiten.', renderTyp:'subLinks'},
 
   // Eingebettete Fahrplan-Anbieter (über iframe statt externer Link)
   'mobilitaet-bahn-bus-westerwaldbus': {
-    titel:'Westerwaldbus (Kreis AK)',
-    breadcrumb:'Mobilität &amp; Verkehr › Bahn & Bus › <strong>Westerwaldbus</strong>',
+    titel:'Landkreis Altenkirchen',
+    breadcrumb:'Mobilität &amp; Verkehr › Bahn & Bus › <strong>Landkreis Altenkirchen</strong>',
     zurueck:'liste/mobilitaet-bahn-bus',
     untertitel:'Fahrpläne der Verkehrsbetriebe Westerwaldkreis & Altenkirchen.',
     renderTyp:'iframe',
-    iframeUrl:'https://www.westerwaldbus.de/fahrplaene',
+    iframeUrl:'https://www.westerwaldbus.de/#fahrplanauskunft',
     iframeTyp:'webseite'
   },
   'mobilitaet-bahn-bus-oepnv-ww': {
-    titel:'ÖPNV Westerwaldkreis',
-    breadcrumb:'Mobilität &amp; Verkehr › Bahn & Bus › <strong>ÖPNV Westerwaldkreis</strong>',
+    titel:'Westerwaldkreis',
+    breadcrumb:'Mobilität &amp; Verkehr › Bahn & Bus › <strong>Westerwaldkreis</strong>',
     zurueck:'liste/mobilitaet-bahn-bus',
-    untertitel:'Aktuelle Linien und Fahrpläne im Westerwaldkreis.',
+    untertitel:'Fahrpläne und Verbindungen im Westerwaldkreis.',
     renderTyp:'iframe',
-    iframeUrl:'https://www.westerwaldkreis.de/oepnv.html',
+    iframeUrl:'https://www.vrminfo.de/fahrplanauskunft/',
     iframeTyp:'webseite'
   },
   'mobilitaet-bahn-bus-vrm': {
-    titel:'VRM Fahrplanauskunft',
-    breadcrumb:'Mobilität &amp; Verkehr › Bahn & Bus › <strong>VRM Fahrplanauskunft</strong>',
+    titel:'Landkreis Neuwied',
+    breadcrumb:'Mobilität &amp; Verkehr › Bahn & Bus › <strong>Landkreis Neuwied</strong>',
     zurueck:'liste/mobilitaet-bahn-bus',
     untertitel:'Verkehrsverbund Rhein-Mosel: Fahrpläne und Verbindungen.',
     renderTyp:'iframe',
@@ -596,16 +596,15 @@ var SUB_LINKS = {
   'westerwaelder-ernte':   { lookup: 'regional', name: 'Westerwälder Ernte' },
   'naturgenuss':           { lookup: 'regional', name: 'Naturgenuss Partner' },
   // Mobilität & Verkehr (aus DATA_MOBILITAET_VERKEHR.subs)
-  'bahn-bus':              { lookup: 'mobilitaet', names: ['Westerwaldbus (Kreis AK)', 'ÖPNV Westerwaldkreis', 'VRM Fahrplanauskunft'] },
-  'mitfahrbank':           { lookup: 'mobilitaet', name: 'Mitfahrerbänke' },
+  'bahn-bus':              { lookup: 'mobilitaet', names: ['Landkreis Altenkirchen', 'Westerwaldkreis', 'Landkreis Neuwied'] },
   'fahrgemeinschaften':    { lookup: 'mobilitaet', name: 'ADAC Pendlernetz App' }
 };
 
 // Mapping: Sub-Name → interne App-Route (für iframe-Anzeige statt externen Link)
 var SUB_INTERNAL_ROUTES = {
-  'Westerwaldbus (Kreis AK)':  'liste/mobilitaet-bahn-bus-westerwaldbus',
-  'ÖPNV Westerwaldkreis':      'liste/mobilitaet-bahn-bus-oepnv-ww',
-  'VRM Fahrplanauskunft':      'liste/mobilitaet-bahn-bus-vrm'
+  'Landkreis Altenkirchen':  'liste/mobilitaet-bahn-bus-westerwaldbus',
+  'Westerwaldkreis':         'liste/mobilitaet-bahn-bus-oepnv-ww',
+  'Landkreis Neuwied':       'liste/mobilitaet-bahn-bus-vrm'
 };
 
 var WANDER_DATEN = {
