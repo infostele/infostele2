@@ -1257,6 +1257,33 @@ function renderTermine(ziel, slug, l) {
   TERMIN_FILTER = { datum: 'alle', bezirk: 'alle', kosten: 'alle', kids: 'alle' };
   window._aktuelleTermine = { slug: slug, info: l };
 
+  // Einmaliges Deduplizieren bei erstem Aufruf — schützt vor Mehrfach-Laden
+  // einzelner Datendateien oder doppelt eingetragenen Events in der Quelle.
+  // Schlüssel: sourceUrl (falls vorhanden), sonst titel|datumIso|zeit.
+  if (window[l.datenName] && !window['__dedup_' + l.datenName]) {
+    var roh = window[l.datenName];
+    var seen = {};
+    var dedup = [];
+    var doppelt = 0;
+    for (var di = 0; di < roh.length; di++) {
+      var ev = roh[di];
+      var key;
+      if (ev.sourceUrl) {
+        key = 'u:' + String(ev.sourceUrl).trim().toLowerCase();
+      } else {
+        key = 't:' + (ev.titel||'').trim().toLowerCase() + '|' + (ev.datumIso||'') + '|' + (ev.zeit||'');
+      }
+      if (seen[key]) { doppelt++; continue; }
+      seen[key] = true;
+      dedup.push(ev);
+    }
+    if (doppelt > 0) {
+      console.log('[Veranstaltungen Dedup] ' + doppelt + ' Duplikate aus ' + l.datenName + ' entfernt (von ' + roh.length + ' → ' + dedup.length + ').');
+      window[l.datenName] = dedup;
+    }
+    window['__dedup_' + l.datenName] = true;
+  }
+
   var rohdaten = window[l.datenName] || [];
 
   if (!rohdaten.length) {

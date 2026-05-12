@@ -5,6 +5,13 @@
    ════════════════════════════════════════════════════════════════ */
 
 (function() {
+  // Idempotenz: nicht doppelt registrieren, auch bei Mehrfach-Laden
+  if (window.__WW_EVENTS_NEU_LOADED__) {
+    console.warn("[Veranstaltungen NEU] Datei wurde mehrfach geladen — zweiter Load übersprungen.");
+    return;
+  }
+  window.__WW_EVENTS_NEU_LOADED__ = true;
+
   var neueEvents = [
     {"titel": "Ausstellung \"Die Bauhaus Keramikklasse\"", "datumIso": "2025-10-18", "quelle": "event", "datumBisIso": "2026-06-07", "zeit": "11:00 – 18:00 Uhr", "bezirk": "WW", "beschreibung": "Diese Ausstellung erinnert an die besondere Keramikklasse des Bauhauses. Zugleich vermittelt sie einen Eindruck von der keramischen Lehre seinerzeit und stellt auch die bisher unbekannten Beziehungen zur Keramischen Fachschule in Höhr dar.", "ort": "Höhr-Grenzhausen", "adresse": "Lindenstraße 13", "plzOrt": "56203 Höhr-Grenzhausen", "veranstalter": "Keramikmuseum Westerwald", "telefon": "02624946010", "email": "kontakt@keramikmuseum.de", "website": "https://www.keramikmuseum.de/", "sourceUrl": "https://wir-westerwaelder.de/kunst-kultur/ausstellung-die-bauhaus-keramikklasse/", "kostenfrei": true, "fuerKids": true},
     {"titel": "Doris Lenz: \"KINDSEIN – SPURENSUCHE\"", "datumIso": "2026-04-25", "quelle": "event", "datumBisIso": "2026-06-14", "zeit": "15:00 – 17:00 Uhr", "bezirk": "NR", "beschreibung": "Am Samstag, 25. April 2026, um 15 Uhr eröffnen Landrat Achim Hallerbach und Museumsleiterin Jennifer Stein die neue Sonderausstellung „Kindsein – Spurensuche“ der Rheinbreitbacher Künstlerin Doris Lenz im RoentgenMuseum Neuwied.", "ort": "Neuwied", "adresse": "Raiffeisenplatz 1a", "plzOrt": "56567 Neuwied", "veranstalter": "Roentgen-Museum Neuwied", "telefon": "02631803379", "email": "roentgenmuseum@kreis-neuwied.de", "website": "https://www.roentgen-museum-neuwied.de", "sourceUrl": "https://wir-westerwaelder.de/kunst-kultur/doris-lenz-kindsein-spurensuche/", "kostenfrei": true},
@@ -122,7 +129,31 @@
     {"titel": "Die BigBand der Bundeswehr mit Cosmo Klein", "datumIso": "2026-12-16", "quelle": "event", "zeit": "20:00 Uhr", "bezirk": "AK", "beschreibung": "Die Big Band der Bundeswehr ist eine ausgezeichnete Wahl. Man erlebt mit diesem Show- und Unterhaltungsorchester - in der vollen Besetzung einer klassischen Big Band - nicht nur erstklassige Solisten, musikalisch- technische Perfektion und überschäumende Spielfreude.....", "ort": "Altenkirchen", "adresse": "Quengelstraße 7", "plzOrt": "57610 Altenkirchen", "veranstalter": "Kultur-/Jugendkulturbüro Haus Felsenkeller e.V.", "telefon": "026817118", "email": "buero@kultur-felsenkeller.de", "website": "https://kultur-felsenkeller.de/de/m1-programm.html", "sourceUrl": "https://wir-westerwaelder.de/kunst-kultur/die-bigband-der-bundeswehr-mit-cosmo-klein/", "kostenfrei": false, "kosten": "29,00 €", "beachten": "Mit Sänger und Songwriter Cosmo Klein"}
   ];
 
-  // An bestehendes DATA_VERANSTALTUNGEN_ALLE anhängen (oder neu anlegen)
+  // Bestehende Liste initialisieren falls nicht vorhanden
   window.DATA_VERANSTALTUNGEN_ALLE = window.DATA_VERANSTALTUNGEN_ALLE || [];
-  window.DATA_VERANSTALTUNGEN_ALLE = window.DATA_VERANSTALTUNGEN_ALLE.concat(neueEvents);
+  var bestand = window.DATA_VERANSTALTUNGEN_ALLE;
+  var bestandVor = bestand.length;
+
+  // Schlüssel zum Identifizieren von Duplikaten: sourceUrl (falls vorhanden)
+  // sonst titel|datumIso. Vergleiche gegen bestehende Liste + bereits eingefügte neue.
+  function machSchluessel(e) {
+    if (e.sourceUrl) return "url:" + e.sourceUrl.trim().toLowerCase();
+    return "td:" + (e.titel||"").trim().toLowerCase() + "|" + (e.datumIso||"");
+  }
+
+  var bekannt = {};
+  for (var i = 0; i < bestand.length; i++) {
+    bekannt[machSchluessel(bestand[i])] = true;
+  }
+
+  var hinzugefuegt = 0, uebersprungen = 0;
+  for (var j = 0; j < neueEvents.length; j++) {
+    var k = machSchluessel(neueEvents[j]);
+    if (bekannt[k]) { uebersprungen++; continue; }
+    bekannt[k] = true;
+    bestand.push(neueEvents[j]);
+    hinzugefuegt++;
+  }
+
+  console.log("[Veranstaltungen NEU] Bestand vorher: " + bestandVor + ", neue Datei: " + neueEvents.length + ", hinzugefügt: " + hinzugefuegt + ", übersprungen (Duplikat): " + uebersprungen + ", Bestand nachher: " + bestand.length);
 })();
