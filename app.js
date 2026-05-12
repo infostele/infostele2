@@ -554,8 +554,8 @@ var LISTEN = {
   'regional-naturgenuss-saisonprodukte': {titel:'Naturgenuss Saisonprodukte', breadcrumb:'Regionale Produkte › Naturgenuss › <strong>Saisonprodukte</strong>', zurueck:'liste/regional-naturgenuss', untertitel:'Saisonale Produkte und Rezepte.', renderTyp:'iframe', iframeUrl:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/naturgenussrezepte.pdf', coverBild:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/startbild_naturgenussrezepte.jpg'},
 
   // MOBILITÄT & VERKEHR
-  'mobilitaet-bahn-bus':      {linkData:'bahn-bus',      titel:'Bahn & Bus', breadcrumb:'Mobilität &amp; Verkehr › <strong>Bahn & Bus</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Fahrpläne und ÖPNV-Verbindungen.', renderTyp:'subLinks'},
-  'mobilitaet-mitfahrbank':   {titel:'Westerwälder Mitfahrerbänke', breadcrumb:'Mobilität &amp; Verkehr › <strong>Westerwälder Mitfahrerbänke</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Standorte in der Region.', renderTyp:'iframe', iframeUrl:'https://mitfahrerbank-ww.de/', iframeTyp:'webseite'},
+  'mobilitaet-bahn-bus':      {titel:'Bahn & Bus', breadcrumb:'Mobilität &amp; Verkehr › <strong>Bahn & Bus</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Fahrpläne und ÖPNV-Verbindungen.', renderTyp:'bahnBusLinks'},
+  'mobilitaet-mitfahrbank':   {titel:'Westerwälder Mitfahrerbänke', breadcrumb:'Mobilität &amp; Verkehr › <strong>Westerwälder Mitfahrerbänke</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Standorte in der Region.', renderTyp:'iframe', iframeUrl:'https://mitfahrerbank-ww.de/', iframeTyp:'webseite', iframeBlockiert:true},
   'mobilitaet-fahrgemeinschaften': {linkData:'fahrgemeinschaften', titel:'Fahrgemeinschaften', breadcrumb:'Mobilität &amp; Verkehr › <strong>Fahrgemeinschaften</strong>', zurueck:'kategorie/mobilitaet', untertitel:'ADAC Pendlernetz – App für Mitfahrgelegenheiten.', renderTyp:'subLinks'},
 
   // Eingebettete Fahrplan-Anbieter (über iframe statt externer Link)
@@ -1278,6 +1278,7 @@ function renderDatenListe(ziel, slug, l) {
   if (l.renderTyp === 'iframe')        { renderIframeSeite(ziel, slug, l); return; }
   if (l.renderTyp === 'museenInline')  { renderMuseenInline(ziel, slug, l); return; }
   if (l.renderTyp === 'naturgenussLinks') { renderNaturgenussLinks(ziel, slug, l); return; }
+  if (l.renderTyp === 'bahnBusLinks')     { renderBahnBusLinks(ziel, slug, l); return; }
 
   // STANDARD: Ausflugsziele, Badeseen, Unterkünfte etc.
   var daten = window[l.datenName] || [];
@@ -2257,6 +2258,26 @@ function renderIframeSeite(ziel, slug, l) {
 
   // ── WEBSEITE ────────────────────────────────────────────────────
   if (iframeTyp === 'webseite') {
+    // Wenn die Seite per X-Frame-Options das Einbetten verbietet,
+    // wird kein iframe-Versuch gemacht. Stattdessen nur die Karte
+    // mit deutlichem "Seite öffnen"-Button.
+    if (l.iframeBlockiert) {
+      var hostB = iframeUrl.replace(/^https?:\/\//,'').split('/')[0];
+      ziel.innerHTML =
+        '<div class="sticky-region">'
+          + navBar(l.zurueck, l.breadcrumb)
+          + intro(l.titel, l.untertitel)
+        + '</div>'
+        + '<div class="pdf-mobile-karte">'
+          + '<div class="pdf-mobile-icon">🌐</div>'
+          + '<div class="pdf-mobile-titel">' + escapeHtml(l.titel) + '</div>'
+          + '<p class="pdf-mobile-hinweis">Diese Webseite erlaubt keine direkte Einbettung. Öffne sie in einem neuen Tab.</p>'
+          + '<a class="btn-pdf-oeffnen-gross" href="' + iframeUrl + '" target="_blank" rel="noopener">🌐 Seite jetzt öffnen</a>'
+          + '<p class="pdf-mobile-meta">Inhalt von <a href="' + iframeUrl + '" target="_blank" rel="noopener">' + escapeHtml(hostB) + '</a></p>'
+        + '</div>'
+        + '<div class="spacer"></div>';
+      return;
+    }
     if (istMobil) {
       // Mobile: schöne Karte mit "In neuem Tab öffnen"-Button.
       // Externe Web-Apps wie westerwald.info sind im iframe auf Mobile
@@ -2394,6 +2415,35 @@ function renderNaturgenussLinks(ziel, slug, l) {
     {label:'Erzeuger & Produkte (PDF, 2025)',  url:'#liste/regional-naturgenuss-erzeuger',  meta:'Übersicht aller Naturgenuss-Partner'},
     {label:'Naturgenuss Broschüre (PDF, 2022)', url:'#liste/regional-naturgenuss-broschuere', meta:'Magazin der Naturgenuss-Initiative'},
     {label:'Naturgenuss Saisonprodukte (PDF)',  url:'#liste/regional-naturgenuss-saisonprodukte', meta:'Saisonale Produkte und Rezepte'}
+  ];
+  var items = links.map(function(lnk) {
+    return '<a class="eintrag" href="' + lnk.url + '">'
+      + '<div class="eintrag-text">'
+        + '<div class="eintrag-titel">' + escapeHtml(lnk.label) + '</div>'
+        + '<div class="eintrag-meta">' + escapeHtml(lnk.meta) + '</div>'
+      + '</div>'
+      + '<div class="eintrag-pfeil">&rsaquo;</div>'
+    + '</a>';
+  }).join('');
+  ziel.innerHTML =
+    '<div class="sticky-region">'
+      + navBar(l.zurueck, l.breadcrumb)
+      + intro(l.titel, l.untertitel)
+    + '</div>'
+    + '<div class="liste linklist">' + items + '</div>'
+    + '<div class="spacer"></div>';
+}
+
+// ════════════════════════════════════════════════════════════════
+// BAHN & BUS LINKS (drei Landkreise mit eigenen Fahrplan-iframes)
+// Hardcoded statt aus DATA_MOBILITAET_VERKEHR, damit unabhängig von
+// externer Datenquelle.
+// ════════════════════════════════════════════════════════════════
+function renderBahnBusLinks(ziel, slug, l) {
+  var links = [
+    {label:'Landkreis Altenkirchen', url:'#liste/mobilitaet-bahn-bus-westerwaldbus', meta:'Fahrplanauskunft Westerwaldbus'},
+    {label:'Westerwaldkreis',        url:'#liste/mobilitaet-bahn-bus-oepnv-ww',      meta:'Fahrplanauskunft VRM'},
+    {label:'Landkreis Neuwied',      url:'#liste/mobilitaet-bahn-bus-vrm',           meta:'Fahrplanauskunft VRM'}
   ];
   var items = links.map(function(lnk) {
     return '<a class="eintrag" href="' + lnk.url + '">'
