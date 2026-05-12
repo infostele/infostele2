@@ -4,6 +4,19 @@
 
 'use strict';
 
+// ════════════════════════════════════════════════════════════════
+// CLOUDFLARE WORKER PROXY (für Seiten mit X-Frame-Options)
+// Hier deine Worker-URL eintragen (ohne /?url=...), Beispiel:
+//   var WW_PROXY = 'https://westerwald-proxy.dein-name.workers.dev';
+// Solange leer ('') zeigt die App eine "Seite öffnen"-Karte als
+// Fallback für blockierte Seiten.
+// ════════════════════════════════════════════════════════════════
+var WW_PROXY = '';
+function ggfProxy(url) {
+  if (!WW_PROXY) return null;
+  return WW_PROXY.replace(/\/$/, '') + '/?url=' + encodeURIComponent(url);
+}
+
 window.addEventListener('DOMContentLoaded', function() {
   initSplash();
   initCookieGate();
@@ -428,7 +441,7 @@ var KATEGORIEN = {
     titel:'Mobilität & Verkehr', untertitel:'So bist du in der Region unterwegs.',
     subs:[
       {slug:'bahn-bus',     label:'Bahn & Bus',    meta:'ÖPNV-Verbindungen',       icon:ICONS.bus},
-      {slug:'mitfahrbank',  label:'Westerwälder Mitfahrerbänke', meta:'Standorte in der Region', icon:ICONS.markierung},
+      {slug:'mitfahrbank',  label:'Westerwälder Mitfahrerbänke', meta:'Standorte in der Region', icon:ICONS.markierung, externalUrl:'https://mitfahrerbank-ww.de/'},
       {slug:'fahrgemeinschaften', label:'Fahrgemeinschaften', meta:'ADAC Pendlernetz',    icon:ICONS.info}
     ]
   }
@@ -438,6 +451,17 @@ function renderKategorie(ziel, slug) {
   var kat = KATEGORIEN[slug];
   if (!kat) { renderHome(ziel); return; }
   var subsHTML = kat.subs.map(function(s) {
+    // Externer Link → in neuem Tab öffnen (statt interner Navigation)
+    if (s.externalUrl) {
+      return '<a class="subkat" href="' + s.externalUrl + '" target="_blank" rel="noopener">'
+        + '<div class="subkat-icon">' + s.icon + '</div>'
+        + '<div class="subkat-text">'
+          + '<div class="subkat-label">' + s.label + '</div>'
+          + '<div class="subkat-meta">' + s.meta + '</div>'
+        + '</div>'
+        + '<div class="subkat-pfeil">↗</div>'
+      + '</a>';
+    }
     return '<button class="subkat" onclick="navigateTo(\'liste/' + slug + '-' + s.slug + '\')">'
       + '<div class="subkat-icon">' + s.icon + '</div>'
       + '<div class="subkat-text">'
@@ -554,8 +578,8 @@ var LISTEN = {
   'regional-naturgenuss-saisonprodukte': {titel:'Naturgenuss Saisonprodukte', breadcrumb:'Regionale Produkte › Naturgenuss › <strong>Saisonprodukte</strong>', zurueck:'liste/regional-naturgenuss', untertitel:'Saisonale Produkte und Rezepte.', renderTyp:'iframe', iframeUrl:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/naturgenussrezepte.pdf', coverBild:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/startbild_naturgenussrezepte.jpg'},
 
   // MOBILITÄT & VERKEHR
-  'mobilitaet-bahn-bus':      {titel:'Bahn & Bus', breadcrumb:'Mobilität &amp; Verkehr › <strong>Bahn & Bus</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Fahrpläne und ÖPNV-Verbindungen.', renderTyp:'bahnBusLinks'},
-  'mobilitaet-mitfahrbank':   {titel:'Westerwälder Mitfahrerbänke', breadcrumb:'Mobilität &amp; Verkehr › <strong>Westerwälder Mitfahrerbänke</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Standorte in der Region.', renderTyp:'iframe', iframeUrl:'https://mitfahrerbank-ww.de/', iframeTyp:'webseite', iframeBlockiert:true},
+  'mobilitaet-bahn-bus':      {titel:'Bahn & Bus', breadcrumb:'Mobilität &amp; Verkehr › <strong>Bahn & Bus</strong>', zurueck:'kategorie/mobilitaet', untertitel:'VRM-Fahrplanauskunft für Altenkirchen, Neuwied und Westerwaldkreis.', renderTyp:'iframe', iframeUrl:'https://www.vrminfo.de/fahrplanauskunft/', iframeTyp:'webseite'},
+  'mobilitaet-mitfahrbank':   {titel:'Westerwälder Mitfahrerbänke', breadcrumb:'Mobilität &amp; Verkehr › <strong>Westerwälder Mitfahrerbänke</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Standorte in der Region.', renderTyp:'iframe', iframeUrl:'https://mitfahrerbank-ww.de/', iframeTyp:'webseite', iframeProxy:true},
   'mobilitaet-fahrgemeinschaften': {linkData:'fahrgemeinschaften', titel:'Fahrgemeinschaften', breadcrumb:'Mobilität &amp; Verkehr › <strong>Fahrgemeinschaften</strong>', zurueck:'kategorie/mobilitaet', untertitel:'ADAC Pendlernetz – App für Mitfahrgelegenheiten.', renderTyp:'subLinks'},
 
   // Eingebettete Fahrplan-Anbieter (über iframe statt externer Link)
@@ -563,9 +587,9 @@ var LISTEN = {
     titel:'Landkreis Altenkirchen',
     breadcrumb:'Mobilität &amp; Verkehr › Bahn & Bus › <strong>Landkreis Altenkirchen</strong>',
     zurueck:'liste/mobilitaet-bahn-bus',
-    untertitel:'Fahrpläne der Verkehrsbetriebe Westerwaldkreis & Altenkirchen.',
+    untertitel:'VRM-Fahrplanauskunft für den Landkreis Altenkirchen.',
     renderTyp:'iframe',
-    iframeUrl:'https://www.westerwaldbus.de/#fahrplanauskunft',
+    iframeUrl:'https://www.vrminfo.de/fahrplanauskunft/',
     iframeTyp:'webseite'
   },
   'mobilitaet-bahn-bus-oepnv-ww': {
@@ -1279,6 +1303,7 @@ function renderDatenListe(ziel, slug, l) {
   if (l.renderTyp === 'museenInline')  { renderMuseenInline(ziel, slug, l); return; }
   if (l.renderTyp === 'naturgenussLinks') { renderNaturgenussLinks(ziel, slug, l); return; }
   if (l.renderTyp === 'bahnBusLinks')     { renderBahnBusLinks(ziel, slug, l); return; }
+  if (l.renderTyp === 'mitfahrbankKarte') { renderMitfahrbankKarte(ziel, slug, l); return; }
 
   // STANDARD: Ausflugsziele, Badeseen, Unterkünfte etc.
   var daten = window[l.datenName] || [];
@@ -2258,25 +2283,32 @@ function renderIframeSeite(ziel, slug, l) {
 
   // ── WEBSEITE ────────────────────────────────────────────────────
   if (iframeTyp === 'webseite') {
-    // Wenn die Seite per X-Frame-Options das Einbetten verbietet,
-    // wird kein iframe-Versuch gemacht. Stattdessen nur die Karte
-    // mit deutlichem "Seite öffnen"-Button.
-    if (l.iframeBlockiert) {
-      var hostB = iframeUrl.replace(/^https?:\/\//,'').split('/')[0];
-      ziel.innerHTML =
-        '<div class="sticky-region">'
-          + navBar(l.zurueck, l.breadcrumb)
-          + intro(l.titel, l.untertitel)
-        + '</div>'
-        + '<div class="pdf-mobile-karte">'
-          + '<div class="pdf-mobile-icon">🌐</div>'
-          + '<div class="pdf-mobile-titel">' + escapeHtml(l.titel) + '</div>'
-          + '<p class="pdf-mobile-hinweis">Diese Webseite erlaubt keine direkte Einbettung. Öffne sie in einem neuen Tab.</p>'
-          + '<a class="btn-pdf-oeffnen-gross" href="' + iframeUrl + '" target="_blank" rel="noopener">🌐 Seite jetzt öffnen</a>'
-          + '<p class="pdf-mobile-meta">Inhalt von <a href="' + iframeUrl + '" target="_blank" rel="noopener">' + escapeHtml(hostB) + '</a></p>'
-        + '</div>'
-        + '<div class="spacer"></div>';
-      return;
+    // Seite blockiert per X-Frame-Options das Einbetten?
+    // - Wenn Proxy konfiguriert: URL durch den Proxy routen, normal weiter
+    // - Wenn kein Proxy: Fallback-Karte mit "Seite öffnen"-Button
+    if (l.iframeBlockiert || l.iframeProxy) {
+      var proxied = ggfProxy(iframeUrl);
+      if (proxied) {
+        // Proxy verfügbar → URL austauschen und weiterlaufen wie normal
+        iframeUrl = proxied;
+      } else {
+        // Kein Proxy → Fallback-Karte
+        var hostB = (l.iframeUrl || '').replace(/^https?:\/\//,'').split('/')[0];
+        ziel.innerHTML =
+          '<div class="sticky-region">'
+            + navBar(l.zurueck, l.breadcrumb)
+            + intro(l.titel, l.untertitel)
+          + '</div>'
+          + '<div class="pdf-mobile-karte">'
+            + '<div class="pdf-mobile-icon">🌐</div>'
+            + '<div class="pdf-mobile-titel">' + escapeHtml(l.titel) + '</div>'
+            + '<p class="pdf-mobile-hinweis">Diese Webseite erlaubt keine direkte Einbettung. Öffne sie in einem neuen Tab.</p>'
+            + '<a class="btn-pdf-oeffnen-gross" href="' + l.iframeUrl + '" target="_blank" rel="noopener">🌐 Seite jetzt öffnen</a>'
+            + '<p class="pdf-mobile-meta">Inhalt von <a href="' + l.iframeUrl + '" target="_blank" rel="noopener">' + escapeHtml(hostB) + '</a></p>'
+          + '</div>'
+          + '<div class="spacer"></div>';
+        return;
+      }
     }
     if (istMobil) {
       // Mobile: schöne Karte mit "In neuem Tab öffnen"-Button.
@@ -2461,6 +2493,133 @@ function renderBahnBusLinks(ziel, slug, l) {
     + '</div>'
     + '<div class="liste linklist">' + items + '</div>'
     + '<div class="spacer"></div>';
+}
+
+// ════════════════════════════════════════════════════════════════
+// MITFAHRERBANK-KARTE (Leaflet + OpenStreetMap + Overpass-API)
+// Zeigt eine eigene OSM-Karte mit allen in OpenStreetMap erfassten
+// Mitfahrerbänken in den Landkreisen Altenkirchen, Neuwied und
+// Westerwaldkreis. Daten werden live aus Overpass geladen.
+// ════════════════════════════════════════════════════════════════
+var LEAFLET_LADEPROMISE = null;
+function ladeLeaflet() {
+  if (window.L) return Promise.resolve();
+  if (LEAFLET_LADEPROMISE) return LEAFLET_LADEPROMISE;
+  LEAFLET_LADEPROMISE = new Promise(function(resolve, reject) {
+    // CSS einfügen
+    if (!document.querySelector('link[data-leaflet]')) {
+      var css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      css.setAttribute('data-leaflet', '1');
+      document.head.appendChild(css);
+    }
+    // JS einfügen
+    var js = document.createElement('script');
+    js.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    js.async = true;
+    js.onload = resolve;
+    js.onerror = function() { reject(new Error('Leaflet konnte nicht geladen werden')); };
+    document.head.appendChild(js);
+  });
+  return LEAFLET_LADEPROMISE;
+}
+
+function renderMitfahrbankKarte(ziel, slug, l) {
+  var mapId = 'mfbk-' + Math.random().toString(36).slice(2);
+  ziel.innerHTML =
+    '<div class="sticky-region">'
+      + navBar(l.zurueck, l.breadcrumb)
+      + intro(l.titel, l.untertitel)
+    + '</div>'
+    + '<div class="osm-karte-wrap">'
+      + '<div id="' + mapId + '" class="osm-karte"></div>'
+      + '<div class="osm-lade-hinweis" id="' + mapId + '-lade">Karte wird geladen …</div>'
+    + '</div>'
+    + '<div class="osm-meta">'
+      + '<p>Datenquelle: <strong>OpenStreetMap</strong>. '
+      + 'Standorte werden von Freiwilligen gepflegt – die Liste kann unvollständig sein. '
+      + 'Offizielle Übersicht: <a href="https://mitfahrerbank-ww.de/" target="_blank" rel="noopener">mitfahrerbank-ww.de ↗</a></p>'
+    + '</div>'
+    + '<div class="spacer"></div>';
+
+  ladeLeaflet().then(function() {
+    initMitfahrbankMap(mapId);
+  }).catch(function(err) {
+    var ladeEl = document.getElementById(mapId + '-lade');
+    if (ladeEl) ladeEl.innerHTML = 'Karte konnte nicht geladen werden. <a href="https://mitfahrerbank-ww.de/" target="_blank" rel="noopener">Zur Webseite ↗</a>';
+  });
+}
+
+function initMitfahrbankMap(mapId) {
+  var mapEl = document.getElementById(mapId);
+  if (!mapEl || !window.L) return;
+  // Westerwald-Zentrum: ca. zwischen Altenkirchen, Neuwied und Westerburg
+  var map = L.map(mapId, {
+    center: [50.65, 7.85],
+    zoom: 10,
+    scrollWheelZoom: false   // Scroll-Konflikt mit Seiten-Scroll vermeiden
+  });
+  // Bei Klick: Scroll-Wheel aktivieren (besseres UX)
+  map.on('focus', function() { map.scrollWheelZoom.enable(); });
+  map.on('blur',  function() { map.scrollWheelZoom.disable(); });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-Mitwirkende',
+    maxZoom: 18
+  }).addTo(map);
+  // Region einrahmen (Landkreis AK + NR + Westerwaldkreis)
+  var bbox = [50.30, 7.30, 50.95, 8.30]; // S, W, N, O
+  map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]]);
+  // Mitfahrerbänke aus Overpass laden
+  ladeMitfahrbaenke(map, bbox, mapId);
+}
+
+function ladeMitfahrbaenke(map, bbox, mapId) {
+  // Overpass-Query: Mitfahrbänke im Westerwald
+  // Tags in OSM für Mitfahrerbänke: amenity=hitchhiking_spot oder highway=hitchhiking
+  var query =
+    '[out:json][timeout:25];'
+    + '('
+      + 'node["amenity"="hitchhiking_spot"](' + bbox.join(',') + ');'
+      + 'node["highway"="hitchhiking"](' + bbox.join(',') + ');'
+      + 'node["amenity"="bench"]["hitchhiking"="yes"](' + bbox.join(',') + ');'
+    + ');'
+    + 'out body;';
+  var url = 'https://overpass-api.de/api/interpreter';
+  fetch(url, {
+    method: 'POST',
+    body: 'data=' + encodeURIComponent(query)
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('Overpass-Fehler ' + r.status);
+    return r.json();
+  })
+  .then(function(data) {
+    var ladeEl = document.getElementById(mapId + '-lade');
+    if (ladeEl) ladeEl.style.display = 'none';
+    if (!data.elements || !data.elements.length) {
+      L.popup({autoClose:false, closeOnClick:false})
+        .setLatLng([50.65, 7.85])
+        .setContent('<strong>Keine Mitfahrerbänke gefunden</strong><br>In OpenStreetMap sind derzeit keine Mitfahrerbänke für die Region erfasst. Schau auf <a href="https://mitfahrerbank-ww.de/" target="_blank" rel="noopener">mitfahrerbank-ww.de</a>.')
+        .openOn(map);
+      return;
+    }
+    data.elements.forEach(function(el) {
+      if (!el.lat || !el.lon) return;
+      var tags = el.tags || {};
+      var name = tags.name || 'Mitfahrerbank';
+      var ort  = tags['addr:city'] || tags['addr:suburb'] || '';
+      var ziel = tags.destination || tags['hitchhiking:destination'] || '';
+      var info = '<strong>' + escapeHtml(name) + '</strong>';
+      if (ort) info += '<br>' + escapeHtml(ort);
+      if (ziel) info += '<br><em>Richtung:</em> ' + escapeHtml(ziel);
+      L.marker([el.lat, el.lon]).addTo(map).bindPopup(info);
+    });
+  })
+  .catch(function(err) {
+    var ladeEl = document.getElementById(mapId + '-lade');
+    if (ladeEl) ladeEl.innerHTML = 'Daten konnten nicht geladen werden. <a href="https://mitfahrerbank-ww.de/" target="_blank" rel="noopener">Zur Webseite ↗</a>';
+  });
 }
 
 
