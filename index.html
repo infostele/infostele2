@@ -216,21 +216,21 @@
 }
 .legende-punkt.punkt-start { background: #1d6b3e; }
 .legende-punkt.punkt-ziel  { background: #c0392b; }
-.legende-download {
-  display: block;
-  margin-top: 8px;
-  padding: 7px 10px;
-  background: #1d6b3e;
-  color: #fff !important;
-  font-weight: 600;
-  font-size: 0.9em;
-  text-decoration: none;
+
+/* Permanente Labels an Start/Ziel-Markern (Tooltips, immer sichtbar) */
+.marker-label {
+  background: rgba(255,255,255,0.95);
   border-radius: 4px;
-  text-align: center;
+  padding: 3px 8px;
+  font-weight: 700;
+  font-size: 0.9em;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
   white-space: nowrap;
-  transition: background 0.15s ease;
 }
-.legende-download:hover { background: #145130; }
+.marker-label.marker-label-start { color: #1d6b3e; border: 1.5px solid #1d6b3e; }
+.marker-label.marker-label-ziel  { color: #c0392b; border: 1.5px solid #c0392b; }
+/* Pfeil-Spitze überschreiben (Leaflet-Default) */
+.leaflet-tooltip.marker-label::before { border: 0 !important; }
 </style>
 </head>
 <body>

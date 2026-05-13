@@ -2618,7 +2618,7 @@ var KARTE_BBOX = [50.30, 7.20, 50.95, 8.35];
 // In-Memory Cache für Landkreis-GeoJSON (einmal pro Session geholt)
 var WW_KREISE_CACHE = null;
 
-// Promise-Cache für zusätzliche Scripts (leaflet-gpx, osmtogeojson)
+// Promise-Cache für zusätzliche Scripts (osmtogeojson für Landkreis-Overlay)
 var KARTE_PLUGIN_PROMISE = null;
 
 function ladeScript(url) {
@@ -2633,14 +2633,13 @@ function ladeScript(url) {
 }
 
 function ladeKartenPlugins() {
-  // Lädt Leaflet + leaflet-gpx + osmtogeojson nacheinander
-  if (window.L && window.L.GPX && window.osmtogeojson) return Promise.resolve();
+  // Lädt Leaflet + osmtogeojson nacheinander
+  if (window.L && window.osmtogeojson) return Promise.resolve();
   if (KARTE_PLUGIN_PROMISE) return KARTE_PLUGIN_PROMISE;
   KARTE_PLUGIN_PROMISE = ladeLeaflet().then(function() {
-    var pendings = [];
-    if (!window.L.GPX) pendings.push(ladeScript('https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/gpx.min.js'));
-    if (!window.osmtogeojson) pendings.push(ladeScript('https://cdn.jsdelivr.net/npm/osmtogeojson@3.0.0-beta.5/osmtogeojson.min.js'));
-    return Promise.all(pendings);
+    if (!window.osmtogeojson) {
+      return ladeScript('https://cdn.jsdelivr.net/npm/osmtogeojson@3.0.0-beta.5/osmtogeojson.min.js');
+    }
   });
   return KARTE_PLUGIN_PROMISE;
 }
@@ -2696,16 +2695,43 @@ function popupAdresse(item) {
   return html;
 }
 
+// Wenn das Straßen-Feld mehrere Komma-getrennte Teile enthält wie
+// "vor dem Regionalladen UNIKUM, Bahnhofstraße 26", findet diese Funktion
+// den TEIL, der tatsächlich eine Straßen-Adresse ist (Hausnummer am Ende
+// oder typisches Straßen-Suffix wie -straße/-weg/-platz). Wichtig für das
+// Geocoding via Nominatim, das sonst auf die Place-Beschreibung reinfällt.
+function extrahiereStrasse(rohStrasse) {
+  if (!rohStrasse || rohStrasse.indexOf(',') < 0) return rohStrasse;
+  var parts = rohStrasse.split(',').map(function(p) { return p.trim(); });
+  // PLZ + Ort-Teile (z. B. "57562 Herdorf") rausfiltern, die gehören nicht in die Straße
+  parts = parts.filter(function(p) { return !/^\d{5}\s/.test(p); });
+  if (parts.length === 0) return rohStrasse;
+  if (parts.length === 1) return parts[0];
+
+  // Bevorzuge Teil mit Hausnummer am Ende ("Bahnhofstraße 26", "Auf der Bell 5")
+  for (var i = 0; i < parts.length; i++) {
+    if (/\s\d+[a-z]?$/i.test(parts[i])) return parts[i];
+  }
+  // Bevorzuge Teil mit typischem Straßen-Suffix
+  for (var j = 0; j < parts.length; j++) {
+    if (/(straße|str\.|weg|platz|allee|gasse|ring|markt|ufer|damm|chaussee|hof)\b/i.test(parts[j])) {
+      return parts[j];
+    }
+  }
+  // Sonst: ersten Teil (häufigster Fall: das ist die Straße)
+  return parts[0];
+}
+
 function baueAdresseFuerGeocoding(item, typ) {
   if (!item) return null;
-  var strasse = '';
+  var strasseRoh = '';
   var ortTeil = '';
 
   // Strukturierte Felder (Badesee, Veranstaltung aus Excel)
-  if (item.strasse) strasse = item.strasse;
-  else if (item.adresse) strasse = item.adresse;
-  else if (item.address) strasse = item.address;
-  else if (item.contact && item.contact.street) strasse = item.contact.street;
+  if (item.strasse) strasseRoh = item.strasse;
+  else if (item.adresse) strasseRoh = item.adresse;
+  else if (item.address) strasseRoh = item.address;
+  else if (item.contact && item.contact.street) strasseRoh = item.contact.street;
 
   // PLZ + Ort
   if (item.plz && item.ort) ortTeil = item.plz + ' ' + item.ort;
@@ -2717,12 +2743,15 @@ function baueAdresseFuerGeocoding(item, typ) {
     ortTeil = p.join(' ');
   }
 
-  // Manche Daten (Museum) haben adresse="Auf der Bell, 57562 Herdorf" – schon komplett
-  if (strasse && /\d{5}/.test(strasse)) return strasse.trim();
+  // Echte Straße aus möglicherweise mehrteiliger Rohadresse extrahieren
+  var strasse = extrahiereStrasse(strasseRoh);
+
+  // Wenn die extrahierte Straße schon PLZ enthält, ist sie bereits komplett
+  if (strasse && /\d{5}\s+/.test(strasse) && !ortTeil) return strasse.trim();
 
   var parts = [];
   if (strasse) parts.push(strasse);
-  if (ortTeil) parts.push(ortTeil);
+  if (ortTeil && (!strasse || strasse.indexOf(ortTeil) < 0)) parts.push(ortTeil);
   if (!parts.length) return null;
   return parts.join(', ');
 }
@@ -2762,7 +2791,8 @@ function geocodeAdresse(adresse) {
 function hatHausnummer(adresse) {
   if (!adresse) return false;
   var strassenTeil = adresse.split(',')[0].trim();
-  return /\d/.test(strassenTeil);
+  // Erkennt einzelne Hausnummern (22, 22a) und Bereiche (1-3, 1/3, 22a-24b)
+  return /\s\d+[a-z]?(?:[-\/]\d+[a-z]?)?\s*$/i.test(strassenTeil);
 }
 
 // Setzt eine Hausnummer in eine Adresse OHNE Nummer ein.
@@ -2782,11 +2812,25 @@ function baueAdressKandidaten(item, typ) {
   var kandidaten = [];
 
   if (basis) {
-    kandidaten.push(basis);
-    // Wenn keine Hausnummer in der Straße: mit 1 und 2 erweitern
-    if (!hatHausnummer(basis)) {
-      kandidaten.push(fuegeHausnummerEin(basis, '1'));
-      kandidaten.push(fuegeHausnummerEin(basis, '2'));
+    // Hausnummer-Bereiche ("1-3", "1/3", "22a-24") in Einzelnummern aufspalten.
+    // Nominatim findet einzelne Nummern wesentlich zuverlässiger als Bereiche
+    // (z. B. "Mittelstraße 1-3" landet oft am Hallenbad statt am Gasthof).
+    var rangeMatch = basis.match(/(\d+)([a-z]?)[-\/](\d+)([a-z]?)/i);
+    if (rangeMatch) {
+      var num1 = rangeMatch[1] + (rangeMatch[2] || '');
+      var num2 = rangeMatch[3] + (rangeMatch[4] || '');
+      // Einzelne Nummern haben Priorität – diese werden zuerst probiert
+      kandidaten.push(basis.replace(rangeMatch[0], num1));
+      kandidaten.push(basis.replace(rangeMatch[0], num2));
+      // Original mit Bereich als zusätzlicher Versuch
+      if (kandidaten.indexOf(basis) < 0) kandidaten.push(basis);
+    } else {
+      kandidaten.push(basis);
+      // Wenn keine Hausnummer in der Straße: mit 1 und 2 erweitern
+      if (!hatHausnummer(basis)) {
+        kandidaten.push(fuegeHausnummerEin(basis, '1'));
+        kandidaten.push(fuegeHausnummerEin(basis, '2'));
+      }
     }
   }
 
@@ -2837,6 +2881,8 @@ function findeKoordinaten(item, typ) {
 }
 
 // Findet die Start- bzw. Zielkoordinate einer Wander-/Rad-Etappe.
+// Nutzt die volle Adress-Kandidaten-Kette inkl. Hausnummer-Range-Split,
+// PLZ-Extraktion und Ortsnamen-Fallback.
 function findeRoutenPunkte(item) {
   function einPunkt(obj) {
     if (!obj) return Promise.resolve(null);
@@ -2845,22 +2891,16 @@ function findeRoutenPunkte(item) {
       var d = parseDmsCoordinates(obj.coordinates);
       if (d) return Promise.resolve(d);
     }
-    // Adress-Varianten in einer Kandidaten-Kette ausprobieren
-    var adressen = [];
+    // Adresse normalisieren und in pseudo-Item für baueAdressKandidaten verpacken
+    var adresseRoh = '';
     if (typeof obj === 'object') {
-      if (obj.address) adressen.push(obj.address);
-      if (obj.name && adressen.indexOf(obj.name) < 0) adressen.push(obj.name);
+      adresseRoh = obj.address || obj.name || '';
     } else if (typeof obj === 'string') {
-      adressen.push(obj);
+      adresseRoh = obj;
     }
-    var kandidaten = [];
-    adressen.forEach(function(a) {
-      kandidaten.push(a);
-      if (!hatHausnummer(a)) {
-        kandidaten.push(fuegeHausnummerEin(a, '1'));
-        kandidaten.push(fuegeHausnummerEin(a, '2'));
-      }
-    });
+    if (!adresseRoh) return Promise.resolve(null);
+    var pseudoItem = { adresse: adresseRoh };
+    var kandidaten = baueAdressKandidaten(pseudoItem, 'route');
     if (!kandidaten.length) return Promise.resolve(null);
     return probiereAdressen(kandidaten, 0);
   }
@@ -2870,17 +2910,38 @@ function findeRoutenPunkte(item) {
 }
 
 // Generische Prüfung: Hat das Item überhaupt Daten, die wir verorten könnten?
-// Wird in den Detail-Renderern verwendet, um den Karte-Button bedingt anzuzeigen.
+// Prüft, ob das Item Daten hat, die einen "ansatzweise korrekten" Standort
+// auf der Karte ermöglichen. Verlangt:
+//   - Direkte Koordinaten (lat/lng oder DMS), ODER
+//   - GPX-Track, ODER
+//   - Eine Adresse mit Straßenanteil (NICHT nur Ort/PLZ)
+// Wenn nur ein Ortsname vorhanden wäre, würde Geocoding nur die Ortsmitte
+// liefern – das ist nicht ausreichend genau, deshalb dann kein Karte-Button.
 function hatVerortbareInfo(item) {
   if (!item) return false;
   if (item.lat && item.lng) return true;
   if (item.coordinates && parseDmsCoordinates(item.coordinates)) return true;
-  if (item.start && (item.start.coordinates || item.start.address)) return true;
-  if (item.adresse || item.address || item.strasse) return true;
-  if (item.plzOrt) return true;
-  if (item.contact && (item.contact.street || item.contact.town)) return true;
+  if (item.start && item.start.coordinates && parseDmsCoordinates(item.start.coordinates)) return true;
   if (item.gpxUrl) return true;
-  return false;
+
+  // Straßen-Felder einsammeln
+  var strasse = item.strasse || item.adresse || item.address ||
+                (item.contact && item.contact.street) ||
+                (item.start && (item.start.address || item.start.name));
+  if (!strasse) return false;
+
+  // Heuristik: Ist das wirklich eine Straße oder nur ein Ortsname?
+  // Akzeptiert wenn:
+  //   - enthält Zahlen (z. B. Hausnummer), ODER
+  //   - typisches Straßen-Suffix (-straße, -weg, -platz, ...), ODER
+  //   - mehrere Wörter (z. B. "Auf der Bell" — echte Straßen ohne Suffix)
+  var extrahiert = (typeof extrahiereStrasse === 'function') ? extrahiereStrasse(strasse) : strasse;
+  if (!extrahiert) return false;
+  var trimmed = extrahiert.trim();
+  var hatZahl = /\d/.test(trimmed);
+  var hatSuffix = /(straße|str\.|weg|platz|allee|gasse|ring|markt|ufer|damm|chaussee|hof|brücke|tor|park)\b/i.test(trimmed);
+  var hatMehrereWoerter = /\s/.test(trimmed);
+  return hatZahl || hatSuffix || hatMehrereWoerter;
 }
 
 function ladeKartenItem(typ, schluessel) {
@@ -3020,7 +3081,9 @@ function initWesterwaldKarte(mapId, opts) {
           html: '<span>S</span>',
           iconSize: [28, 28]
         })
-      }).addTo(map).bindPopup('<strong>Start</strong>');
+      }).addTo(map)
+        .bindTooltip('Start', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-start' })
+        .openTooltip();
       pts.push([opts.startPunkt.lat, opts.startPunkt.lng]);
     }
     if (opts.zielPunkt) {
@@ -3030,14 +3093,14 @@ function initWesterwaldKarte(mapId, opts) {
           html: '<span>Z</span>',
           iconSize: [28, 28]
         })
-      }).addTo(map).bindPopup('<strong>Ziel</strong>');
+      }).addTo(map)
+        .bindTooltip('Ziel', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-ziel' })
+        .openTooltip();
       pts.push([opts.zielPunkt.lat, opts.zielPunkt.lng]);
     }
     if (pts.length === 1) {
       map.setView(pts[0], 13);
     } else if (pts.length === 2) {
-      // Direktverbindung als gestrichelte Hilfslinie (zur Orientierung,
-      // nicht der echte Wegverlauf!)
       L.polyline(pts, { color: '#888', weight: 2, dashArray: '6,8', opacity: 0.7 }).addTo(map);
       map.fitBounds(pts, { padding: [30, 30] });
     }
@@ -3050,57 +3113,20 @@ function initWesterwaldKarte(mapId, opts) {
     if (n > 0) {
       if (ladeEl) ladeEl.style.display = 'none';
     } else {
-      if (ladeEl) ladeEl.innerHTML = 'Start/Ziel konnten nicht ermittelt werden. <a href="' + opts.gpxUrl + '" target="_blank" rel="noopener">GPX direkt öffnen ↗</a>';
+      if (ladeEl) ladeEl.innerHTML = 'Start/Ziel konnten nicht ermittelt werden.';
     }
 
-    // Karte um einen Button erweitern: GPX-Track manuell laden
-    var gpxStatus = 'idle'; // 'idle' | 'lade' | 'ok' | 'fehler'
-    var gpxLayer = null;
-    var gpxControl = L.control({ position: 'topright' });
-    gpxControl.onAdd = function() {
-      var div = L.DomUtil.create('div', 'leaflet-bar gpx-control-wrap');
-      div.innerHTML = '<a href="#" class="gpx-control-btn" title="GPX-Track auf Karte anzeigen">🗺️ GPX-Track laden</a>';
+    // Legende oben rechts: Start (grün), Ziel (rot)
+    var legende = L.control({ position: 'topright' });
+    legende.onAdd = function() {
+      var div = L.DomUtil.create('div', 'karte-legende');
+      div.innerHTML = ''
+        + '<div class="legende-zeile"><span class="legende-punkt punkt-start"></span> Start</div>'
+        + '<div class="legende-zeile"><span class="legende-punkt punkt-ziel"></span> Ziel</div>';
       L.DomEvent.disableClickPropagation(div);
-      L.DomEvent.on(div.firstChild, 'click', function(e) {
-        e.preventDefault();
-        if (gpxStatus === 'lade' || gpxStatus === 'ok') return;
-        gpxStatus = 'lade';
-        var btn = div.firstChild;
-        btn.innerHTML = '⏳ Lade GPX …';
-
-        try {
-          gpxLayer = new L.GPX(opts.gpxUrl, {
-            async: true,
-            marker_options: {
-              startIconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/pin-icon-start.png',
-              endIconUrl:   'https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/pin-icon-end.png',
-              shadowUrl:    'https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/pin-shadow.png'
-            },
-            polyline_options: { color: '#0b422a', weight: 4, opacity: 0.85 }
-          })
-          .on('loaded', function(e) {
-            gpxStatus = 'ok';
-            btn.innerHTML = '✓ GPX geladen';
-            btn.classList.add('gpx-control-btn-ok');
-            try { map.fitBounds(e.target.getBounds(), { padding: [20, 20] }); } catch (err) {}
-          })
-          .on('error', function() {
-            gpxStatus = 'fehler';
-            btn.innerHTML = '⚠ Direkt öffnen ↗';
-            btn.classList.add('gpx-control-btn-err');
-            btn.onclick = function(ev) { ev.preventDefault(); window.open(opts.gpxUrl, '_blank', 'noopener'); };
-          })
-          .addTo(map);
-        } catch (err) {
-          gpxStatus = 'fehler';
-          btn.innerHTML = '⚠ Direkt öffnen ↗';
-          btn.classList.add('gpx-control-btn-err');
-          btn.onclick = function(ev) { ev.preventDefault(); window.open(opts.gpxUrl, '_blank', 'noopener'); };
-        }
-      });
       return div;
     };
-    gpxControl.addTo(map);
+    legende.addTo(map);
   } else if (opts.modus === 'punkt') {
     var popupContent = opts.popupHtml || ('<strong>' + escapeHtml(opts.label) + '</strong>');
     L.marker([opts.lat, opts.lng]).addTo(map).bindPopup(popupContent).openPopup();
