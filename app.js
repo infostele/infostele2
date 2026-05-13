@@ -2458,11 +2458,29 @@ function renderIframeSeite(ziel, slug, l) {
   }
 
   // ── PDF (default) ───────────────────────────────────────────────
-  // PDFs direkt im iframe einbetten — jsDelivr liefert mit korrektem
-  // Content-Type aus, moderne Browser (Edge, Chrome, Firefox) rendern
-  // PDFs nativ inline. Vorteil: kein Google-Docs-Viewer-Cache-Problem
-  // mehr (das verursachte leere Anzeige beim ersten Aufruf).
-  var iframeId = 'pdfvw-' + Math.random().toString(36).slice(2);
+  // Mobile: PDF.js rendert Seiten als Canvas (zuverlässig auf allen
+  //         Smartphones, vor allem iOS Safari, wo iframes oft scheitern).
+  // Desktop: iframe-Einbettung (funktioniert gut und ist schnell).
+  var pdfWrapId = 'pdfvw-' + Math.random().toString(36).slice(2);
+
+  if (istMobil) {
+    ziel.innerHTML =
+      '<div class="sticky-region">'
+        + navBar(l.zurueck, l.breadcrumb)
+        + intro(l.titel, l.untertitel)
+        + '<div class="iframe-aktionen">'
+          + '<a class="btn-action btn-pdf-oeffnen" href="' + iframeUrl + '" target="_blank" rel="noopener">📄 PDF in neuem Tab öffnen</a>'
+        + '</div>'
+      + '</div>'
+      + '<div class="pdf-mobile-viewer" id="' + pdfWrapId + '">'
+        + '<div class="pdf-lade-hinweis" id="' + pdfWrapId + '-lade">PDF wird geladen…</div>'
+      + '</div>'
+      + '<div class="spacer"></div>';
+    rendePdfMobile(pdfWrapId, iframeUrl);
+    return;
+  }
+
+  // Desktop: iframe
   ziel.innerHTML =
     '<div class="sticky-region">'
       + navBar(l.zurueck, l.breadcrumb)
@@ -2471,9 +2489,9 @@ function renderIframeSeite(ziel, slug, l) {
         + '<a class="btn-action btn-pdf-oeffnen" href="' + iframeUrl + '" target="_blank" rel="noopener">📄 PDF in neuem Tab öffnen</a>'
       + '</div>'
     + '</div>'
-    + '<div class="iframe-wrap iframe-wrap-pdf" id="' + iframeId + '-wrap">'
+    + '<div class="iframe-wrap iframe-wrap-pdf" id="' + pdfWrapId + '-wrap">'
       + '<div class="iframe-lade-hinweis">PDF wird geladen…</div>'
-      + '<iframe id="' + iframeId + '" src="' + iframeUrl + '#view=FitH" class="inhalts-iframe inhalts-iframe-pdf" '
+      + '<iframe id="' + pdfWrapId + '" src="' + iframeUrl + '#view=FitH" class="inhalts-iframe inhalts-iframe-pdf" '
       + 'type="application/pdf" '
       + 'allowfullscreen referrerpolicy="no-referrer-when-downgrade" '
       + 'onload="this.parentNode.classList.add(\'iframe-geladen\')"></iframe>'
@@ -2482,11 +2500,109 @@ function renderIframeSeite(ziel, slug, l) {
       + 'PDF wird nicht angezeigt? <a href="' + iframeUrl + '" target="_blank" rel="noopener">Direkt öffnen ↗</a>'
     + '</div>'
     + '<div class="spacer"></div>';
-  // Lade-Hinweis nach 6s ausblenden, falls onload nicht feuert
   setTimeout(function() {
-    var wrap = document.getElementById(iframeId + '-wrap');
+    var wrap = document.getElementById(pdfWrapId + '-wrap');
     if (wrap) wrap.classList.add('iframe-geladen');
   }, 6000);
+}
+
+// ════════════════════════════════════════════════════════════════
+// PDF.JS MOBILE-RENDERER
+// Lädt PDF.js dynamisch und rendert die PDF-Seiten als Canvas in
+// einen scrollbaren Container. Funktioniert zuverlässig auf allen
+// Mobile-Browsern (im Gegensatz zu iframe-PDF-Einbettung).
+// ════════════════════════════════════════════════════════════════
+var PDFJS_LADE_PROMISE = null;
+function ladePdfJs() {
+  if (window.pdfjsLib) return Promise.resolve();
+  if (PDFJS_LADE_PROMISE) return PDFJS_LADE_PROMISE;
+  PDFJS_LADE_PROMISE = new Promise(function(resolve, reject) {
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js';
+    s.async = true;
+    s.onload = function() {
+      if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+          'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+      }
+      resolve();
+    };
+    s.onerror = function() { reject(new Error('PDF.js konnte nicht geladen werden')); };
+    document.head.appendChild(s);
+  });
+  return PDFJS_LADE_PROMISE;
+}
+
+function rendePdfMobile(containerId, pdfUrl) {
+  var container = document.getElementById(containerId);
+  var ladeEl   = document.getElementById(containerId + '-lade');
+  if (!container) return;
+
+  function zeigeFehler(msg) {
+    if (ladeEl) ladeEl.style.display = 'none';
+    container.innerHTML =
+      '<div class="pdf-fehler">'
+        + '<p>' + escapeHtml(msg) + '</p>'
+        + '<a class="btn-pdf-oeffnen-gross" href="' + pdfUrl + '" target="_blank" rel="noopener">📄 PDF in neuem Tab öffnen</a>'
+      + '</div>';
+  }
+
+  ladePdfJs().then(function() {
+    var pdfjsLib = window.pdfjsLib;
+    if (!pdfjsLib) return zeigeFehler('PDF-Viewer konnte nicht initialisiert werden.');
+
+    pdfjsLib.getDocument(pdfUrl).promise.then(function(pdf) {
+      if (ladeEl) ladeEl.style.display = 'none';
+      var anzSeiten = pdf.numPages;
+
+      // Seiten der Reihe nach rendern (verhindert Speicher-Spike auf Mobile)
+      var promise = Promise.resolve();
+      for (var i = 1; i <= anzSeiten; i++) {
+        (function(seitenNr) {
+          promise = promise.then(function() {
+            return pdf.getPage(seitenNr).then(function(page) {
+              var containerBreite = container.clientWidth - 16; // etwas Innenabstand
+              var basisViewport = page.getViewport({ scale: 1 });
+              var scale = containerBreite / basisViewport.width;
+              // Auf Retina-Displays für Schärfe doppelt rendern
+              var devicePixelRatio = window.devicePixelRatio || 1;
+              var renderViewport = page.getViewport({ scale: scale * devicePixelRatio });
+
+              var canvas = document.createElement('canvas');
+              canvas.className = 'pdf-seite-canvas';
+              canvas.width  = renderViewport.width;
+              canvas.height = renderViewport.height;
+              // CSS-Breite an Container anpassen (Retina wird automatisch herunterskaliert)
+              canvas.style.width  = (renderViewport.width / devicePixelRatio) + 'px';
+              canvas.style.height = (renderViewport.height / devicePixelRatio) + 'px';
+
+              var seitenWrap = document.createElement('div');
+              seitenWrap.className = 'pdf-seite-wrap';
+              seitenWrap.appendChild(canvas);
+              var seitenNum = document.createElement('div');
+              seitenNum.className = 'pdf-seiten-nr';
+              seitenNum.textContent = 'Seite ' + seitenNr + ' von ' + anzSeiten;
+              seitenWrap.appendChild(seitenNum);
+
+              container.appendChild(seitenWrap);
+
+              return page.render({
+                canvasContext: canvas.getContext('2d'),
+                viewport: renderViewport
+              }).promise;
+            });
+          });
+        })(i);
+      }
+      return promise;
+    }).catch(function(err) {
+      console.error('[PDF] Render-Fehler:', err);
+      zeigeFehler('PDF konnte nicht geladen werden.');
+    });
+  }).catch(function(err) {
+    console.error('[PDF] Library-Fehler:', err);
+    zeigeFehler('PDF-Viewer konnte nicht geladen werden.');
+  });
 }
 
 // ════════════════════════════════════════════════════════════════
