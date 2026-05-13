@@ -2662,6 +2662,40 @@ function parseDmsCoordinates(str) {
 }
 
 // Baut die beste verfügbare Geocoding-Adresse aus einem Item, je nach Typ.
+// Baut Popup-HTML für Marker: Titel + Straße + PLZ/Ort (jeweils eigene Zeile)
+function popupAdresse(item) {
+  var titel = item.titel || item.name || item.title || '';
+  var strasse = '';
+  var plzOrt = '';
+
+  if (item.strasse) strasse = item.strasse;
+  else if (item.adresse) strasse = item.adresse;
+  else if (item.address) strasse = item.address;
+  else if (item.contact && item.contact.street) strasse = item.contact.street;
+
+  if (item.plz && item.ort) plzOrt = item.plz + ' ' + item.ort;
+  else if (item.plzOrt) plzOrt = item.plzOrt;
+  else if (item.ort && !strasse) plzOrt = item.ort;
+  else if (item.contact) {
+    var p = [];
+    if (item.contact.zip)  p.push(item.contact.zip);
+    if (item.contact.town) p.push(item.contact.town);
+    plzOrt = p.join(' ');
+  }
+
+  // Manche Daten haben "Straße, PLZ Ort" in einem String — aufsplitten
+  if (strasse && /,\s*\d{5}\s/.test(strasse) && !plzOrt) {
+    var parts = strasse.split(/,\s*/);
+    strasse = parts[0];
+    plzOrt = parts.slice(1).join(', ');
+  }
+
+  var html = '<strong>' + escapeHtml(titel) + '</strong>';
+  if (strasse) html += '<br>' + escapeHtml(strasse);
+  if (plzOrt)  html += '<br>' + escapeHtml(plzOrt);
+  return html;
+}
+
 function baueAdresseFuerGeocoding(item, typ) {
   if (!item) return null;
   var strasse = '';
@@ -2722,6 +2756,67 @@ function geocodeAdresse(adresse) {
 //   1. item.lat/lng (numerisch)
 //   2. DMS-Koordinaten aus item.start.coordinates / item.coordinates
 //   3. Geocoding der Adresse via Nominatim (gecacht)
+// Prüft, ob die Straßen-Komponente einer Adresse eine Hausnummer enthält.
+//   "Auf der Bell, 57562 Herdorf"  → false
+//   "Walzwerkstraße 22, 57537 …"   → true
+function hatHausnummer(adresse) {
+  if (!adresse) return false;
+  var strassenTeil = adresse.split(',')[0].trim();
+  return /\d/.test(strassenTeil);
+}
+
+// Setzt eine Hausnummer in eine Adresse OHNE Nummer ein.
+//   "Auf der Bell, 57562 Herdorf" + "1"  →  "Auf der Bell 1, 57562 Herdorf"
+function fuegeHausnummerEin(adresse, nummer) {
+  var parts = adresse.split(',');
+  parts[0] = parts[0].trim() + ' ' + nummer;
+  return parts.join(',').trim();
+}
+
+// Erstellt eine geordnete Liste von Adress-Varianten zum Probieren.
+// Reihenfolge: präzise → weniger präzise. Sobald eine Variante geocoded wird,
+// stoppt die Kette. So landen wir z. B. bei "Auf der Bell 1, 57562 Herdorf"
+// (Bergbaumuseum) statt bei "57562 Herdorf" (Ortsmitte) zu enden.
+function baueAdressKandidaten(item, typ) {
+  var basis = baueAdresseFuerGeocoding(item, typ);
+  var kandidaten = [];
+
+  if (basis) {
+    kandidaten.push(basis);
+    // Wenn keine Hausnummer in der Straße: mit 1 und 2 erweitern
+    if (!hatHausnummer(basis)) {
+      kandidaten.push(fuegeHausnummerEin(basis, '1'));
+      kandidaten.push(fuegeHausnummerEin(basis, '2'));
+    }
+  }
+
+  // PLZ + Ort
+  var plzOrt = '';
+  if (item.plz && item.ort) plzOrt = item.plz + ' ' + item.ort;
+  else if (item.plzOrt) plzOrt = item.plzOrt;
+  else if (basis) {
+    var m = basis.match(/(\d{5}\s+[A-Za-zäöüÄÖÜß\-\s]+)/);
+    if (m) plzOrt = m[1].trim();
+  }
+  if (plzOrt && kandidaten.indexOf(plzOrt) < 0) kandidaten.push(plzOrt);
+
+  // Nur Ortsname
+  var ortAllein = item.ort || (item.contact && item.contact.town) || item.town || '';
+  if (ortAllein && kandidaten.indexOf(ortAllein) < 0) kandidaten.push(ortAllein);
+
+  return kandidaten;
+}
+
+// Probiert nacheinander alle Adress-Varianten, gibt das erste Ergebnis zurück
+function probiereAdressen(kandidaten, idx) {
+  idx = idx || 0;
+  if (idx >= kandidaten.length) return Promise.resolve(null);
+  return geocodeAdresse(kandidaten[idx]).then(function(c) {
+    if (c) return c;
+    return probiereAdressen(kandidaten, idx + 1);
+  });
+}
+
 function findeKoordinaten(item, typ) {
   // 1. Direkt
   var lat = parseFloat(item.lat); var lng = parseFloat(item.lng);
@@ -2735,30 +2830,39 @@ function findeKoordinaten(item, typ) {
   }
   if (dms) return Promise.resolve(dms);
 
-  // 3. Adresse geocoden
-  var adr = baueAdresseFuerGeocoding(item, typ);
-  if (adr) return geocodeAdresse(adr);
-
-  return Promise.resolve(null);
+  // 3. Adress-Kandidaten der Reihe nach probieren
+  var kandidaten = baueAdressKandidaten(item, typ);
+  if (!kandidaten.length) return Promise.resolve(null);
+  return probiereAdressen(kandidaten, 0);
 }
 
 // Findet die Start- bzw. Zielkoordinate einer Wander-/Rad-Etappe.
 function findeRoutenPunkte(item) {
   function einPunkt(obj) {
-    if (!obj) return null;
-    if (typeof obj === 'object') {
-      // DMS-Koordinaten?
-      if (obj.coordinates) {
-        var d = parseDmsCoordinates(obj.coordinates);
-        if (d) return Promise.resolve(d);
-      }
-      // Adresse?
-      if (obj.address) return geocodeAdresse(obj.address);
-      if (obj.name)    return geocodeAdresse(obj.name);
-    } else if (typeof obj === 'string') {
-      return geocodeAdresse(obj);
+    if (!obj) return Promise.resolve(null);
+    // DMS-Koordinaten haben Priorität (Wandern hat oft beides)
+    if (typeof obj === 'object' && obj.coordinates) {
+      var d = parseDmsCoordinates(obj.coordinates);
+      if (d) return Promise.resolve(d);
     }
-    return Promise.resolve(null);
+    // Adress-Varianten in einer Kandidaten-Kette ausprobieren
+    var adressen = [];
+    if (typeof obj === 'object') {
+      if (obj.address) adressen.push(obj.address);
+      if (obj.name && adressen.indexOf(obj.name) < 0) adressen.push(obj.name);
+    } else if (typeof obj === 'string') {
+      adressen.push(obj);
+    }
+    var kandidaten = [];
+    adressen.forEach(function(a) {
+      kandidaten.push(a);
+      if (!hatHausnummer(a)) {
+        kandidaten.push(fuegeHausnummerEin(a, '1'));
+        kandidaten.push(fuegeHausnummerEin(a, '2'));
+      }
+    });
+    if (!kandidaten.length) return Promise.resolve(null);
+    return probiereAdressen(kandidaten, 0);
   }
   return Promise.all([einPunkt(item.start), einPunkt(item.destination)]).then(function(arr) {
     return { start: arr[0], ziel: arr[1] };
@@ -2848,10 +2952,14 @@ function renderKarte(ziel, typ, schluessel) {
 
   ladeKartenPlugins().then(function() {
     if (hatGpx) {
-      // Vorab Start/Ziel parallel geocoden – als Fallback falls GPX-Fetch scheitert (CORS)
+      // Vorab Start/Ziel parallel geocoden – werden sofort angezeigt.
+      // GPX wird NICHT automatisch geladen (CORS-Problem beim Anbieter).
+      // Stattdessen Button "GPX-Track laden" auf der Karte, der vom User
+      // bewusst ausgelöst wird. Bei Erfolg ersetzt der GPX-Verlauf die Marker.
       findeRoutenPunkte(item).then(function(pts) {
         initWesterwaldKarte(mapId, {
           modus: 'gpx', gpxUrl: gpxUrl, label: titel,
+          popupHtml: popupAdresse(item),
           startPunkt: pts.start, zielPunkt: pts.ziel
         });
       });
@@ -2861,13 +2969,12 @@ function renderKarte(ziel, typ, schluessel) {
         if (!coords) {
           var ladeEl = document.getElementById(mapId + '-lade');
           if (ladeEl) ladeEl.innerHTML = 'Für diesen Eintrag konnte kein Standort ermittelt werden.';
-          // Wir initialisieren die Karte trotzdem (nur Landkreis-Overlay + Eigenstandort),
-          // damit der User wenigstens etwas sieht.
           initWesterwaldKarte(mapId, { modus: 'leer', label: titel });
           return;
         }
         initWesterwaldKarte(mapId, {
-          modus: 'punkt', lat: coords.lat, lng: coords.lng, label: titel
+          modus: 'punkt', lat: coords.lat, lng: coords.lng,
+          label: titel, popupHtml: popupAdresse(item)
         });
       });
     }
@@ -2938,47 +3045,65 @@ function initWesterwaldKarte(mapId, opts) {
   }
 
   if (opts.modus === 'gpx') {
-    var gpxFehler = false;
-    var gpxTimeout = setTimeout(function() {
-      // Wenn nach 8s noch nicht 'loaded' gefeuert hat, vermutlich CORS-Problem
-      if (!gpxFehler) handleGpxFehler();
-    }, 8000);
-
-    function handleGpxFehler() {
-      gpxFehler = true;
-      clearTimeout(gpxTimeout);
-      var n = zeichneStartZiel();
-      if (n > 0) {
-        if (ladeEl) ladeEl.innerHTML = 'GPX-Track konnte nicht geladen werden (CORS). Start und Ziel sind als Marker eingezeichnet. <a href="' + opts.gpxUrl + '" target="_blank" rel="noopener">GPX direkt öffnen ↗</a>';
-        setTimeout(function() { if (ladeEl) ladeEl.style.display = 'none'; }, 4500);
-      } else {
-        if (ladeEl) ladeEl.innerHTML = 'GPX konnte nicht geladen werden. <a href="' + opts.gpxUrl + '" target="_blank" rel="noopener">GPX direkt öffnen ↗</a>';
-      }
+    // Sofort Start/Ziel anzeigen (aus Geocoding)
+    var n = zeichneStartZiel();
+    if (n > 0) {
+      if (ladeEl) ladeEl.style.display = 'none';
+    } else {
+      if (ladeEl) ladeEl.innerHTML = 'Start/Ziel konnten nicht ermittelt werden. <a href="' + opts.gpxUrl + '" target="_blank" rel="noopener">GPX direkt öffnen ↗</a>';
     }
 
-    try {
-      new L.GPX(opts.gpxUrl, {
-        async: true,
-        marker_options: {
-          startIconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/pin-icon-start.png',
-          endIconUrl:   'https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/pin-icon-end.png',
-          shadowUrl:    'https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/pin-shadow.png'
-        },
-        polyline_options: { color: '#0b422a', weight: 4, opacity: 0.85 }
-      })
-      .on('loaded', function(e) {
-        clearTimeout(gpxTimeout);
-        if (gpxFehler) return; // schon Fallback gerendert
-        try { map.fitBounds(e.target.getBounds(), { padding: [20, 20] }); } catch (err) {}
-        if (ladeEl) ladeEl.style.display = 'none';
-      })
-      .on('error', handleGpxFehler)
-      .addTo(map);
-    } catch (e) {
-      handleGpxFehler();
-    }
+    // Karte um einen Button erweitern: GPX-Track manuell laden
+    var gpxStatus = 'idle'; // 'idle' | 'lade' | 'ok' | 'fehler'
+    var gpxLayer = null;
+    var gpxControl = L.control({ position: 'topright' });
+    gpxControl.onAdd = function() {
+      var div = L.DomUtil.create('div', 'leaflet-bar gpx-control-wrap');
+      div.innerHTML = '<a href="#" class="gpx-control-btn" title="GPX-Track auf Karte anzeigen">🗺️ GPX-Track laden</a>';
+      L.DomEvent.disableClickPropagation(div);
+      L.DomEvent.on(div.firstChild, 'click', function(e) {
+        e.preventDefault();
+        if (gpxStatus === 'lade' || gpxStatus === 'ok') return;
+        gpxStatus = 'lade';
+        var btn = div.firstChild;
+        btn.innerHTML = '⏳ Lade GPX …';
+
+        try {
+          gpxLayer = new L.GPX(opts.gpxUrl, {
+            async: true,
+            marker_options: {
+              startIconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/pin-icon-start.png',
+              endIconUrl:   'https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/pin-icon-end.png',
+              shadowUrl:    'https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/pin-shadow.png'
+            },
+            polyline_options: { color: '#0b422a', weight: 4, opacity: 0.85 }
+          })
+          .on('loaded', function(e) {
+            gpxStatus = 'ok';
+            btn.innerHTML = '✓ GPX geladen';
+            btn.classList.add('gpx-control-btn-ok');
+            try { map.fitBounds(e.target.getBounds(), { padding: [20, 20] }); } catch (err) {}
+          })
+          .on('error', function() {
+            gpxStatus = 'fehler';
+            btn.innerHTML = '⚠ Direkt öffnen ↗';
+            btn.classList.add('gpx-control-btn-err');
+            btn.onclick = function(ev) { ev.preventDefault(); window.open(opts.gpxUrl, '_blank', 'noopener'); };
+          })
+          .addTo(map);
+        } catch (err) {
+          gpxStatus = 'fehler';
+          btn.innerHTML = '⚠ Direkt öffnen ↗';
+          btn.classList.add('gpx-control-btn-err');
+          btn.onclick = function(ev) { ev.preventDefault(); window.open(opts.gpxUrl, '_blank', 'noopener'); };
+        }
+      });
+      return div;
+    };
+    gpxControl.addTo(map);
   } else if (opts.modus === 'punkt') {
-    L.marker([opts.lat, opts.lng]).addTo(map).bindPopup('<strong>' + escapeHtml(opts.label) + '</strong>').openPopup();
+    var popupContent = opts.popupHtml || ('<strong>' + escapeHtml(opts.label) + '</strong>');
+    L.marker([opts.lat, opts.lng]).addTo(map).bindPopup(popupContent).openPopup();
     map.setView([opts.lat, opts.lng], 14);
     if (ladeEl) ladeEl.style.display = 'none';
   } else {
