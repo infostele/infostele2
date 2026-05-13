@@ -1107,7 +1107,7 @@ function renderWwLit(ziel, slug, l) {
 // ════════════════════════════════════════════════════════════════
 
 // Termin-Filter-State (eigener State)
-var TERMIN_FILTER = { datum: 'alle', bezirk: 'alle', kosten: 'alle', kids: 'alle' };
+var TERMIN_FILTER = { datum: 'alle', bezirk: 'alle', kids: 'alle' };
 window._aktuelleTermine = null;
 
 function termineFilterUI() {
@@ -1131,11 +1131,6 @@ function termineFilterUI() {
     + pill('bezirk','NR','Neuwied')
     + pill('bezirk','WW','Westerwald')
     + pill('bezirk','Hessen','Hessen')
-    + '</div>';
-  html += '<div class="filter-gruppe"><span class="filter-label">💶 Preis:</span>'
-    + pill('kosten','alle','Alle')
-    + pill('kosten','frei','Kostenfrei')
-    + pill('kosten','kostenpflichtig','Kostenpflichtig')
     + '</div>';
   html += '<div class="filter-gruppe"><span class="filter-label">👶 Kinder:</span>'
     + pill('kids','alle','Alle')
@@ -1175,23 +1170,55 @@ function termineFilterAnwenden(items) {
   return items.filter(function(item) {
     var d = item.datumIso || '';
     if (!d) return false;
-    // Bei mehrtägigen Events (z. B. Ausstellungen): Ende-Datum berücksichtigen.
-    // Solange das Event-Ende >= heute, gilt das Event als "noch laufend".
+    // Event muss noch laufen oder in der Zukunft sein (Enddatum berücksichtigen)
     var dEnde = item.datumBisIso || d;
     if (dEnde < heuteStr) return false;
-    // Für die Datumsfilter: das spätere von Start oder Heute als wirksames Datum
-    // verwenden, sodass laufende Events in "heute"/"woche"/"monat" korrekt einsortiert werden.
-    var dEff = d < heuteStr ? heuteStr : d;
-    if (TERMIN_FILTER.datum === 'heute' && dEff !== heuteStr) return false;
-    if (TERMIN_FILTER.datum === 'woche' && dEff > sonntagStr) return false;
-    if (TERMIN_FILTER.datum === 'monat' && dEff > monatsendeStr) return false;
-    if (TERMIN_FILTER.datum === 'jahr'  && dEff > jahresende) return false;
+
+    // Period-Filter: ÜBERLAPPUNG zwischen Event-Zeitraum und Period-Zeitraum prüfen.
+    // So erscheinen sowohl Einzeltermine als auch durchgehende Veranstaltungen
+    // (Ausstellungen, mehrtägige Märkte) in jedem Period-Filter, in dem sie aktiv sind.
+    // Wiederkehrende Termine (z. B. wöchentliche Kräuterführung) sind in der
+    // Datenquelle bereits als jeweils einzelner Eintrag pro Datum erfasst und
+    // erscheinen daher automatisch korrekt: 1x pro Woche, 4x pro Monat usw.
+    if (TERMIN_FILTER.datum !== 'alle') {
+      var periodEnde;
+      if (TERMIN_FILTER.datum === 'heute')      periodEnde = heuteStr;
+      else if (TERMIN_FILTER.datum === 'woche') periodEnde = sonntagStr;
+      else if (TERMIN_FILTER.datum === 'monat') periodEnde = monatsendeStr;
+      else if (TERMIN_FILTER.datum === 'jahr')  periodEnde = jahresende;
+      // Überlappung: Event-Start <= Period-Ende UND Event-Ende >= heuteStr
+      // (letzteres oben bereits geprüft)
+      if (d > periodEnde) return false;
+    }
+
     if (TERMIN_FILTER.bezirk !== 'alle' && item.bezirk !== TERMIN_FILTER.bezirk) return false;
-    if (TERMIN_FILTER.kosten === 'frei' && !item.kostenfrei) return false;
-    if (TERMIN_FILTER.kosten === 'kostenpflichtig' && item.kostenfrei) return false;
     if (TERMIN_FILTER.kids === 'ja' && !item.fuerKids) return false;
     return true;
   });
+}
+
+// Smart-Datumsanzeige für Listen: bei laufenden Mehrtages-Events das Enddatum
+// statt des (vergangenen) Startdatums zeigen, damit der User sieht, wie lange
+// die Veranstaltung noch läuft. Für Einzeltermine oder zukünftige Events bleibt
+// das normale Startdatum.
+function formatTerminDatumSmart(item) {
+  var dStart = item.datumIso || '';
+  var dEnde = item.datumBisIso || dStart;
+  if (!dStart) return '';
+  var heute = new Date();
+  heute.setHours(0,0,0,0);
+  var pad = function(n) { return String(n).padStart(2,'0'); };
+  var heuteStr = heute.getFullYear() + '-' + pad(heute.getMonth()+1) + '-' + pad(heute.getDate());
+  // Mehrtägig & bereits laufend → "bis [Enddatum]"
+  if (dStart < heuteStr && dEnde > dStart && dEnde >= heuteStr) {
+    return 'bis ' + formatTerminDatum(dEnde);
+  }
+  // Mehrtägig & zukünftig → "[Start] – [Ende]"
+  if (dEnde > dStart) {
+    return formatTerminDatum(dStart) + ' – ' + formatTerminDatum(dEnde);
+  }
+  // Einzeltermin
+  return formatTerminDatum(dStart);
 }
 
 function formatTerminDatum(d) {
@@ -1230,7 +1257,7 @@ function baueTermineListe(slug, l) {
 
     return '<button class="eintrag termin-eintrag" onclick="navigateTo(\'detail/' + l.detailKey + '/' + slug + '_' + idx + '\')">'
       + '<div class="termin-datum-badge">'
-        + '<div class="termin-datum-text">' + escapeHtml(formatTerminDatum(item.datumIso)) + '</div>'
+        + '<div class="termin-datum-text">' + escapeHtml(formatTerminDatumSmart(item)) + '</div>'
         + (item.bezirk ? '<div class="termin-bezirk">' + escapeHtml(item.bezirk) + '</div>' : '')
       + '</div>'
       + '<div class="eintrag-text">'
@@ -1254,7 +1281,7 @@ function aktualisiereTermineTreffer(l) {
 }
 
 function renderTermine(ziel, slug, l) {
-  TERMIN_FILTER = { datum: 'alle', bezirk: 'alle', kosten: 'alle', kids: 'alle' };
+  TERMIN_FILTER = { datum: 'alle', bezirk: 'alle', kids: 'alle' };
   window._aktuelleTermine = { slug: slug, info: l };
 
   // Einmaliges Deduplizieren bei erstem Aufruf — schützt vor Mehrfach-Laden
@@ -1504,7 +1531,7 @@ function renderTerminDetail(ziel, item, info, zurueck) {
     kontakt += '<p><strong>Website:</strong> <a href="' + w + '" target="_blank" rel="noopener">' + escapeHtml(item.website) + '</a></p>';
   }
   if (item.anmeldungKontakt) kontakt += '<p><strong>Anmeldung:</strong> ' + escapeHtml(item.anmeldungKontakt) + '</p>';
-  if (item.sourceUrl)    kontakt += '<p><a href="' + item.sourceUrl + '" target="_blank" rel="noopener">Diese Veranstaltung an der Quelle ansehen</a></p>';
+  if (item.sourceUrl)    kontakt += '<p><a href="' + item.sourceUrl + '" target="_blank" rel="noopener">Link zur Originalwebsite</a></p>';
   if (kontakt) { html += dropdown('Veranstalter & Kontakt', kontakt, first); first = false; }
 
   if (first) html += '<div class="hinweis">Weitere Details werden ergänzt.</div>';
@@ -2402,14 +2429,10 @@ function renderIframeSeite(ziel, slug, l) {
   }
 
   // ── PDF (default) ───────────────────────────────────────────────
-  // Einheitlich auf Mobile + Desktop: Google-Docs-Viewer als iFrame.
-  // Originalserver liefert PDFs zwar mit korrektem Content-Type aus
-  // (jsDelivr), aber der Google-Viewer rendert auf allen Geräten
-  // konsistent mit Pagination/Zoom-Controls. Über dem iFrame steht
-  // immer ein "In neuem Tab öffnen"-Button als Fallback, falls die
-  // Vorschau auf einem Gerät nicht lädt (z. B. iOS Safari).
-  var safe = encodeURIComponent(iframeUrl);
-  var viewerUrl = 'https://docs.google.com/viewer?url=' + safe + '&embedded=true';
+  // PDFs direkt im iframe einbetten — jsDelivr liefert mit korrektem
+  // Content-Type aus, moderne Browser (Edge, Chrome, Firefox) rendern
+  // PDFs nativ inline. Vorteil: kein Google-Docs-Viewer-Cache-Problem
+  // mehr (das verursachte leere Anzeige beim ersten Aufruf).
   var iframeId = 'pdfvw-' + Math.random().toString(36).slice(2);
   ziel.innerHTML =
     '<div class="sticky-region">'
@@ -2421,7 +2444,8 @@ function renderIframeSeite(ziel, slug, l) {
     + '</div>'
     + '<div class="iframe-wrap iframe-wrap-pdf" id="' + iframeId + '-wrap">'
       + '<div class="iframe-lade-hinweis">PDF wird geladen…</div>'
-      + '<iframe id="' + iframeId + '" src="' + viewerUrl + '" class="inhalts-iframe inhalts-iframe-pdf" '
+      + '<iframe id="' + iframeId + '" src="' + iframeUrl + '#view=FitH" class="inhalts-iframe inhalts-iframe-pdf" '
+      + 'type="application/pdf" '
       + 'allowfullscreen referrerpolicy="no-referrer-when-downgrade" '
       + 'onload="this.parentNode.classList.add(\'iframe-geladen\')"></iframe>'
     + '</div>'
@@ -2662,7 +2686,7 @@ function renderMuseumDetail(ziel, item, info, zurueck) {
     + '<div class="sticky-detail-titel">' + escapeHtml(item.name) + '</div>'
     + '<div class="diff-gpx-row">';
   if (item.ort) html += '<span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(item.ort) + '</span>';
-  if (item.sourceUrl) html += '<a class="btn-action btn-gpx" href="' + item.sourceUrl + '" target="_blank" rel="noopener">↗ Quelle</a>';
+  if (item.sourceUrl) html += '<a class="btn-action btn-gpx" href="' + item.sourceUrl + '" target="_blank" rel="noopener">🌐 Website</a>';
   html += '</div></div>';
 
   html += '<div class="detail-section">';
