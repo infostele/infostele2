@@ -344,6 +344,7 @@ function router() {
   else if (teile[0] === 'kategorie' && teile[1]) renderKategorie(ziel, teile[1]);
   else if (teile[0] === 'liste' && teile[1])    renderListe(ziel, teile[1]);
   else if (teile[0] === 'detail' && teile[1] && teile[2]) renderDetail(ziel, teile[1], teile[2]);
+  else if (teile[0] === 'karte'  && teile[1] && teile[2]) renderKarte(ziel, teile[1], teile[2]);
   else renderHome(ziel);
 }
 function navigateTo(pfad) { window.location.hash = pfad; }
@@ -1434,6 +1435,9 @@ function renderDetail(ziel, typ, schluessel) {
     return;
   }
   var item = daten[idx];
+  // Karte-URL für Detail-Renderer bereitstellen (wird nur genutzt, wenn Item
+  // tatsächlich Koordinaten/GPX hat - die Render-Funktion prüft das selbst).
+  info.karteUrl = '#karte/' + typ + '/' + schluessel;
 
   if (typ === 'wandern' || typ === 'rad')      renderRouteDetail(ziel, item, info, zurueck);
   else if (typ === 'ausfl')                    renderAusflDetail(ziel, item, info, zurueck);
@@ -1468,10 +1472,13 @@ function renderTerminDetail(ziel, item, info, zurueck) {
   if (item.kostenfrei) pills += '<span class="diff-pill termin-frei-pill">kostenfrei</span>';
   if (item.fuerKids) pills += '<span class="diff-pill termin-kids-pill">👶 Familie</span>';
   if (item.quelle === 'lit') pills += '<span class="diff-pill quelle-lit">📚 ww-Lit</span>';
-  if (item.sourceUrl) pills += '<a class="btn-action btn-gpx" href="' + item.sourceUrl + '" target="_blank" rel="noopener">↗ Quelle</a>';
+  if (item.sourceUrl) pills += '<a class="btn-action btn-gpx" href="' + item.sourceUrl + '" target="_blank" rel="noopener">🌐 Website</a>';
   if (item.quelle === 'natur' && item.website) {
     var url = item.website.indexOf('http') === 0 ? item.website : 'https://' + item.website;
     pills += '<a class="btn-action btn-gpx" href="' + url + '" target="_blank" rel="noopener">🌐 Website</a>';
+  }
+  if (item.lat && item.lng && info.karteUrl) {
+    pills += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
   }
   pills += '</div>';
 
@@ -1923,7 +1930,12 @@ function renderRouteDetail(ziel, item, info, zurueck) {
   var stickyTopRow = '<div class="diff-gpx-row">';
   if (n.schwierigkeit) stickyTopRow += '<span class="diff-pill ' + diffBg + '">' + escapeHtml(n.schwierigkeit) + '</span>';
   if (n.gpxUrl) stickyTopRow += '<a class="btn-action btn-gpx" href="' + n.gpxUrl + '" target="_blank" rel="noopener">📥 GPX</a>';
-  if (n.tourenplanerUrl) stickyTopRow += '<a class="btn-action outline" href="' + n.tourenplanerUrl + '" target="_blank" rel="noopener">🗺️ Karte</a>';
+  // Karte intern (Leaflet + GPX-Track) — fällt zurück auf externen Tourenplaner, wenn kein GPX
+  if (n.gpxUrl && info.karteUrl) {
+    stickyTopRow += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
+  } else if (n.tourenplanerUrl) {
+    stickyTopRow += '<a class="btn-action outline" href="' + n.tourenplanerUrl + '" target="_blank" rel="noopener">🗺️ Karte</a>';
+  }
   stickyTopRow += '</div>';
 
   var html = '<div class="sticky-detail">'
@@ -1977,6 +1989,10 @@ function renderAusflDetail(ziel, item, info, zurueck) {
   var tagRow = '<div class="diff-gpx-row">';
   if (item.mainTopic || item.topic) tagRow += '<span class="diff-pill">' + escapeHtml(item.mainTopic || item.topic) + '</span>';
   if (item.town) tagRow += '<span class="diff-pill diff-leicht-bg">' + escapeHtml(item.town) + '</span>';
+  if (item.url) tagRow += '<a class="btn-action btn-gpx" href="' + item.url + '" target="_blank" rel="noopener">🌐 Website</a>';
+  if (item.lat && item.lng && info.karteUrl) {
+    tagRow += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
+  }
   tagRow += '</div>';
   html += tagRow;
   if (item.description || item.desc) html += dropdown('Beschreibung', txt(item.description || item.desc), true);
@@ -1991,7 +2007,13 @@ function renderBadeseeDetail(ziel, item, info, zurueck) {
     + intro(info.titel, '')
     + '<div class="detail-section">'
     + '<h2 class="detail-titel">' + escapeHtml(item.name) + '</h2>';
-  if (item.ort) html += '<div class="diff-gpx-row"><span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(item.ort) + '</span></div>';
+  var tagRow = '<div class="diff-gpx-row">';
+  if (item.ort) tagRow += '<span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(item.ort) + '</span>';
+  if (item.lat && item.lng && info.karteUrl) {
+    tagRow += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
+  }
+  tagRow += '</div>';
+  html += tagRow;
   if (item.kurz) html += dropdown('Kurzinfo', txt(item.kurz), true);
   if (item.detail) html += dropdown('Beschreibung', txt(item.detail));
 
@@ -2024,11 +2046,18 @@ function renderUnterkunftDetail(ziel, item, info, zurueck) {
     + intro(info.titel, '')
     + '<div class="detail-section">'
     + '<h2 class="detail-titel">' + escapeHtml(item.name) + '</h2>';
+  var tagRow = '<div class="diff-gpx-row">';
+  var hatTags = false;
   if (item.categories && item.categories.length) {
-    html += '<div class="diff-gpx-row">';
-    item.categories.forEach(function(c) { html += '<span class="diff-pill">' + escapeHtml(c) + '</span>'; });
-    html += '</div>';
+    item.categories.forEach(function(c) { tagRow += '<span class="diff-pill">' + escapeHtml(c) + '</span>'; });
+    hatTags = true;
   }
+  if (item.lat && item.lng && info.karteUrl) {
+    tagRow += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
+    hatTags = true;
+  }
+  tagRow += '</div>';
+  if (hatTags) html += tagRow;
   if (item.description) html += dropdown('Beschreibung', txt(item.description), true);
   if (item.features && item.features.length) {
     var f = '<ul>';
@@ -2578,6 +2607,274 @@ function ladeLeaflet() {
   return LEAFLET_LADEPROMISE;
 }
 
+// ════════════════════════════════════════════════════════════════
+// KARTE: Generischer Renderer für GPX-Touren + einzelne Standorte
+// Mit Landkreis-Overlay (AK/WW/NR) und optionalem Eigen-Standort.
+// ════════════════════════════════════════════════════════════════
+
+// Bounding-Box der drei Landkreise (S, W, N, O) – grob, für Map-Default
+var KARTE_BBOX = [50.30, 7.20, 50.95, 8.35];
+
+// In-Memory Cache für Landkreis-GeoJSON (einmal pro Session geholt)
+var WW_KREISE_CACHE = null;
+
+// Promise-Cache für zusätzliche Scripts (leaflet-gpx, osmtogeojson)
+var KARTE_PLUGIN_PROMISE = null;
+
+function ladeScript(url) {
+  return new Promise(function(resolve, reject) {
+    var s = document.createElement('script');
+    s.src = url;
+    s.async = true;
+    s.onload = resolve;
+    s.onerror = function() { reject(new Error('Script konnte nicht geladen werden: ' + url)); };
+    document.head.appendChild(s);
+  });
+}
+
+function ladeKartenPlugins() {
+  // Lädt Leaflet + leaflet-gpx + osmtogeojson nacheinander
+  if (window.L && window.L.GPX && window.osmtogeojson) return Promise.resolve();
+  if (KARTE_PLUGIN_PROMISE) return KARTE_PLUGIN_PROMISE;
+  KARTE_PLUGIN_PROMISE = ladeLeaflet().then(function() {
+    var pendings = [];
+    if (!window.L.GPX) pendings.push(ladeScript('https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/gpx.min.js'));
+    if (!window.osmtogeojson) pendings.push(ladeScript('https://cdn.jsdelivr.net/npm/osmtogeojson@3.0.0-beta.5/osmtogeojson.min.js'));
+    return Promise.all(pendings);
+  });
+  return KARTE_PLUGIN_PROMISE;
+}
+
+// ─── DATEN-LOOKUP (parallel zu renderDetail) ────────────────────
+function ladeKartenItem(typ, schluessel) {
+  // Liefert { item, info, zurueck } oder null
+  if (typ === 'wwbox') {
+    var bIdx = parseInt(schluessel, 10);
+    var bData = window.DATA_WESTERWALDBOX_BETRIEBE || [];
+    if (!bData[bIdx]) return null;
+    return { item: bData[bIdx], info: { titel: bData[bIdx].name, breadcrumb: 'Karte' }, zurueck: 'detail/wwbox/' + bIdx };
+  }
+  var teile = schluessel.split('_');
+  var listeSlug = teile.slice(0, -1).join('_');
+  var idx = parseInt(teile[teile.length - 1], 10);
+  var info = null, daten = null, zurueck = 'home';
+  if (typ === 'wandern') {
+    var sub = listeSlug.split('-').slice(2).join('-');
+    info = WANDER_DATEN[sub]; daten = info && window[info.name];
+    zurueck = 'detail/wandern/' + schluessel;
+  } else if (typ === 'rad') {
+    var sub = listeSlug.split('-').slice(2).join('-');
+    info = RAD_DATEN[sub]; daten = info && window[info.name];
+    zurueck = 'detail/rad/' + schluessel;
+  } else {
+    var ll = LISTEN[listeSlug];
+    if (ll) {
+      info = { breadcrumb: ll.breadcrumb, titel: ll.titel };
+      daten = window[ll.datenName];
+      zurueck = 'detail/' + typ + '/' + schluessel;
+    }
+  }
+  if (!daten || !daten[idx]) return null;
+  return { item: daten[idx], info: info, zurueck: zurueck };
+}
+
+// ─── HAUPT-RENDERER ─────────────────────────────────────────────
+function renderKarte(ziel, typ, schluessel) {
+  var ctx = ladeKartenItem(typ, schluessel);
+  if (!ctx) {
+    ziel.innerHTML = navBar('home','') + intro('Nicht gefunden','') + '<div class="hinweis">Eintrag nicht verfügbar.</div>';
+    return;
+  }
+  var item = ctx.item;
+  var titel = item.titel || item.name || item.title || 'Karte';
+
+  // Karten-Modus bestimmen
+  var modus = null;
+  var gpxUrl = null;
+  var lat = null, lng = null;
+
+  if (typ === 'wandern' || typ === 'rad') {
+    gpxUrl = item.gpxUrl || (typeof gpxAusTourenplaner === 'function' ? gpxAusTourenplaner(item.tourenplanerUrl || item.tourenplaner) : null);
+    if (gpxUrl) modus = 'gpx';
+  }
+  if (!modus) {
+    // Punkt-Modus: lat/lng direkt
+    lat = parseFloat(item.lat); lng = parseFloat(item.lng);
+    if (!isNaN(lat) && !isNaN(lng)) modus = 'punkt';
+  }
+
+  var mapId = 'karte-' + Math.random().toString(36).slice(2);
+  ziel.innerHTML =
+    '<div class="sticky-region">'
+      + navBar(ctx.zurueck, ctx.info.breadcrumb + ' › <strong>Karte</strong>')
+      + intro(titel, '')
+    + '</div>'
+    + '<div class="karte-wrap">'
+      + '<div id="' + mapId + '" class="karte-leaflet"></div>'
+      + '<div class="karte-lade-hinweis" id="' + mapId + '-lade">Karte wird geladen …</div>'
+    + '</div>'
+    + '<div class="karte-meta">'
+      + (modus === 'gpx'    ? '<p>Tour-Verlauf · GPX-Daten: Tourenplaner Rheinland-Pfalz · Kartendaten: © OpenStreetMap</p>' :
+         modus === 'punkt'  ? '<p>Standort · Kartendaten: © OpenStreetMap-Mitwirkende</p>' :
+                              '<p>Kein konkreter Standort hinterlegt. Kartendaten: © OpenStreetMap</p>')
+    + '</div>'
+    + '<div class="spacer"></div>';
+
+  if (!modus) {
+    var ladeEl = document.getElementById(mapId + '-lade');
+    if (ladeEl) ladeEl.innerHTML = 'Für diesen Eintrag wurden keine Koordinaten hinterlegt.';
+    return;
+  }
+
+  ladeKartenPlugins().then(function() {
+    initWesterwaldKarte(mapId, { modus: modus, gpxUrl: gpxUrl, lat: lat, lng: lng, label: titel });
+  }).catch(function(err) {
+    var ladeEl = document.getElementById(mapId + '-lade');
+    if (ladeEl) ladeEl.innerHTML = 'Karte konnte nicht geladen werden.';
+  });
+}
+
+// ─── MAP-INITIALISIERUNG ───────────────────────────────────────
+function initWesterwaldKarte(mapId, opts) {
+  var mapEl = document.getElementById(mapId);
+  if (!mapEl || !window.L) return;
+  var map = L.map(mapId, {
+    center: [(KARTE_BBOX[0]+KARTE_BBOX[2])/2, (KARTE_BBOX[1]+KARTE_BBOX[3])/2],
+    zoom: 10,
+    scrollWheelZoom: false
+  });
+  // Scroll-Wheel-Zoom aktivieren wenn Karte angeklickt wird (Konflikt mit Seiten-Scroll vermeiden)
+  map.on('focus', function() { map.scrollWheelZoom.enable(); });
+  map.on('blur',  function() { map.scrollWheelZoom.disable(); });
+  map.getContainer().addEventListener('click', function() { map.scrollWheelZoom.enable(); });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
+    maxZoom: 18
+  }).addTo(map);
+
+  // 1. Landkreis-Grenzen als Overlay laden (asynchron, blockiert nichts)
+  ladeKreisGrenzen(map);
+
+  // 2. Inhalt anzeigen (GPX oder Punkt)
+  var ladeEl = document.getElementById(mapId + '-lade');
+  if (opts.modus === 'gpx') {
+    try {
+      new L.GPX(opts.gpxUrl, {
+        async: true,
+        marker_options: {
+          startIconUrl: 'https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/pin-icon-start.png',
+          endIconUrl:   'https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/pin-icon-end.png',
+          shadowUrl:    'https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/pin-shadow.png'
+        },
+        polyline_options: { color: '#0b422a', weight: 4, opacity: 0.85 }
+      })
+      .on('loaded', function(e) {
+        map.fitBounds(e.target.getBounds(), { padding: [20, 20] });
+        if (ladeEl) ladeEl.style.display = 'none';
+      })
+      .on('error', function() {
+        if (ladeEl) ladeEl.innerHTML = 'GPX konnte nicht geladen werden. <a href="' + opts.gpxUrl + '" target="_blank" rel="noopener">GPX direkt öffnen ↗</a>';
+      })
+      .addTo(map);
+    } catch (e) {
+      if (ladeEl) ladeEl.innerHTML = 'GPX konnte nicht angezeigt werden.';
+    }
+  } else if (opts.modus === 'punkt') {
+    L.marker([opts.lat, opts.lng]).addTo(map).bindPopup('<strong>' + escapeHtml(opts.label) + '</strong>').openPopup();
+    map.setView([opts.lat, opts.lng], 14);
+    if (ladeEl) ladeEl.style.display = 'none';
+  }
+
+  // 3. Eigener Standort (asynchron, nur wenn User erlaubt)
+  zeigeEigenenStandort(map);
+}
+
+// ─── LANDKREIS-OVERLAY ─────────────────────────────────────────
+function ladeKreisGrenzen(map) {
+  if (WW_KREISE_CACHE) { ueberlageKreise(map, WW_KREISE_CACHE); return; }
+  // Overpass-Query: die drei Landkreise als administrative Boundaries (admin_level=6)
+  var query = '[out:json][timeout:25];'
+    + '('
+      + 'relation["boundary"="administrative"]["admin_level"="6"]["name"="Landkreis Altenkirchen (Westerwald)"];'
+      + 'relation["boundary"="administrative"]["admin_level"="6"]["name"="Westerwaldkreis"];'
+      + 'relation["boundary"="administrative"]["admin_level"="6"]["name"="Landkreis Neuwied"];'
+    + ');'
+    + '(._;>;);'
+    + 'out body;';
+  fetch('https://overpass-api.de/api/interpreter', {
+    method: 'POST',
+    body: 'data=' + encodeURIComponent(query)
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!window.osmtogeojson) return;
+    var geojson = window.osmtogeojson(data);
+    // Nur Polygone/MultiPolygone behalten
+    geojson.features = geojson.features.filter(function(f) {
+      return f.geometry && (f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon');
+    });
+    WW_KREISE_CACHE = geojson;
+    ueberlageKreise(map, geojson);
+  })
+  .catch(function(err) {
+    // Stiller Fehler: Karte funktioniert auch ohne Overlay
+    console.warn('Landkreis-Overlay konnte nicht geladen werden:', err);
+  });
+}
+
+function ueberlageKreise(map, geojson) {
+  L.geoJSON(geojson, {
+    style: {
+      color: '#1d6b3e',       // Linienfarbe (Westerwald-Grün)
+      weight: 2,
+      opacity: 0.7,
+      fillColor: '#88c340',   // Füllfarbe (helleres Grün, hebt Region hervor)
+      fillOpacity: 0.12
+    },
+    interactive: false        // Klicks gehen durch zur Karte
+  }).addTo(map);
+}
+
+// ─── EIGENER STANDORT ──────────────────────────────────────────
+function zeigeEigenenStandort(map) {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    var lat = pos.coords.latitude, lng = pos.coords.longitude;
+    // Marker für Eigen-Standort: blauer Kreis mit weißem Rand
+    L.circleMarker([lat, lng], {
+      radius: 8,
+      fillColor: '#3388ff',
+      color: '#ffffff',
+      weight: 3,
+      opacity: 1,
+      fillOpacity: 0.9
+    }).addTo(map).bindPopup('<strong>Dein Standort</strong>');
+    // Genauigkeits-Radius andeuten
+    if (pos.coords.accuracy && pos.coords.accuracy < 5000) {
+      L.circle([lat, lng], {
+        radius: pos.coords.accuracy,
+        color: '#3388ff',
+        weight: 1,
+        opacity: 0.4,
+        fillColor: '#3388ff',
+        fillOpacity: 0.08,
+        interactive: false
+      }).addTo(map);
+    }
+  }, function() { /* User hat abgelehnt oder Fehler – still */ }, {
+    enableHighAccuracy: false,
+    timeout: 8000,
+    maximumAge: 60000
+  });
+}
+
+// Helper: Karte-Button HTML für Detail-Views
+function karteButton(typ, schluessel, sichtbar) {
+  if (!sichtbar) return '';
+  return '<a class="btn-action outline" href="#karte/' + typ + '/' + schluessel + '">🗺️ Karte</a>';
+}
+
 function renderMitfahrbankKarte(ziel, slug, l) {
   var mapId = 'mfbk-' + Math.random().toString(36).slice(2);
   ziel.innerHTML =
@@ -2687,6 +2984,9 @@ function renderMuseumDetail(ziel, item, info, zurueck) {
     + '<div class="diff-gpx-row">';
   if (item.ort) html += '<span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(item.ort) + '</span>';
   if (item.sourceUrl) html += '<a class="btn-action btn-gpx" href="' + item.sourceUrl + '" target="_blank" rel="noopener">🌐 Website</a>';
+  if (item.lat && item.lng && info.karteUrl) {
+    html += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
+  }
   html += '</div></div>';
 
   html += '<div class="detail-section">';
