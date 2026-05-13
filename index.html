@@ -171,6 +171,22 @@
   padding: 0 16px;
   max-width: 640px;
 }
+/* Start- und Ziel-Marker auf der Karte (Fallback bei GPX-CORS-Fehler) */
+.marker-start-ziel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 14px;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  border: 2px solid #fff;
+}
+.marker-start-ziel.marker-start { background: #1d6b3e; }
+.marker-start-ziel.marker-ziel  { background: #c0392b; }
 </style>
 </head>
 <body>

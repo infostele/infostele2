@@ -1477,7 +1477,7 @@ function renderTerminDetail(ziel, item, info, zurueck) {
     var url = item.website.indexOf('http') === 0 ? item.website : 'https://' + item.website;
     pills += '<a class="btn-action btn-gpx" href="' + url + '" target="_blank" rel="noopener">🌐 Website</a>';
   }
-  if (item.lat && item.lng && info.karteUrl) {
+  if (hatVerortbareInfo(item) && info.karteUrl) {
     pills += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
   }
   pills += '</div>';
@@ -1930,8 +1930,8 @@ function renderRouteDetail(ziel, item, info, zurueck) {
   var stickyTopRow = '<div class="diff-gpx-row">';
   if (n.schwierigkeit) stickyTopRow += '<span class="diff-pill ' + diffBg + '">' + escapeHtml(n.schwierigkeit) + '</span>';
   if (n.gpxUrl) stickyTopRow += '<a class="btn-action btn-gpx" href="' + n.gpxUrl + '" target="_blank" rel="noopener">📥 GPX</a>';
-  // Karte intern (Leaflet + GPX-Track) — fällt zurück auf externen Tourenplaner, wenn kein GPX
-  if (n.gpxUrl && info.karteUrl) {
+  // Karte intern (Leaflet + GPX/Marker) — anzeigen wenn GPX ODER Start/Ziel-Daten vorhanden
+  if (info.karteUrl && (n.gpxUrl || item.start || item.destination)) {
     stickyTopRow += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
   } else if (n.tourenplanerUrl) {
     stickyTopRow += '<a class="btn-action outline" href="' + n.tourenplanerUrl + '" target="_blank" rel="noopener">🗺️ Karte</a>';
@@ -1990,7 +1990,7 @@ function renderAusflDetail(ziel, item, info, zurueck) {
   if (item.mainTopic || item.topic) tagRow += '<span class="diff-pill">' + escapeHtml(item.mainTopic || item.topic) + '</span>';
   if (item.town) tagRow += '<span class="diff-pill diff-leicht-bg">' + escapeHtml(item.town) + '</span>';
   if (item.url) tagRow += '<a class="btn-action btn-gpx" href="' + item.url + '" target="_blank" rel="noopener">🌐 Website</a>';
-  if (item.lat && item.lng && info.karteUrl) {
+  if (hatVerortbareInfo(item) && info.karteUrl) {
     tagRow += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
   }
   tagRow += '</div>';
@@ -2009,7 +2009,7 @@ function renderBadeseeDetail(ziel, item, info, zurueck) {
     + '<h2 class="detail-titel">' + escapeHtml(item.name) + '</h2>';
   var tagRow = '<div class="diff-gpx-row">';
   if (item.ort) tagRow += '<span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(item.ort) + '</span>';
-  if (item.lat && item.lng && info.karteUrl) {
+  if (hatVerortbareInfo(item) && info.karteUrl) {
     tagRow += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
   }
   tagRow += '</div>';
@@ -2052,7 +2052,7 @@ function renderUnterkunftDetail(ziel, item, info, zurueck) {
     item.categories.forEach(function(c) { tagRow += '<span class="diff-pill">' + escapeHtml(c) + '</span>'; });
     hatTags = true;
   }
-  if (item.lat && item.lng && info.karteUrl) {
+  if (hatVerortbareInfo(item) && info.karteUrl) {
     tagRow += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
     hatTags = true;
   }
@@ -2646,6 +2646,139 @@ function ladeKartenPlugins() {
 }
 
 // ─── DATEN-LOOKUP (parallel zu renderDetail) ────────────────────
+// ─── KOORDINATEN-HELFER ────────────────────────────────────────
+// Parst DMS-Strings wie: "N 50° 41' 0.0" | O 8° 18' 11.0""
+// Auch tolerant gegenüber unterschiedlichen Quotes, Trennzeichen, Dezimalkomma.
+function parseDmsCoordinates(str) {
+  if (!str || typeof str !== 'string') return null;
+  var re = /([NSns])\s*(\d+)\s*°\s*(\d+)\s*['′]\s*([\d.,]+)\s*["″]?\s*[|\/,;]\s*([EOWeow])\s*(\d+)\s*°\s*(\d+)\s*['′]\s*([\d.,]+)\s*["″]?/;
+  var m = str.match(re);
+  if (!m) return null;
+  var lat = parseInt(m[2],10) + parseInt(m[3],10)/60 + parseFloat(m[4].replace(',','.'))/3600;
+  var lng = parseInt(m[6],10) + parseInt(m[7],10)/60 + parseFloat(m[8].replace(',','.'))/3600;
+  if (m[1].toUpperCase() === 'S') lat = -lat;
+  if (m[5].toUpperCase() === 'W') lng = -lng;
+  return { lat: lat, lng: lng };
+}
+
+// Baut die beste verfügbare Geocoding-Adresse aus einem Item, je nach Typ.
+function baueAdresseFuerGeocoding(item, typ) {
+  if (!item) return null;
+  var strasse = '';
+  var ortTeil = '';
+
+  // Strukturierte Felder (Badesee, Veranstaltung aus Excel)
+  if (item.strasse) strasse = item.strasse;
+  else if (item.adresse) strasse = item.adresse;
+  else if (item.address) strasse = item.address;
+  else if (item.contact && item.contact.street) strasse = item.contact.street;
+
+  // PLZ + Ort
+  if (item.plz && item.ort) ortTeil = item.plz + ' ' + item.ort;
+  else if (item.plzOrt) ortTeil = item.plzOrt;
+  else if (item.ort) ortTeil = item.ort;
+  else if (item.town) ortTeil = item.town;
+  else if (item.contact) {
+    var p = []; if (item.contact.zip) p.push(item.contact.zip); if (item.contact.town) p.push(item.contact.town);
+    ortTeil = p.join(' ');
+  }
+
+  // Manche Daten (Museum) haben adresse="Auf der Bell, 57562 Herdorf" – schon komplett
+  if (strasse && /\d{5}/.test(strasse)) return strasse.trim();
+
+  var parts = [];
+  if (strasse) parts.push(strasse);
+  if (ortTeil) parts.push(ortTeil);
+  if (!parts.length) return null;
+  return parts.join(', ');
+}
+
+// Geocoding via Nominatim mit localStorage-Cache.
+// Hinweis: Nominatim erlaubt 1 Request/Sekunde – für eine Regional-App mehr
+// als ausreichend, vor allem mit Cache (jede Adresse wird nur einmal gefragt).
+function geocodeAdresse(adresse) {
+  if (!adresse) return Promise.resolve(null);
+  var key = 'wwgeo:' + adresse.toLowerCase().trim();
+  try {
+    var cached = localStorage.getItem(key);
+    if (cached) return Promise.resolve(JSON.parse(cached));
+  } catch (e) {}
+
+  // Suche eingrenzen auf Deutschland für bessere Treffer
+  var url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=de&accept-language=de&q='
+    + encodeURIComponent(adresse);
+  return fetch(url, { headers: { 'Accept-Language': 'de' } })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(arr) {
+      if (!arr || !arr.length) return null;
+      var result = { lat: parseFloat(arr[0].lat), lng: parseFloat(arr[0].lon) };
+      try { localStorage.setItem(key, JSON.stringify(result)); } catch (e) {}
+      return result;
+    })
+    .catch(function() { return null; });
+}
+
+// Findet Koordinaten für ein Item durch Fallback-Kette:
+//   1. item.lat/lng (numerisch)
+//   2. DMS-Koordinaten aus item.start.coordinates / item.coordinates
+//   3. Geocoding der Adresse via Nominatim (gecacht)
+function findeKoordinaten(item, typ) {
+  // 1. Direkt
+  var lat = parseFloat(item.lat); var lng = parseFloat(item.lng);
+  if (!isNaN(lat) && !isNaN(lng)) return Promise.resolve({ lat: lat, lng: lng });
+
+  // 2. DMS aus div. Feldern
+  var dms = null;
+  if (item.coordinates) dms = parseDmsCoordinates(item.coordinates);
+  if (!dms && item.start && typeof item.start === 'object' && item.start.coordinates) {
+    dms = parseDmsCoordinates(item.start.coordinates);
+  }
+  if (dms) return Promise.resolve(dms);
+
+  // 3. Adresse geocoden
+  var adr = baueAdresseFuerGeocoding(item, typ);
+  if (adr) return geocodeAdresse(adr);
+
+  return Promise.resolve(null);
+}
+
+// Findet die Start- bzw. Zielkoordinate einer Wander-/Rad-Etappe.
+function findeRoutenPunkte(item) {
+  function einPunkt(obj) {
+    if (!obj) return null;
+    if (typeof obj === 'object') {
+      // DMS-Koordinaten?
+      if (obj.coordinates) {
+        var d = parseDmsCoordinates(obj.coordinates);
+        if (d) return Promise.resolve(d);
+      }
+      // Adresse?
+      if (obj.address) return geocodeAdresse(obj.address);
+      if (obj.name)    return geocodeAdresse(obj.name);
+    } else if (typeof obj === 'string') {
+      return geocodeAdresse(obj);
+    }
+    return Promise.resolve(null);
+  }
+  return Promise.all([einPunkt(item.start), einPunkt(item.destination)]).then(function(arr) {
+    return { start: arr[0], ziel: arr[1] };
+  });
+}
+
+// Generische Prüfung: Hat das Item überhaupt Daten, die wir verorten könnten?
+// Wird in den Detail-Renderern verwendet, um den Karte-Button bedingt anzuzeigen.
+function hatVerortbareInfo(item) {
+  if (!item) return false;
+  if (item.lat && item.lng) return true;
+  if (item.coordinates && parseDmsCoordinates(item.coordinates)) return true;
+  if (item.start && (item.start.coordinates || item.start.address)) return true;
+  if (item.adresse || item.address || item.strasse) return true;
+  if (item.plzOrt) return true;
+  if (item.contact && (item.contact.street || item.contact.town)) return true;
+  if (item.gpxUrl) return true;
+  return false;
+}
+
 function ladeKartenItem(typ, schluessel) {
   // Liefert { item, info, zurueck } oder null
   if (typ === 'wwbox') {
@@ -2689,18 +2822,12 @@ function renderKarte(ziel, typ, schluessel) {
   var titel = item.titel || item.name || item.title || 'Karte';
 
   // Karten-Modus bestimmen
-  var modus = null;
+  var hatGpx = false;
   var gpxUrl = null;
-  var lat = null, lng = null;
 
   if (typ === 'wandern' || typ === 'rad') {
     gpxUrl = item.gpxUrl || (typeof gpxAusTourenplaner === 'function' ? gpxAusTourenplaner(item.tourenplanerUrl || item.tourenplaner) : null);
-    if (gpxUrl) modus = 'gpx';
-  }
-  if (!modus) {
-    // Punkt-Modus: lat/lng direkt
-    lat = parseFloat(item.lat); lng = parseFloat(item.lng);
-    if (!isNaN(lat) && !isNaN(lng)) modus = 'punkt';
+    if (gpxUrl) hatGpx = true;
   }
 
   var mapId = 'karte-' + Math.random().toString(36).slice(2);
@@ -2714,21 +2841,37 @@ function renderKarte(ziel, typ, schluessel) {
       + '<div class="karte-lade-hinweis" id="' + mapId + '-lade">Karte wird geladen …</div>'
     + '</div>'
     + '<div class="karte-meta">'
-      + (modus === 'gpx'    ? '<p>Tour-Verlauf · GPX-Daten: Tourenplaner Rheinland-Pfalz · Kartendaten: © OpenStreetMap</p>' :
-         modus === 'punkt'  ? '<p>Standort · Kartendaten: © OpenStreetMap-Mitwirkende</p>' :
-                              '<p>Kein konkreter Standort hinterlegt. Kartendaten: © OpenStreetMap</p>')
+      + (hatGpx ? '<p>Tour-Verlauf · GPX-Daten: Tourenplaner Rheinland-Pfalz · Kartendaten: © OpenStreetMap-Mitwirkende</p>'
+                : '<p>Kartendaten: © OpenStreetMap-Mitwirkende. Adress-Suche: Nominatim / OSM.</p>')
     + '</div>'
     + '<div class="spacer"></div>';
 
-  if (!modus) {
-    var ladeEl = document.getElementById(mapId + '-lade');
-    if (ladeEl) ladeEl.innerHTML = 'Für diesen Eintrag wurden keine Koordinaten hinterlegt.';
-    return;
-  }
-
   ladeKartenPlugins().then(function() {
-    initWesterwaldKarte(mapId, { modus: modus, gpxUrl: gpxUrl, lat: lat, lng: lng, label: titel });
-  }).catch(function(err) {
+    if (hatGpx) {
+      // Vorab Start/Ziel parallel geocoden – als Fallback falls GPX-Fetch scheitert (CORS)
+      findeRoutenPunkte(item).then(function(pts) {
+        initWesterwaldKarte(mapId, {
+          modus: 'gpx', gpxUrl: gpxUrl, label: titel,
+          startPunkt: pts.start, zielPunkt: pts.ziel
+        });
+      });
+    } else {
+      // Punkt-Modus: Koordinaten asynchron auflösen (lat/lng → DMS → Geocoding)
+      findeKoordinaten(item, typ).then(function(coords) {
+        if (!coords) {
+          var ladeEl = document.getElementById(mapId + '-lade');
+          if (ladeEl) ladeEl.innerHTML = 'Für diesen Eintrag konnte kein Standort ermittelt werden.';
+          // Wir initialisieren die Karte trotzdem (nur Landkreis-Overlay + Eigenstandort),
+          // damit der User wenigstens etwas sieht.
+          initWesterwaldKarte(mapId, { modus: 'leer', label: titel });
+          return;
+        }
+        initWesterwaldKarte(mapId, {
+          modus: 'punkt', lat: coords.lat, lng: coords.lng, label: titel
+        });
+      });
+    }
+  }).catch(function() {
     var ladeEl = document.getElementById(mapId + '-lade');
     if (ladeEl) ladeEl.innerHTML = 'Karte konnte nicht geladen werden.';
   });
@@ -2756,9 +2899,63 @@ function initWesterwaldKarte(mapId, opts) {
   // 1. Landkreis-Grenzen als Overlay laden (asynchron, blockiert nichts)
   ladeKreisGrenzen(map);
 
-  // 2. Inhalt anzeigen (GPX oder Punkt)
+  // 2. Inhalt anzeigen (GPX oder Punkt oder leer)
   var ladeEl = document.getElementById(mapId + '-lade');
+
+  // Helfer: Start- und Ziel-Marker zeichnen (für Wandern/Rad als Fallback,
+  // wenn GPX nicht lädt, oder als Ergänzung wenn beides vorhanden ist)
+  function zeichneStartZiel() {
+    var pts = [];
+    if (opts.startPunkt) {
+      L.marker([opts.startPunkt.lat, opts.startPunkt.lng], {
+        icon: L.divIcon({
+          className: 'marker-start-ziel marker-start',
+          html: '<span>S</span>',
+          iconSize: [28, 28]
+        })
+      }).addTo(map).bindPopup('<strong>Start</strong>');
+      pts.push([opts.startPunkt.lat, opts.startPunkt.lng]);
+    }
+    if (opts.zielPunkt) {
+      L.marker([opts.zielPunkt.lat, opts.zielPunkt.lng], {
+        icon: L.divIcon({
+          className: 'marker-start-ziel marker-ziel',
+          html: '<span>Z</span>',
+          iconSize: [28, 28]
+        })
+      }).addTo(map).bindPopup('<strong>Ziel</strong>');
+      pts.push([opts.zielPunkt.lat, opts.zielPunkt.lng]);
+    }
+    if (pts.length === 1) {
+      map.setView(pts[0], 13);
+    } else if (pts.length === 2) {
+      // Direktverbindung als gestrichelte Hilfslinie (zur Orientierung,
+      // nicht der echte Wegverlauf!)
+      L.polyline(pts, { color: '#888', weight: 2, dashArray: '6,8', opacity: 0.7 }).addTo(map);
+      map.fitBounds(pts, { padding: [30, 30] });
+    }
+    return pts.length;
+  }
+
   if (opts.modus === 'gpx') {
+    var gpxFehler = false;
+    var gpxTimeout = setTimeout(function() {
+      // Wenn nach 8s noch nicht 'loaded' gefeuert hat, vermutlich CORS-Problem
+      if (!gpxFehler) handleGpxFehler();
+    }, 8000);
+
+    function handleGpxFehler() {
+      gpxFehler = true;
+      clearTimeout(gpxTimeout);
+      var n = zeichneStartZiel();
+      if (n > 0) {
+        if (ladeEl) ladeEl.innerHTML = 'GPX-Track konnte nicht geladen werden (CORS). Start und Ziel sind als Marker eingezeichnet. <a href="' + opts.gpxUrl + '" target="_blank" rel="noopener">GPX direkt öffnen ↗</a>';
+        setTimeout(function() { if (ladeEl) ladeEl.style.display = 'none'; }, 4500);
+      } else {
+        if (ladeEl) ladeEl.innerHTML = 'GPX konnte nicht geladen werden. <a href="' + opts.gpxUrl + '" target="_blank" rel="noopener">GPX direkt öffnen ↗</a>';
+      }
+    }
+
     try {
       new L.GPX(opts.gpxUrl, {
         async: true,
@@ -2770,20 +2967,23 @@ function initWesterwaldKarte(mapId, opts) {
         polyline_options: { color: '#0b422a', weight: 4, opacity: 0.85 }
       })
       .on('loaded', function(e) {
-        map.fitBounds(e.target.getBounds(), { padding: [20, 20] });
+        clearTimeout(gpxTimeout);
+        if (gpxFehler) return; // schon Fallback gerendert
+        try { map.fitBounds(e.target.getBounds(), { padding: [20, 20] }); } catch (err) {}
         if (ladeEl) ladeEl.style.display = 'none';
       })
-      .on('error', function() {
-        if (ladeEl) ladeEl.innerHTML = 'GPX konnte nicht geladen werden. <a href="' + opts.gpxUrl + '" target="_blank" rel="noopener">GPX direkt öffnen ↗</a>';
-      })
+      .on('error', handleGpxFehler)
       .addTo(map);
     } catch (e) {
-      if (ladeEl) ladeEl.innerHTML = 'GPX konnte nicht angezeigt werden.';
+      handleGpxFehler();
     }
   } else if (opts.modus === 'punkt') {
     L.marker([opts.lat, opts.lng]).addTo(map).bindPopup('<strong>' + escapeHtml(opts.label) + '</strong>').openPopup();
     map.setView([opts.lat, opts.lng], 14);
     if (ladeEl) ladeEl.style.display = 'none';
+  } else {
+    // modus === 'leer' – nur Landkreis-Overlay und Eigen-Standort
+    // ladeEl bleibt sichtbar mit Fehlermeldung (vom Aufrufer gesetzt)
   }
 
   // 3. Eigener Standort (asynchron, nur wenn User erlaubt)
@@ -2984,7 +3184,7 @@ function renderMuseumDetail(ziel, item, info, zurueck) {
     + '<div class="diff-gpx-row">';
   if (item.ort) html += '<span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(item.ort) + '</span>';
   if (item.sourceUrl) html += '<a class="btn-action btn-gpx" href="' + item.sourceUrl + '" target="_blank" rel="noopener">🌐 Website</a>';
-  if (item.lat && item.lng && info.karteUrl) {
+  if (hatVerortbareInfo(item) && info.karteUrl) {
     html += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
   }
   html += '</div></div>';
@@ -3163,6 +3363,9 @@ function renderEbikeDetail(ziel, item, info, zurueck) {
     + '<div class="diff-gpx-row">';
   if (item.ort)  html += '<span class="diff-pill diff-leicht-bg">📍 ' + escapeHtml(item.ort) + '</span>';
   if (item.type) html += '<span class="diff-pill diff-mittel-bg">' + escapeHtml(item.type) + '</span>';
+  if (hatVerortbareInfo(item) && info.karteUrl) {
+    html += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
+  }
   html += '</div></div>';
 
   html += '<div class="detail-section">';
