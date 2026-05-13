@@ -2650,14 +2650,42 @@ function ladeKartenPlugins() {
 // Auch tolerant gegenüber unterschiedlichen Quotes, Trennzeichen, Dezimalkomma.
 function parseDmsCoordinates(str) {
   if (!str || typeof str !== 'string') return null;
-  var re = /([NSns])\s*(\d+)\s*°\s*(\d+)\s*['′]\s*([\d.,]+)\s*["″]?\s*[|\/,;]\s*([EOWeow])\s*(\d+)\s*°\s*(\d+)\s*['′]\s*([\d.,]+)\s*["″]?/;
-  var m = str.match(re);
-  if (!m) return null;
-  var lat = parseInt(m[2],10) + parseInt(m[3],10)/60 + parseFloat(m[4].replace(',','.'))/3600;
-  var lng = parseInt(m[6],10) + parseInt(m[7],10)/60 + parseFloat(m[8].replace(',','.'))/3600;
-  if (m[1].toUpperCase() === 'S') lat = -lat;
-  if (m[5].toUpperCase() === 'W') lng = -lng;
-  return { lat: lat, lng: lng };
+
+  // Format 1: "N 50° 41' 0.0" | O 8° 18' 11.0"" (Buchstabe VORNE)
+  var re1 = /([NSns])\s*(\d+)\s*°\s*(\d+)\s*['′]\s*([\d.,]+)\s*["″]?\s*[|\/,;\s]+\s*([EOWeow])\s*(\d+)\s*°\s*(\d+)\s*['′]\s*([\d.,]+)\s*["″]?/;
+  var m = str.match(re1);
+  if (m) {
+    var lat = parseInt(m[2],10) + parseInt(m[3],10)/60 + parseFloat(m[4].replace(',','.'))/3600;
+    var lng = parseInt(m[6],10) + parseInt(m[7],10)/60 + parseFloat(m[8].replace(',','.'))/3600;
+    if (m[1].toUpperCase() === 'S') lat = -lat;
+    if (m[5].toUpperCase() === 'W') lng = -lng;
+    return { lat: lat, lng: lng };
+  }
+
+  // Format 2: "50°41'0.0"N 8°18'11.0"E" (Buchstabe HINTEN)
+  var re2 = /(\d+)\s*°\s*(\d+)\s*['′]\s*([\d.,]+)\s*["″]?\s*([NSns])\s*[,;\/\s]+\s*(\d+)\s*°\s*(\d+)\s*['′]\s*([\d.,]+)\s*["″]?\s*([EOWeow])/;
+  m = str.match(re2);
+  if (m) {
+    var lat2 = parseInt(m[1],10) + parseInt(m[2],10)/60 + parseFloat(m[3].replace(',','.'))/3600;
+    var lng2 = parseInt(m[5],10) + parseInt(m[6],10)/60 + parseFloat(m[7].replace(',','.'))/3600;
+    if (m[4].toUpperCase() === 'S') lat2 = -lat2;
+    if (m[8].toUpperCase() === 'W') lng2 = -lng2;
+    return { lat: lat2, lng: lng2 };
+  }
+
+  // Format 3: Dezimalgrad "50.123456, 7.456789"
+  var re3 = /(-?\d{1,2}[.,]\d{3,})\s*[,;\s]+\s*(-?\d{1,2}[.,]\d{3,})/;
+  m = str.match(re3);
+  if (m) {
+    var lat3 = parseFloat(m[1].replace(',','.'));
+    var lng3 = parseFloat(m[2].replace(',','.'));
+    // Plausibilitätscheck: Deutschland ungefähr lat 47-55, lng 5-15
+    if (lat3 > 45 && lat3 < 56 && lng3 > 4 && lng3 < 16) {
+      return { lat: lat3, lng: lng3 };
+    }
+  }
+
+  return null;
 }
 
 // Baut die beste verfügbare Geocoding-Adresse aus einem Item, je nach Typ.
@@ -2746,6 +2774,15 @@ function baueAdresseFuerGeocoding(item, typ) {
   // Echte Straße aus möglicherweise mehrteiliger Rohadresse extrahieren
   var strasse = extrahiereStrasse(strasseRoh);
 
+  // Wenn ortTeil leer ist aber strasseRoh PLZ-Teile enthält:
+  // PLZ aus strasseRoh extrahieren (z. B. "Marktplatz, 35745 Herborn" → ortTeil = "35745 Herborn")
+  if (!ortTeil && strasseRoh && strasseRoh.indexOf(',') >= 0) {
+    var teile = strasseRoh.split(',').map(function(p){ return p.trim(); });
+    for (var ti = 0; ti < teile.length; ti++) {
+      if (/^\d{5}\s/.test(teile[ti])) { ortTeil = teile[ti]; break; }
+    }
+  }
+
   // Wenn die extrahierte Straße schon PLZ enthält, ist sie bereits komplett
   if (strasse && /\d{5}\s+/.test(strasse) && !ortTeil) return strasse.trim();
 
@@ -2807,23 +2844,22 @@ function fuegeHausnummerEin(adresse, nummer) {
 // Reihenfolge: präzise → weniger präzise. Sobald eine Variante geocoded wird,
 // stoppt die Kette. So landen wir z. B. bei "Auf der Bell 1, 57562 Herdorf"
 // (Bergbaumuseum) statt bei "57562 Herdorf" (Ortsmitte) zu enden.
-function baueAdressKandidaten(item, typ) {
+function baueAdressKandidaten(item, typ, opts) {
+  opts = opts || {};
+  // strikt=true: KEINE PLZ+Ort/Ort-Fallbacks (lieber leer als ungenau)
+  // strikt=false: PLZ+Ort und Ort als Notfall-Fallback (für Routen-Marker)
+  var strikt = (opts.strikt !== false);
+
   var basis = baueAdresseFuerGeocoding(item, typ);
   var kandidaten = [];
 
   if (basis) {
-    // Hausnummer-Bereiche ("1-3", "1/3", "22a-24") in Einzelnummern aufspalten.
-    // Nominatim findet einzelne Nummern wesentlich zuverlässiger als Bereiche
-    // (z. B. "Mittelstraße 1-3" landet oft am Hallenbad statt am Gasthof).
+    // Hausnummer-Bereiche ("1-3", "22a-24") erkennen: nur ERSTE Nummer
+    // verwenden (User-Vorgabe: zweite Nummer ergibt oft falsche Position).
     var rangeMatch = basis.match(/(\d+)([a-z]?)[-\/](\d+)([a-z]?)/i);
     if (rangeMatch) {
       var num1 = rangeMatch[1] + (rangeMatch[2] || '');
-      var num2 = rangeMatch[3] + (rangeMatch[4] || '');
-      // Einzelne Nummern haben Priorität – diese werden zuerst probiert
       kandidaten.push(basis.replace(rangeMatch[0], num1));
-      kandidaten.push(basis.replace(rangeMatch[0], num2));
-      // Original mit Bereich als zusätzlicher Versuch
-      if (kandidaten.indexOf(basis) < 0) kandidaten.push(basis);
     } else {
       kandidaten.push(basis);
       // Wenn keine Hausnummer in der Straße: mit 1 und 2 erweitern
@@ -2834,19 +2870,22 @@ function baueAdressKandidaten(item, typ) {
     }
   }
 
-  // PLZ + Ort
-  var plzOrt = '';
-  if (item.plz && item.ort) plzOrt = item.plz + ' ' + item.ort;
-  else if (item.plzOrt) plzOrt = item.plzOrt;
-  else if (basis) {
-    var m = basis.match(/(\d{5}\s+[A-Za-zäöüÄÖÜß\-\s]+)/);
-    if (m) plzOrt = m[1].trim();
-  }
-  if (plzOrt && kandidaten.indexOf(plzOrt) < 0) kandidaten.push(plzOrt);
+  // Im strikten Modus (Punkt-Items wie Veranstaltungen, Museen, Badeseen)
+  // KEINE Ort-Fallbacks anhängen – sonst landen wir bei verfehlten Adressen
+  // auf der Ortsmitte (Hallenbad etc.). Lieber gar keine Karte als falsche.
+  if (!strikt) {
+    var plzOrt = '';
+    if (item.plz && item.ort) plzOrt = item.plz + ' ' + item.ort;
+    else if (item.plzOrt) plzOrt = item.plzOrt;
+    else if (basis) {
+      var m = basis.match(/(\d{5}\s+[A-Za-zäöüÄÖÜß\-\s]+)/);
+      if (m) plzOrt = m[1].trim();
+    }
+    if (plzOrt && kandidaten.indexOf(plzOrt) < 0) kandidaten.push(plzOrt);
 
-  // Nur Ortsname
-  var ortAllein = item.ort || (item.contact && item.contact.town) || item.town || '';
-  if (ortAllein && kandidaten.indexOf(ortAllein) < 0) kandidaten.push(ortAllein);
+    var ortAllein = item.ort || (item.contact && item.contact.town) || item.town || '';
+    if (ortAllein && kandidaten.indexOf(ortAllein) < 0) kandidaten.push(ortAllein);
+  }
 
   return kandidaten;
 }
@@ -2862,6 +2901,7 @@ function probiereAdressen(kandidaten, idx) {
 }
 
 function findeKoordinaten(item, typ) {
+  var titel = item.titel || item.name || item.title || '(unbenannt)';
   // 1. Direkt
   var lat = parseFloat(item.lat); var lng = parseFloat(item.lng);
   if (!isNaN(lat) && !isNaN(lng)) return Promise.resolve({ lat: lat, lng: lng });
@@ -2874,37 +2914,59 @@ function findeKoordinaten(item, typ) {
   }
   if (dms) return Promise.resolve(dms);
 
-  // 3. Adress-Kandidaten der Reihe nach probieren
-  var kandidaten = baueAdressKandidaten(item, typ);
-  if (!kandidaten.length) return Promise.resolve(null);
-  return probiereAdressen(kandidaten, 0);
+  // 3. Adress-Kandidaten der Reihe nach probieren – STRIKT (keine Ort-Fallbacks).
+  // Lieber kein Marker als ein Marker auf der Ortsmitte.
+  var kandidaten = baueAdressKandidaten(item, typ, { strikt: true });
+  if (!kandidaten.length) {
+    console.warn('[Karte] Keine geocodierbaren Daten für:', titel);
+    return Promise.resolve(null);
+  }
+  return probiereAdressen(kandidaten, 0).then(function(c) {
+    if (!c) {
+      console.warn('[Karte] Geocoding ohne Treffer für "' + titel + '". Probierte Kandidaten:', kandidaten);
+    }
+    return c;
+  });
 }
 
 // Findet die Start- bzw. Zielkoordinate einer Wander-/Rad-Etappe.
-// Nutzt die volle Adress-Kandidaten-Kette inkl. Hausnummer-Range-Split,
-// PLZ-Extraktion und Ortsnamen-Fallback.
+// Für Routen-Marker erlauben wir den weicheren Modus (PLZ+Ort/Ort-Fallback),
+// damit zumindest die ungefähre Region eingezeichnet wird, falls die exakte
+// Adresse nicht erfasst ist.
 function findeRoutenPunkte(item) {
-  function einPunkt(obj) {
+  var titel = item.title || item.name || item.titel || '(Etappe)';
+
+  function einPunkt(obj, rolle) {
     if (!obj) return Promise.resolve(null);
-    // DMS-Koordinaten haben Priorität (Wandern hat oft beides)
+    // DMS-Koordinaten haben Priorität
     if (typeof obj === 'object' && obj.coordinates) {
       var d = parseDmsCoordinates(obj.coordinates);
       if (d) return Promise.resolve(d);
+      console.warn('[Karte] ' + rolle + '-Koordinaten konnten nicht geparst werden für "' + titel + '":', obj.coordinates);
     }
-    // Adresse normalisieren und in pseudo-Item für baueAdressKandidaten verpacken
+    // Adresse normalisieren
     var adresseRoh = '';
     if (typeof obj === 'object') {
       adresseRoh = obj.address || obj.name || '';
     } else if (typeof obj === 'string') {
       adresseRoh = obj;
     }
-    if (!adresseRoh) return Promise.resolve(null);
+    if (!adresseRoh) {
+      console.warn('[Karte] Kein ' + rolle + ' für "' + titel + '" vorhanden.');
+      return Promise.resolve(null);
+    }
     var pseudoItem = { adresse: adresseRoh };
-    var kandidaten = baueAdressKandidaten(pseudoItem, 'route');
+    // Bei Routen-Markern: weicher Modus (PLZ+Ort als Fallback OK)
+    var kandidaten = baueAdressKandidaten(pseudoItem, 'route', { strikt: false });
     if (!kandidaten.length) return Promise.resolve(null);
-    return probiereAdressen(kandidaten, 0);
+    return probiereAdressen(kandidaten, 0).then(function(c) {
+      if (!c) {
+        console.warn('[Karte] ' + rolle + '-Geocoding fehlgeschlagen für "' + titel + '". Kandidaten:', kandidaten);
+      }
+      return c;
+    });
   }
-  return Promise.all([einPunkt(item.start), einPunkt(item.destination)]).then(function(arr) {
+  return Promise.all([einPunkt(item.start, 'Start'), einPunkt(item.destination, 'Ziel')]).then(function(arr) {
     return { start: arr[0], ziel: arr[1] };
   });
 }
