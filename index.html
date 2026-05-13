@@ -187,6 +187,36 @@
 }
 .marker-start-ziel.marker-start { background: #1d6b3e; }
 .marker-start-ziel.marker-ziel  { background: #c0392b; }
+
+/* GPX-Track-Laden-Button als Leaflet-Control rechts oben */
+.gpx-control-wrap {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+  border: 2px solid rgba(0,0,0,0.2);
+  background-clip: padding-box;
+}
+.gpx-control-btn {
+  display: block;
+  padding: 8px 14px;
+  background: #1d6b3e;
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 0.9em;
+  text-decoration: none;
+  border-radius: 2px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.gpx-control-btn:hover { background: #145130; }
+.gpx-control-btn-ok {
+  background: #4a7c2e !important;
+  cursor: default;
+}
+.gpx-control-btn-err {
+  background: #b85c00 !important;
+}
 </style>
 </head>
 <body>
