@@ -188,35 +188,49 @@
 .marker-start-ziel.marker-start { background: #1d6b3e; }
 .marker-start-ziel.marker-ziel  { background: #c0392b; }
 
-/* GPX-Track-Laden-Button als Leaflet-Control rechts oben */
-.gpx-control-wrap {
+/* Karten-Legende oben rechts: Start/Ziel + GPX-Download */
+.karte-legende {
   background: #fff;
-  border-radius: 4px;
+  border-radius: 6px;
   box-shadow: 0 1px 5px rgba(0,0,0,0.4);
   border: 2px solid rgba(0,0,0,0.2);
-  background-clip: padding-box;
+  padding: 8px 12px;
+  font-size: 0.88em;
+  line-height: 1.5;
+  min-width: 140px;
 }
-.gpx-control-btn {
+.legende-zeile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+}
+.legende-punkt {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  flex-shrink: 0;
+}
+.legende-punkt.punkt-start { background: #1d6b3e; }
+.legende-punkt.punkt-ziel  { background: #c0392b; }
+.legende-download {
   display: block;
-  padding: 8px 14px;
+  margin-top: 8px;
+  padding: 7px 10px;
   background: #1d6b3e;
   color: #fff !important;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.9em;
   text-decoration: none;
-  border-radius: 2px;
+  border-radius: 4px;
+  text-align: center;
   white-space: nowrap;
-  cursor: pointer;
   transition: background 0.15s ease;
 }
-.gpx-control-btn:hover { background: #145130; }
-.gpx-control-btn-ok {
-  background: #4a7c2e !important;
-  cursor: default;
-}
-.gpx-control-btn-err {
-  background: #b85c00 !important;
-}
+.legende-download:hover { background: #145130; }
 </style>
 </head>
 <body>
