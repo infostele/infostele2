@@ -1931,7 +1931,8 @@ function renderRouteDetail(ziel, item, info, zurueck) {
   if (n.schwierigkeit) stickyTopRow += '<span class="diff-pill ' + diffBg + '">' + escapeHtml(n.schwierigkeit) + '</span>';
   if (n.gpxUrl) stickyTopRow += '<a class="btn-action btn-gpx" href="' + n.gpxUrl + '" target="_blank" rel="noopener">📥 GPX</a>';
   // Karte intern (Leaflet + GPX/Marker) — anzeigen wenn GPX ODER Start/Ziel-Daten vorhanden
-  if (info.karteUrl && (n.gpxUrl || item.start || item.destination)) {
+  // Erkennt alle 5 Wanderweg-Schemata: start/destination (Objekt), sections (Druidensteig), startPoint (Wiedweg)
+  if (info.karteUrl && (n.gpxUrl || item.start || item.destination || item.sections || item.startPoint)) {
     stickyTopRow += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
   } else if (n.tourenplanerUrl) {
     stickyTopRow += '<a class="btn-action outline" href="' + n.tourenplanerUrl + '" target="_blank" rel="noopener">🗺️ Karte</a>';
@@ -3082,9 +3083,37 @@ function findeRoutenPunkte(item) {
       return c;
     });
   }
-  return Promise.all([einPunkt(item.start, 'Start'), einPunkt(item.destination, 'Ziel')]).then(function(arr) {
+  // Schema-Erkennung: Start- und Ziel-Quelle je nach Wanderweg-Datensatz wählen
+  //   • Westerwald-Steig / Wäller Touren / Kleine Wäller → item.start / item.destination (Objekt)
+  //   • Druidensteig                                     → item.sections[] mit icon='start'/'ziel' (HTML mit Adresse)
+  //   • Wiedweg                                          → item.startPoint / item.endPoint (String)
+  var startQuelle = item.start || null;
+  var zielQuelle  = item.destination || null;
+  if (!startQuelle && !zielQuelle && item.sections && item.sections.length) {
+    for (var sI = 0; sI < item.sections.length; sI++) {
+      var sec = item.sections[sI];
+      if (sec.icon === 'start' && sec.html && !startQuelle) {
+        startQuelle = extrahiereAdresseAusSectionHtml(sec.html);
+      } else if (sec.icon === 'ziel' && sec.html && !zielQuelle) {
+        zielQuelle = extrahiereAdresseAusSectionHtml(sec.html);
+      }
+    }
+  }
+  if (!startQuelle && typeof item.startPoint === 'string') startQuelle = item.startPoint;
+  if (!zielQuelle  && typeof item.endPoint   === 'string') zielQuelle  = item.endPoint;
+
+  return Promise.all([einPunkt(startQuelle, 'Start'), einPunkt(zielQuelle, 'Ziel')]).then(function(arr) {
     return { start: arr[0], ziel: arr[1] };
   });
+}
+
+// Helper: Adresse aus dem HTML einer Druidensteig-section extrahieren.
+// Erwartete Form: "<p><strong>NAME</strong>, ADRESSE</p>"
+// Liefert einen String "NAME, ADRESSE" – mit STRG nach unten zu einPunkt() durchgereicht.
+function extrahiereAdresseAusSectionHtml(html) {
+  if (!html) return '';
+  var plain = String(html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  return plain;
 }
 
 // Generische Prüfung: Hat das Item überhaupt Daten, die wir verorten könnten?
@@ -3101,6 +3130,17 @@ function hatVerortbareInfo(item) {
   if (item.coordinates && parseDmsCoordinates(item.coordinates)) return true;
   if (item.start && item.start.coordinates && parseDmsCoordinates(item.start.coordinates)) return true;
   if (item.gpxUrl) return true;
+
+  // Druidensteig-Schema: sections[] mit icon='start'/'ziel' enthält die Adresse als HTML
+  if (item.sections && item.sections.length) {
+    for (var si = 0; si < item.sections.length; si++) {
+      var sec = item.sections[si];
+      if ((sec.icon === 'start' || sec.icon === 'ziel') && sec.html) return true;
+    }
+  }
+  // Wiedweg-Schema: startPoint/endPoint als String
+  if (typeof item.startPoint === 'string' && item.startPoint.length > 0) return true;
+  if (typeof item.endPoint   === 'string' && item.endPoint.length   > 0) return true;
 
   // Straßen-Felder einsammeln
   var strasse = item.strasse || item.adresse || item.address ||
@@ -3169,7 +3209,7 @@ function renderKarte(ziel, typ, schluessel) {
   var gpxUrl = null;
 
   if (typ === 'wandern' || typ === 'rad') {
-    gpxUrl = item.gpxUrl || (typeof gpxAusTourenplaner === 'function' ? gpxAusTourenplaner(item.tourenplanerUrl || item.tourenplaner) : null);
+    gpxUrl = item.gpxUrl || item.gpx || (typeof gpxAusTourenplaner === 'function' ? gpxAusTourenplaner(item.tourenplanerUrl || item.tourenplaner) : null);
     if (gpxUrl) hatGpx = true;
   }
 
@@ -3249,58 +3289,92 @@ function initWesterwaldKarte(mapId, opts) {
   var ladeEl = document.getElementById(mapId + '-lade');
 
   // Helfer: Start- und Ziel-Marker zeichnen (für Wandern/Rad als Fallback,
-  // wenn GPX nicht lädt, oder als Ergänzung wenn beides vorhanden ist)
+  // wenn GPX nicht lädt, oder als Ergänzung wenn beides vorhanden ist).
+  // Bei Rundwegen (Start und Ziel sehr nah beieinander) wird stattdessen
+  // ein einzelner "Start-Ziel"-Marker gesetzt.
   function zeichneStartZiel() {
     var pts = [];
-    if (opts.startPunkt) {
-      L.marker([opts.startPunkt.lat, opts.startPunkt.lng], {
+    var sP = opts.startPunkt;
+    var zP = opts.zielPunkt;
+
+    // Rundweg-Erkennung: Wenn Start und Ziel quasi identisch sind (< ~150 m),
+    // nur einen blauen "Start-Ziel"-Marker zeichnen.
+    var istRundweg = false;
+    if (sP && zP) {
+      var dLat = sP.lat - zP.lat;
+      var dLng = sP.lng - zP.lng;
+      // Grobe Distanz-Heuristik (1° lat ≈ 111 km; 1° lng ≈ 70 km bei 50° N)
+      var distKm = Math.sqrt((dLat * 111) * (dLat * 111) + (dLng * 70) * (dLng * 70));
+      if (distKm < 0.15) istRundweg = true;
+    }
+
+    if (istRundweg) {
+      L.marker([sP.lat, sP.lng], {
         icon: L.divIcon({
-          className: 'marker-start-ziel marker-start',
-          html: '<span>S</span>',
+          className: 'marker-start-ziel marker-rundweg',
+          html: '<span>★</span>',
           iconSize: [28, 28]
         })
       }).addTo(map)
-        .bindTooltip('Start', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-start' })
+        .bindTooltip('Start-Ziel', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-rundweg' })
         .openTooltip();
-      pts.push([opts.startPunkt.lat, opts.startPunkt.lng]);
+      pts.push([sP.lat, sP.lng]);
+    } else {
+      if (sP) {
+        L.marker([sP.lat, sP.lng], {
+          icon: L.divIcon({
+            className: 'marker-start-ziel marker-start',
+            html: '<span>S</span>',
+            iconSize: [28, 28]
+          })
+        }).addTo(map)
+          .bindTooltip('Start', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-start' })
+          .openTooltip();
+        pts.push([sP.lat, sP.lng]);
+      }
+      if (zP) {
+        L.marker([zP.lat, zP.lng], {
+          icon: L.divIcon({
+            className: 'marker-start-ziel marker-ziel',
+            html: '<span>Z</span>',
+            iconSize: [28, 28]
+          })
+        }).addTo(map)
+          .bindTooltip('Ziel', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-ziel' })
+          .openTooltip();
+        pts.push([zP.lat, zP.lng]);
+      }
     }
-    if (opts.zielPunkt) {
-      L.marker([opts.zielPunkt.lat, opts.zielPunkt.lng], {
-        icon: L.divIcon({
-          className: 'marker-start-ziel marker-ziel',
-          html: '<span>Z</span>',
-          iconSize: [28, 28]
-        })
-      }).addTo(map)
-        .bindTooltip('Ziel', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-ziel' })
-        .openTooltip();
-      pts.push([opts.zielPunkt.lat, opts.zielPunkt.lng]);
-    }
+
     if (pts.length === 1) {
       map.setView(pts[0], 13);
     } else if (pts.length === 2) {
       L.polyline(pts, { color: '#888', weight: 2, dashArray: '6,8', opacity: 0.7 }).addTo(map);
       map.fitBounds(pts, { padding: [30, 30] });
     }
-    return pts.length;
+    return { anzahl: pts.length, rundweg: istRundweg };
   }
 
   if (opts.modus === 'gpx') {
     // Sofort Start/Ziel anzeigen (aus Geocoding)
-    var n = zeichneStartZiel();
-    if (n > 0) {
+    var sz = zeichneStartZiel();
+    if (sz.anzahl > 0) {
       if (ladeEl) ladeEl.style.display = 'none';
     } else {
       if (ladeEl) ladeEl.innerHTML = 'Start/Ziel konnten nicht ermittelt werden.';
     }
 
-    // Legende oben rechts: Start (grün), Ziel (rot)
+    // Legende oben rechts: bei Rundweg "Start-Ziel" (blau), sonst Start (grün) + Ziel (rot)
     var legende = L.control({ position: 'topright' });
     legende.onAdd = function() {
       var div = L.DomUtil.create('div', 'karte-legende');
-      div.innerHTML = ''
-        + '<div class="legende-zeile"><span class="legende-punkt punkt-start"></span> Start</div>'
-        + '<div class="legende-zeile"><span class="legende-punkt punkt-ziel"></span> Ziel</div>';
+      if (sz.rundweg) {
+        div.innerHTML = '<div class="legende-zeile"><span class="legende-punkt punkt-rundweg"></span> Start-Ziel</div>';
+      } else {
+        div.innerHTML = ''
+          + '<div class="legende-zeile"><span class="legende-punkt punkt-start"></span> Start</div>'
+          + '<div class="legende-zeile"><span class="legende-punkt punkt-ziel"></span> Ziel</div>';
+      }
       L.DomEvent.disableClickPropagation(div);
       return div;
     };
