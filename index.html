@@ -187,7 +187,6 @@
 }
 .marker-start-ziel.marker-start { background: #1d6b3e; }
 .marker-start-ziel.marker-ziel  { background: #c0392b; }
-.marker-start-ziel.marker-rundweg { background: #1565c0; }
 
 /* Karten-Legende oben rechts: Start/Ziel + GPX-Download */
 .karte-legende {
@@ -217,7 +216,14 @@
 }
 .legende-punkt.punkt-start { background: #1d6b3e; }
 .legende-punkt.punkt-ziel  { background: #c0392b; }
-.legende-punkt.punkt-rundweg { background: #1565c0; }
+.legende-linie {
+  display: inline-block;
+  width: 18px;
+  height: 3px;
+  background: #0b422a;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
 
 /* Permanente Labels an Start/Ziel-Markern (Tooltips, immer sichtbar) */
 .marker-label {
@@ -231,7 +237,6 @@
 }
 .marker-label.marker-label-start { color: #1d6b3e; border: 1.5px solid #1d6b3e; }
 .marker-label.marker-label-ziel  { color: #c0392b; border: 1.5px solid #c0392b; }
-.marker-label.marker-label-rundweg { color: #1565c0; border: 1.5px solid #1565c0; }
 /* Pfeil-Spitze überschreiben (Leaflet-Default) */
 .leaflet-tooltip.marker-label::before { border: 0 !important; }
 
@@ -477,6 +482,7 @@ window._WASSERZEICHEN = '<div class="hero-wm" aria-hidden="true">'
 <script src="legal.js"></script>
 
 <!-- HAUPT-LOGIK -->
+<script src="gpx-mapping.js"></script>
 <script src="app.js"></script>
 
 </body>

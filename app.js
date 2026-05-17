@@ -1931,8 +1931,7 @@ function renderRouteDetail(ziel, item, info, zurueck) {
   if (n.schwierigkeit) stickyTopRow += '<span class="diff-pill ' + diffBg + '">' + escapeHtml(n.schwierigkeit) + '</span>';
   if (n.gpxUrl) stickyTopRow += '<a class="btn-action btn-gpx" href="' + n.gpxUrl + '" target="_blank" rel="noopener">📥 GPX</a>';
   // Karte intern (Leaflet + GPX/Marker) — anzeigen wenn GPX ODER Start/Ziel-Daten vorhanden
-  // Erkennt alle 5 Wanderweg-Schemata: start/destination (Objekt), sections (Druidensteig), startPoint (Wiedweg)
-  if (info.karteUrl && (n.gpxUrl || item.start || item.destination || item.sections || item.startPoint)) {
+  if (info.karteUrl && (n.gpxUrl || item.start || item.destination)) {
     stickyTopRow += '<a class="btn-action outline" href="' + info.karteUrl + '">🗺️ Karte</a>';
   } else if (n.tourenplanerUrl) {
     stickyTopRow += '<a class="btn-action outline" href="' + n.tourenplanerUrl + '" target="_blank" rel="noopener">🗺️ Karte</a>';
@@ -2750,16 +2749,25 @@ function ladeScript(url) {
 }
 
 function ladeKartenPlugins() {
-  // Lädt Leaflet + osmtogeojson nacheinander
-  if (window.L && window.osmtogeojson) return Promise.resolve();
+  // Lädt Leaflet + osmtogeojson + leaflet-gpx nacheinander
+  if (window.L && window.osmtogeojson && window.L.GPX) return Promise.resolve();
   if (KARTE_PLUGIN_PROMISE) return KARTE_PLUGIN_PROMISE;
   KARTE_PLUGIN_PROMISE = ladeLeaflet().then(function() {
+    var pendings = [];
     if (!window.osmtogeojson) {
-      return ladeScript('https://cdn.jsdelivr.net/npm/osmtogeojson@3.0.0-beta.5/osmtogeojson.min.js');
+      pendings.push(ladeScript('https://cdn.jsdelivr.net/npm/osmtogeojson@3.0.0-beta.5/osmtogeojson.min.js'));
     }
+    if (!window.L.GPX) {
+      pendings.push(ladeScript('https://cdn.jsdelivr.net/npm/leaflet-gpx@1.7.0/gpx.min.js'));
+    }
+    return Promise.all(pendings);
   });
   return KARTE_PLUGIN_PROMISE;
 }
+
+// CDN-Basis für lokale GPX-Dateien aus dem eigenen Repo. Wird nur genutzt,
+// wenn ein Mapping existiert (siehe gpx-mapping.js).
+var GPX_LOKAL_CDN = 'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/';
 
 // ─── DATEN-LOOKUP (parallel zu renderDetail) ────────────────────
 // ─── KOORDINATEN-HELFER ────────────────────────────────────────
@@ -3083,37 +3091,9 @@ function findeRoutenPunkte(item) {
       return c;
     });
   }
-  // Schema-Erkennung: Start- und Ziel-Quelle je nach Wanderweg-Datensatz wählen
-  //   • Westerwald-Steig / Wäller Touren / Kleine Wäller → item.start / item.destination (Objekt)
-  //   • Druidensteig                                     → item.sections[] mit icon='start'/'ziel' (HTML mit Adresse)
-  //   • Wiedweg                                          → item.startPoint / item.endPoint (String)
-  var startQuelle = item.start || null;
-  var zielQuelle  = item.destination || null;
-  if (!startQuelle && !zielQuelle && item.sections && item.sections.length) {
-    for (var sI = 0; sI < item.sections.length; sI++) {
-      var sec = item.sections[sI];
-      if (sec.icon === 'start' && sec.html && !startQuelle) {
-        startQuelle = extrahiereAdresseAusSectionHtml(sec.html);
-      } else if (sec.icon === 'ziel' && sec.html && !zielQuelle) {
-        zielQuelle = extrahiereAdresseAusSectionHtml(sec.html);
-      }
-    }
-  }
-  if (!startQuelle && typeof item.startPoint === 'string') startQuelle = item.startPoint;
-  if (!zielQuelle  && typeof item.endPoint   === 'string') zielQuelle  = item.endPoint;
-
-  return Promise.all([einPunkt(startQuelle, 'Start'), einPunkt(zielQuelle, 'Ziel')]).then(function(arr) {
+  return Promise.all([einPunkt(item.start, 'Start'), einPunkt(item.destination, 'Ziel')]).then(function(arr) {
     return { start: arr[0], ziel: arr[1] };
   });
-}
-
-// Helper: Adresse aus dem HTML einer Druidensteig-section extrahieren.
-// Erwartete Form: "<p><strong>NAME</strong>, ADRESSE</p>"
-// Liefert einen String "NAME, ADRESSE" – mit STRG nach unten zu einPunkt() durchgereicht.
-function extrahiereAdresseAusSectionHtml(html) {
-  if (!html) return '';
-  var plain = String(html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-  return plain;
 }
 
 // Generische Prüfung: Hat das Item überhaupt Daten, die wir verorten könnten?
@@ -3130,17 +3110,6 @@ function hatVerortbareInfo(item) {
   if (item.coordinates && parseDmsCoordinates(item.coordinates)) return true;
   if (item.start && item.start.coordinates && parseDmsCoordinates(item.start.coordinates)) return true;
   if (item.gpxUrl) return true;
-
-  // Druidensteig-Schema: sections[] mit icon='start'/'ziel' enthält die Adresse als HTML
-  if (item.sections && item.sections.length) {
-    for (var si = 0; si < item.sections.length; si++) {
-      var sec = item.sections[si];
-      if ((sec.icon === 'start' || sec.icon === 'ziel') && sec.html) return true;
-    }
-  }
-  // Wiedweg-Schema: startPoint/endPoint als String
-  if (typeof item.startPoint === 'string' && item.startPoint.length > 0) return true;
-  if (typeof item.endPoint   === 'string' && item.endPoint.length   > 0) return true;
 
   // Straßen-Felder einsammeln
   var strasse = item.strasse || item.adresse || item.address ||
@@ -3160,6 +3129,138 @@ function hatVerortbareInfo(item) {
   var hatSuffix = /(straße|str\.|weg|platz|allee|gasse|ring|markt|ufer|damm|chaussee|hof|brücke|tor|park)\b/i.test(trimmed);
   var hatMehrereWoerter = /\s/.test(trimmed);
   return hatZahl || hatSuffix || hatMehrereWoerter;
+}
+
+// ════════════════════════════════════════════════════════════════
+// KARTEN-OVERRIDES für Routen, deren Adressen in den Quelldaten zu
+// falschen Geocoding-Treffern führen (z. B. "Steinebach" landet beim
+// Steinebach in Hessen statt Steinebach an der Sieg).
+// Schlüssel: Substring, der im Tour-/Etappentitel ODER Routen-Slug enthalten
+// sein muss (Vergleich case-insensitiv). Erster Treffer gewinnt.
+// Werte als Adress-Strings ("Stöffelstraße, 57647 Enspel") oder direkte
+// Koordinaten ({lat:..., lng:...}) – beides erlaubt.
+// ════════════════════════════════════════════════════════════════
+var KARTEN_OVERRIDES = [
+  // ─── Druidensteig ───────────────────────────────────────────────
+  { match: { typ: 'wandern', slug: 'druidensteig', etappe: 5 }, // 6. Etappe (0-indexed)
+    ziel:  '57589 Steinebach an der Sieg' },
+  { match: { typ: 'wandern', slug: 'druidensteig', etappe: 6 }, // 7. Etappe
+    start: '57589 Steinebach an der Sieg' },
+
+  // ─── Wiedweg ────────────────────────────────────────────────────
+  { match: { typ: 'wandern', slug: 'wiedweg', etappe: 0 },
+    start: 'Linden, 57629 Westerburg',
+    ziel:  'Linden, 57629 Westerburg' },
+  { match: { typ: 'wandern', slug: 'wiedweg', etappe: 1 },
+    start: 'Linden, 57629 Westerburg' },
+
+  // ─── Wäller Routen / Wäller Touren ──────────────────────────────
+  { match: { titelEnthaelt: ['stöffel', 'stoeffel'] },
+    start: 'Stöffelstraße, 57647 Enspel' },
+  { match: { titelEnthaelt: ['nauort'] },
+    start: { lat: 50.467114, lng: 7.619140 } },
+  { match: { titelEnthaelt: ['bärenkopp', 'baerenkopp'] },
+    start: 'Marktstraße, 56588 Waldbreitbach' },
+  { match: { titelEnthaelt: ['klosterweg'] },
+    start: 'Friedrich-Ebert-Straße, 56579 Rengsdorf' },
+  { match: { titelEnthaelt: ['iserbachschleife', 'iserbach'] },
+    start: 'Auf dem Löh 2, 56584 Anhausen' },
+  { match: { titelEnthaelt: ['brexbachschluchtweg', 'brexbachschlucht'] },
+    start: 'Burgstraße 7, 56203 Höhr-Grenzhausen' },
+  { match: { titelEnthaelt: ['augst'] },
+    start: { lat: 50.39064, lng: 7.72018 },
+    ziel:  { lat: 50.52887, lng: 7.96737 } },
+  { match: { titelEnthaelt: ['elbertshöhen', 'elbertshoehen'] },
+    start: { lat: 50.41045, lng: 7.81216 } },
+  { match: { titelEnthaelt: ['buchfinkenland'] },
+    start: { lat: 50.367250, lng: 7.854216 } },
+  { match: { titelEnthaelt: ['watzenhahn'] },
+    start: { lat: 50.52887, lng: 7.96737 } },
+  { match: { titelEnthaelt: ['hohe hahnscheid', 'hahnscheid'] },
+    start: 'Kirchstraße 11, 56479 Irmtraut' },
+  { match: { titelEnthaelt: ['greifenstein schleife etappe 2', 'greifenstein-schleife-etappe-2'] },
+    start: { lat: 50.58552, lng: 8.24354 } },
+  { match: { titelEnthaelt: ['greifenstein schleife', 'greifenstein-schleife'] },
+    start: { lat: 50.67576, lng: 8.29388 } },
+
+  // ─── Kleiner Wäller (Rundwege: Start = Ziel) ───────────────────
+  { match: { titelEnthaelt: ['wied-runde', 'wied runde'] },
+    start: { lat: 50.55198, lng: 7.42065 },
+    ziel:  { lat: 50.55198, lng: 7.42065 } },
+  { match: { titelEnthaelt: ['malbergseeblick', 'malberg-seeblick', 'malberg seeblick'] },
+    start: { lat: 50.56306, lng: 7.39167 },
+    ziel:  { lat: 50.56306, lng: 7.39167 } },
+  { match: { titelEnthaelt: ['zwergenweg 2', 'zwergenweg2'] },
+    start: { lat: 50.50550, lng: 7.49350 },
+    ziel:  { lat: 50.50550, lng: 7.49350 } },
+  { match: { titelEnthaelt: ['basalt + wasser', 'basalt und wasser', 'basalt & wasser'] },
+    start: { lat: 50.57945, lng: 8.24921 },
+    ziel:  { lat: 50.57945, lng: 8.24921 } },
+  { match: { titelEnthaelt: ['sagenweg'] },
+    start: { lat: 50.68686, lng: 7.51334 },
+    ziel:  { lat: 50.68686, lng: 7.51334 } },
+  { match: { titelEnthaelt: ['klangpfad'] },
+    start: 'Walter-Bartels-Weg, 57632 Rott',
+    ziel:  'Walter-Bartels-Weg, 57632 Rott' },
+
+  // ─── Kleiner Wäller – weitere Tranche ──────────────────────────
+  { match: { titelEnthaelt: ['kunst + natur', 'kunst und natur', 'kunst & natur'] },
+    start: 'Märchenpark 1, 35753 Greifenstein',
+    ziel:  'Märchenpark 1, 35753 Greifenstein' },
+  { match: { titelEnthaelt: ['wolfsteine'] },
+    start: 'Wildparkstraße 15, 56470 Bad Marienberg',
+    ziel:  'Wildparkstraße 15, 56470 Bad Marienberg' },
+  { match: { titelEnthaelt: ['weg der sinne'] },
+    start: { lat: 50.723441, lng: 7.532203 },
+    ziel:  { lat: 50.723441, lng: 7.532203 } },
+  { match: { titelEnthaelt: ['vitalparcours'] },
+    start: 'Wanderparkplatz Hardert, K104, 56599 Hardert',
+    ziel:  'Wanderparkplatz Hardert, K104, 56599 Hardert' },
+  { match: { titelEnthaelt: ['georoute glasstadt', 'georoute-glasstadt', 'glasstadt wirges'] },
+    start: 'Montchaninplatz 1, 56422 Wirges',
+    ziel:  'Montchaninplatz 1, 56422 Wirges' }
+];
+
+// Liefert {start, ziel} aus den Overrides – oder null falls kein Match.
+// Beide Felder können String (Adresse) oder Coords-Objekt {lat,lng} sein,
+// oder undefined falls Override nur eine Seite überschreibt.
+function findeKartenOverride(typ, listeSlug, etappenIdx, item) {
+  var titel = (item && (item.title || item.name || item.titel) || '').toLowerCase();
+  var slugLower = (listeSlug || '').toLowerCase();
+  for (var i = 0; i < KARTEN_OVERRIDES.length; i++) {
+    var rule = KARTEN_OVERRIDES[i];
+    var m = rule.match || {};
+    // typ + slug + etappe (präzise)
+    if (m.typ && m.slug !== undefined && m.etappe !== undefined) {
+      if (m.typ === typ && slugLower.indexOf(m.slug) >= 0 && m.etappe === etappenIdx) {
+        return rule;
+      }
+      continue;
+    }
+    // titelEnthaelt (flexibel über Substring im Etappentitel)
+    if (m.titelEnthaelt) {
+      var arr = Array.isArray(m.titelEnthaelt) ? m.titelEnthaelt : [m.titelEnthaelt];
+      for (var j = 0; j < arr.length; j++) {
+        if (titel.indexOf(String(arr[j]).toLowerCase()) >= 0) return rule;
+      }
+    }
+  }
+  return null;
+}
+
+// Wandelt einen Override-Wert (String oder Coords) in ein Promise<{lat,lng}> um.
+function aufloeseOverrideWert(wert) {
+  if (!wert) return Promise.resolve(null);
+  if (typeof wert === 'object' && typeof wert.lat === 'number') {
+    return Promise.resolve({ lat: wert.lat, lng: wert.lng });
+  }
+  if (typeof wert === 'string') {
+    // Ist es eine DMS- oder Dezimal-Koordinate als String?
+    var dms = parseDmsCoordinates(wert);
+    if (dms) return Promise.resolve(dms);
+    return geocodeAdresse(wert);
+  }
+  return Promise.resolve(null);
 }
 
 function ladeKartenItem(typ, schluessel) {
@@ -3204,13 +3305,42 @@ function renderKarte(ziel, typ, schluessel) {
   var item = ctx.item;
   var titel = item.titel || item.name || item.title || 'Karte';
 
+  // Listen-Slug und Etappenindex aus dem Schlüssel extrahieren
+  // Format: "tourismus-wandern-druidensteig_5"  → listeSlug="tourismus-wandern-druidensteig", idx=5
+  var teile = schluessel.split('_');
+  var listeSlug = teile.slice(0, -1).join('_');
+  var etappenIdx = parseInt(teile[teile.length - 1], 10);
+
+  // Override für diese Etappe? (Korrekturen für falsche Adress-Treffer)
+  var override = (typ === 'wandern' || typ === 'rad')
+    ? findeKartenOverride(typ, listeSlug, etappenIdx, item)
+    : null;
+
   // Karten-Modus bestimmen
   var hatGpx = false;
   var gpxUrl = null;
+  var gpxLokalPfad = null;
 
   if (typ === 'wandern' || typ === 'rad') {
-    gpxUrl = item.gpxUrl || item.gpx || (typeof gpxAusTourenplaner === 'function' ? gpxAusTourenplaner(item.tourenplanerUrl || item.tourenplaner) : null);
+    gpxUrl = item.gpxUrl || (typeof gpxAusTourenplaner === 'function' ? gpxAusTourenplaner(item.tourenplanerUrl || item.tourenplaner) : null);
     if (gpxUrl) hatGpx = true;
+    // Lokale GPX-Datei aus eigenem Repo? (falls gpx-mapping.js geladen ist)
+    if (typeof findeGpxDateinameLokal === 'function') {
+      // Slug-Mapping: WANDER_DATEN/RAD_DATEN-Slug zum Mapping-Schlüssel umwandeln.
+      // listeSlug ist z. B. "tourismus-wandern-druidensteig" – wir brauchen
+      // den hinteren Teil ("druidensteig") als Gruppe.
+      var gruppeSlug = listeSlug.replace(/^tourismus-(wandern|radfahren)-/, '').replace(/^tourismus-rad-/, '');
+      gpxLokalPfad = findeGpxDateinameLokal(typ, gruppeSlug, etappenIdx);
+      if (gpxLokalPfad) hatGpx = true;
+    }
+  }
+
+  // Bei Wandern/Rad ohne GPX, aber MIT Override oder vorhandenen Start/Ziel-Daten
+  // → trotzdem im Routen-Modus (Start/Ziel-Marker) anzeigen
+  var hatRouteOhneGpx = false;
+  if (!hatGpx && (typ === 'wandern' || typ === 'rad') &&
+      (override || item.start || item.destination)) {
+    hatRouteOhneGpx = true;
   }
 
   var mapId = 'karte-' + Math.random().toString(36).slice(2);
@@ -3224,22 +3354,37 @@ function renderKarte(ziel, typ, schluessel) {
       + '<div class="karte-lade-hinweis" id="' + mapId + '-lade">Karte wird geladen …</div>'
     + '</div>'
     + '<div class="karte-meta">'
-      + (hatGpx ? '<p>Tour-Verlauf · GPX-Daten: Tourenplaner Rheinland-Pfalz · Kartendaten: © OpenStreetMap-Mitwirkende</p>'
-                : '<p>Kartendaten: © OpenStreetMap-Mitwirkende. Adress-Suche: Nominatim / OSM.</p>')
+      + (gpxLokalPfad ? '<p>Tour-Verlauf · GPX aus eigenem Datenbestand · Kartendaten: © OpenStreetMap-Mitwirkende</p>'
+                      : hatGpx ? '<p>Tour-Verlauf · GPX-Daten: Tourenplaner Rheinland-Pfalz · Kartendaten: © OpenStreetMap-Mitwirkende</p>'
+                               : '<p>Kartendaten: © OpenStreetMap-Mitwirkende. Adress-Suche: Nominatim / OSM.</p>')
     + '</div>'
     + '<div class="spacer"></div>';
 
   ladeKartenPlugins().then(function() {
-    if (hatGpx) {
-      // Vorab Start/Ziel parallel geocoden – werden sofort angezeigt.
-      // GPX wird NICHT automatisch geladen (CORS-Problem beim Anbieter).
-      // Stattdessen Button "GPX-Track laden" auf der Karte, der vom User
-      // bewusst ausgelöst wird. Bei Erfolg ersetzt der GPX-Verlauf die Marker.
-      findeRoutenPunkte(item).then(function(pts) {
+    if (hatGpx || hatRouteOhneGpx) {
+      // Vorab Start/Ziel parallel geocoden. Override-Werte haben Vorrang vor
+      // dem Daten-basierten Geocoding (für bekannte Problemfälle).
+      var startPromise = override && override.start
+        ? aufloeseOverrideWert(override.start)
+        : null;
+      var zielPromise  = override && override.ziel
+        ? aufloeseOverrideWert(override.ziel)
+        : null;
+
+      Promise.all([
+        startPromise || Promise.resolve(null),
+        zielPromise  || Promise.resolve(null),
+        findeRoutenPunkte(item)
+      ]).then(function(arr) {
+        var oStart = arr[0], oZiel = arr[1], pts = arr[2];
         initWesterwaldKarte(mapId, {
-          modus: 'gpx', gpxUrl: gpxUrl, label: titel,
+          modus: 'gpx',
+          gpxUrl: gpxUrl,
+          gpxLokalUrl: gpxLokalPfad ? (GPX_LOKAL_CDN + gpxLokalPfad) : null,
+          label: titel,
           popupHtml: popupAdresse(item),
-          startPunkt: pts.start, zielPunkt: pts.ziel
+          startPunkt: oStart || pts.start,
+          zielPunkt:  oZiel  || pts.ziel
         });
       });
     } else {
@@ -3289,92 +3434,113 @@ function initWesterwaldKarte(mapId, opts) {
   var ladeEl = document.getElementById(mapId + '-lade');
 
   // Helfer: Start- und Ziel-Marker zeichnen (für Wandern/Rad als Fallback,
-  // wenn GPX nicht lädt, oder als Ergänzung wenn beides vorhanden ist).
-  // Bei Rundwegen (Start und Ziel sehr nah beieinander) wird stattdessen
-  // ein einzelner "Start-Ziel"-Marker gesetzt.
+  // wenn GPX nicht lädt, oder als Ergänzung wenn beides vorhanden ist)
   function zeichneStartZiel() {
-    var pts = [];
-    var sP = opts.startPunkt;
-    var zP = opts.zielPunkt;
-
-    // Rundweg-Erkennung: Wenn Start und Ziel quasi identisch sind (< ~150 m),
-    // nur einen blauen "Start-Ziel"-Marker zeichnen.
-    var istRundweg = false;
-    if (sP && zP) {
-      var dLat = sP.lat - zP.lat;
-      var dLng = sP.lng - zP.lng;
-      // Grobe Distanz-Heuristik (1° lat ≈ 111 km; 1° lng ≈ 70 km bei 50° N)
-      var distKm = Math.sqrt((dLat * 111) * (dLat * 111) + (dLng * 70) * (dLng * 70));
-      if (distKm < 0.15) istRundweg = true;
-    }
+    // Prüfe ob Start und Ziel identisch sind (Rundweg) – dann nur EIN Marker
+    var istRundweg = opts.startPunkt && opts.zielPunkt &&
+      Math.abs(opts.startPunkt.lat - opts.zielPunkt.lat) < 0.0001 &&
+      Math.abs(opts.startPunkt.lng - opts.zielPunkt.lng) < 0.0001;
 
     if (istRundweg) {
-      L.marker([sP.lat, sP.lng], {
+      L.marker([opts.startPunkt.lat, opts.startPunkt.lng], {
         icon: L.divIcon({
-          className: 'marker-start-ziel marker-rundweg',
-          html: '<span>★</span>',
+          className: 'marker-start-ziel marker-start',
+          html: '<span>S</span>',
           iconSize: [28, 28]
         })
       }).addTo(map)
-        .bindTooltip('Start-Ziel', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-rundweg' })
+        .bindTooltip('Start / Ziel', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-start' })
         .openTooltip();
-      pts.push([sP.lat, sP.lng]);
-    } else {
-      if (sP) {
-        L.marker([sP.lat, sP.lng], {
-          icon: L.divIcon({
-            className: 'marker-start-ziel marker-start',
-            html: '<span>S</span>',
-            iconSize: [28, 28]
-          })
-        }).addTo(map)
-          .bindTooltip('Start', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-start' })
-          .openTooltip();
-        pts.push([sP.lat, sP.lng]);
-      }
-      if (zP) {
-        L.marker([zP.lat, zP.lng], {
-          icon: L.divIcon({
-            className: 'marker-start-ziel marker-ziel',
-            html: '<span>Z</span>',
-            iconSize: [28, 28]
-          })
-        }).addTo(map)
-          .bindTooltip('Ziel', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-ziel' })
-          .openTooltip();
-        pts.push([zP.lat, zP.lng]);
-      }
+      map.setView([opts.startPunkt.lat, opts.startPunkt.lng], 13);
+      return 1;
     }
 
+    var pts = [];
+    if (opts.startPunkt) {
+      L.marker([opts.startPunkt.lat, opts.startPunkt.lng], {
+        icon: L.divIcon({
+          className: 'marker-start-ziel marker-start',
+          html: '<span>S</span>',
+          iconSize: [28, 28]
+        })
+      }).addTo(map)
+        .bindTooltip('Start', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-start' })
+        .openTooltip();
+      pts.push([opts.startPunkt.lat, opts.startPunkt.lng]);
+    }
+    if (opts.zielPunkt) {
+      L.marker([opts.zielPunkt.lat, opts.zielPunkt.lng], {
+        icon: L.divIcon({
+          className: 'marker-start-ziel marker-ziel',
+          html: '<span>Z</span>',
+          iconSize: [28, 28]
+        })
+      }).addTo(map)
+        .bindTooltip('Ziel', { permanent: true, direction: 'right', offset: [16, 0], className: 'marker-label marker-label-ziel' })
+        .openTooltip();
+      pts.push([opts.zielPunkt.lat, opts.zielPunkt.lng]);
+    }
     if (pts.length === 1) {
       map.setView(pts[0], 13);
     } else if (pts.length === 2) {
       L.polyline(pts, { color: '#888', weight: 2, dashArray: '6,8', opacity: 0.7 }).addTo(map);
       map.fitBounds(pts, { padding: [30, 30] });
     }
-    return { anzahl: pts.length, rundweg: istRundweg };
+    return pts.length;
   }
 
   if (opts.modus === 'gpx') {
     // Sofort Start/Ziel anzeigen (aus Geocoding)
-    var sz = zeichneStartZiel();
-    if (sz.anzahl > 0) {
+    var n = zeichneStartZiel();
+    if (n > 0) {
       if (ladeEl) ladeEl.style.display = 'none';
     } else {
       if (ladeEl) ladeEl.innerHTML = 'Start/Ziel konnten nicht ermittelt werden.';
     }
 
-    // Legende oben rechts: bei Rundweg "Start-Ziel" (blau), sonst Start (grün) + Ziel (rot)
+    // Wenn lokale GPX-URL vorhanden: Track aus dem eigenen Repo laden und zeichnen
+    if (opts.gpxLokalUrl && window.L && window.L.GPX) {
+      try {
+        new L.GPX(opts.gpxLokalUrl, {
+          async: true,
+          // Eigene Start/Ziel-Marker ausblenden, weil wir die selbst gesetzt haben
+          marker_options: {
+            startIconUrl: '',
+            endIconUrl: '',
+            shadowUrl: ''
+          },
+          polyline_options: { color: '#0b422a', weight: 4, opacity: 0.85 }
+        })
+        .on('loaded', function(e) {
+          try { map.fitBounds(e.target.getBounds(), { padding: [30, 30] }); } catch (err) {}
+        })
+        .on('error', function(err) {
+          console.warn('[Karte] GPX-Track konnte nicht geladen werden:', opts.gpxLokalUrl, err);
+        })
+        .addTo(map);
+      } catch (e) {
+        console.warn('[Karte] GPX-Track Fehler:', e);
+      }
+    }
+
+    // Legende oben rechts: Start (grün), Ziel (rot) - bei Rundwegen nur "Start/Ziel"
+    var istRundwegLeg = opts.startPunkt && opts.zielPunkt &&
+      Math.abs(opts.startPunkt.lat - opts.zielPunkt.lat) < 0.0001 &&
+      Math.abs(opts.startPunkt.lng - opts.zielPunkt.lng) < 0.0001;
     var legende = L.control({ position: 'topright' });
     legende.onAdd = function() {
       var div = L.DomUtil.create('div', 'karte-legende');
-      if (sz.rundweg) {
-        div.innerHTML = '<div class="legende-zeile"><span class="legende-punkt punkt-rundweg"></span> Start-Ziel</div>';
+      var html = '';
+      if (istRundwegLeg) {
+        html += '<div class="legende-zeile"><span class="legende-punkt punkt-start"></span> Start / Ziel</div>';
       } else {
-        div.innerHTML = ''
-          + '<div class="legende-zeile"><span class="legende-punkt punkt-start"></span> Start</div>'
-          + '<div class="legende-zeile"><span class="legende-punkt punkt-ziel"></span> Ziel</div>';
+        html += '<div class="legende-zeile"><span class="legende-punkt punkt-start"></span> Start</div>'
+              + '<div class="legende-zeile"><span class="legende-punkt punkt-ziel"></span> Ziel</div>';
       }
+      if (opts.gpxLokalUrl) {
+        html += '<div class="legende-zeile"><span class="legende-linie"></span> Route</div>';
+      }
+      div.innerHTML = html;
       L.DomEvent.disableClickPropagation(div);
       return div;
     };
