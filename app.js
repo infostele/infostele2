@@ -542,7 +542,8 @@ var LISTEN = {
     untertitel:'Sehenswertes in der Region (Live-Daten von westerwald.info).',
     renderTyp:'iframe',
     iframeUrl:'https://www.westerwald.info/tosc5/infrastruktur?limINFOSYSTEMSUBTOPICS=a1716a20-0da0-4cd6-b473-febf29b39eea,f7fe9672-2fdc-4105-bbc7-40bb170afef3#/pois',
-    iframeTyp:'webseite'
+    iframeTyp:'webseite',
+    mobilIframe:true
   },
   'tourismus-badeseen':      {datenName:'DATA_BADESEEN_NEU',  titel:'Badeseen',     breadcrumb:'Tourismus &amp; Freizeit › <strong>Badeseen</strong>',     zurueck:'kategorie/tourismus', untertitel:'Erfrischung und Naturerlebnis.', detailKey:'badesee'},
   'tourismus-unterkuenfte': {
@@ -552,7 +553,8 @@ var LISTEN = {
     untertitel:'Hotels, Pensionen, Ferienwohnungen, Camping (Live-Daten von westerwald.info).',
     renderTyp:'iframe',
     iframeUrl:'https://www.westerwald.info/tosc5/unterkuenfte/#/unterkuenfte',
-    iframeTyp:'webseite'
+    iframeTyp:'webseite',
+    mobilIframe:true
   },
   'tourismus-veranstaltungen': {datenName:'DATA_VERANSTALTUNGEN_ALLE', titel:'Veranstaltungen', breadcrumb:'Tourismus &amp; Freizeit › <strong>Veranstaltungen</strong>', zurueck:'kategorie/tourismus', untertitel:'Alle Termine in der Region.', detailKey:'event', renderTyp:'termine'},
 
@@ -569,7 +571,7 @@ var LISTEN = {
   'regional-naturgenuss-saisonprodukte': {titel:'Naturgenuss Saisonprodukte', breadcrumb:'Regionale Produkte › Naturgenuss › <strong>Saisonprodukte</strong>', zurueck:'liste/regional-naturgenuss', untertitel:'Saisonale Produkte und Rezepte.', renderTyp:'iframe', iframeUrl:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/naturgenussrezepte.pdf', coverBild:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/startbild_naturgenussrezepte.jpg'},
 
   // MOBILITÄT & VERKEHR
-  'mobilitaet-bahn-bus':      {titel:'Bahn & Bus', breadcrumb:'Mobilität &amp; Verkehr › <strong>Bahn & Bus</strong>', zurueck:'kategorie/mobilitaet', untertitel:'VRM-Fahrplanauskunft für Altenkirchen, Neuwied und Westerwaldkreis.', renderTyp:'iframe', iframeUrl:'https://www.vrminfo.de/fahrplanauskunft/', iframeTyp:'webseite'},
+  'mobilitaet-bahn-bus':      {titel:'Bahn & Bus', breadcrumb:'Mobilität &amp; Verkehr › <strong>Bahn & Bus</strong>', zurueck:'kategorie/mobilitaet', untertitel:'VRM-Fahrplanauskunft für Altenkirchen, Neuwied und Westerwaldkreis.', renderTyp:'iframe', iframeUrl:'https://www.vrminfo.de/fahrplanauskunft/', iframeTyp:'webseite', mobilIframe:true},
   'mobilitaet-mitfahrbank':   {titel:'Westerwälder Mitfahrerbänke', breadcrumb:'Mobilität &amp; Verkehr › <strong>Westerwälder Mitfahrerbänke</strong>', zurueck:'kategorie/mobilitaet', untertitel:'Standorte in der Region.', renderTyp:'iframe', iframeUrl:'https://mitfahrerbank-ww.de/', iframeTyp:'webseite', iframeProxy:true},
   'mobilitaet-fahrgemeinschaften': {linkData:'fahrgemeinschaften', titel:'Fahrgemeinschaften', breadcrumb:'Mobilität &amp; Verkehr › <strong>Fahrgemeinschaften</strong>', zurueck:'kategorie/mobilitaet', untertitel:'ADAC Pendlernetz – App für Mitfahrgelegenheiten.', renderTyp:'subLinks'},
 
@@ -581,7 +583,8 @@ var LISTEN = {
     untertitel:'VRM-Fahrplanauskunft für den Landkreis Altenkirchen.',
     renderTyp:'iframe',
     iframeUrl:'https://www.vrminfo.de/fahrplanauskunft/',
-    iframeTyp:'webseite'
+    iframeTyp:'webseite',
+    mobilIframe:true
   },
   'mobilitaet-bahn-bus-oepnv-ww': {
     titel:'Westerwaldkreis',
@@ -590,7 +593,8 @@ var LISTEN = {
     untertitel:'Fahrpläne und Verbindungen im Westerwaldkreis.',
     renderTyp:'iframe',
     iframeUrl:'https://www.vrminfo.de/fahrplanauskunft/',
-    iframeTyp:'webseite'
+    iframeTyp:'webseite',
+    mobilIframe:true
   },
   'mobilitaet-bahn-bus-vrm': {
     titel:'Landkreis Neuwied',
@@ -599,7 +603,8 @@ var LISTEN = {
     untertitel:'Verkehrsverbund Rhein-Mosel: Fahrpläne und Verbindungen.',
     renderTyp:'iframe',
     iframeUrl:'https://www.vrminfo.de/fahrplanauskunft/',
-    iframeTyp:'webseite'
+    iframeTyp:'webseite',
+    mobilIframe:true
   }
 };
 
@@ -2395,10 +2400,13 @@ function renderIframeSeite(ziel, slug, l) {
         return;
       }
     }
-    if (istMobil) {
+    if (istMobil && !l.mobilIframe) {
       // Mobile: schöne Karte mit "In neuem Tab öffnen"-Button.
       // Externe Web-Apps wie westerwald.info sind im iframe auf Mobile
       // schwer zu bedienen (Touch-Konflikte, scrollen, kleine Buttons).
+      // Ausnahme: Wenn die Route ausdrücklich mobilIframe:true setzt,
+      // wird die Seite auch auf Mobile direkt eingebettet (gleiche
+      // Strategie wie Desktop: Karte mit "Seite öffnen"-Button + iframe).
       ziel.innerHTML =
         '<div class="sticky-region">'
           + navBar(l.zurueck, l.breadcrumb)
@@ -3490,20 +3498,17 @@ function initWesterwaldKarte(mapId, opts) {
   }
 
   if (opts.modus === 'gpx') {
-    // Sofort Start/Ziel anzeigen (aus Geocoding)
-    var n = zeichneStartZiel();
-    if (n > 0) {
-      if (ladeEl) ladeEl.style.display = 'none';
-    } else {
-      if (ladeEl) ladeEl.innerHTML = 'Start/Ziel konnten nicht ermittelt werden.';
-    }
+    // Start/Ziel-Marker werden nicht mehr separat gesetzt. Stattdessen wird
+    // ausschließlich der GPX-Track gezeichnet und die Karte auf dessen Bounds
+    // gefittet. Das vermeidet die Meldung "Start/Ziel konnten nicht ermittelt
+    // werden" bei Touren ohne saubere Geocoding-Treffer.
+    var gpxGeladen = false;
 
-    // Wenn lokale GPX-URL vorhanden: Track aus dem eigenen Repo laden und zeichnen
     if (opts.gpxLokalUrl && window.L && window.L.GPX) {
       try {
         new L.GPX(opts.gpxLokalUrl, {
           async: true,
-          // Eigene Start/Ziel-Marker ausblenden, weil wir die selbst gesetzt haben
+          // L.GPX setzt seine eigenen Start/Ende-Marker — die blenden wir aus.
           marker_options: {
             startIconUrl: '',
             endIconUrl: '',
@@ -3512,39 +3517,36 @@ function initWesterwaldKarte(mapId, opts) {
           polyline_options: { color: '#0b422a', weight: 4, opacity: 0.85 }
         })
         .on('loaded', function(e) {
+          gpxGeladen = true;
+          if (ladeEl) ladeEl.style.display = 'none';
           try { map.fitBounds(e.target.getBounds(), { padding: [30, 30] }); } catch (err) {}
         })
         .on('error', function(err) {
           console.warn('[Karte] GPX-Track konnte nicht geladen werden:', opts.gpxLokalUrl, err);
+          if (ladeEl) ladeEl.innerHTML = 'Route konnte nicht geladen werden.';
         })
         .addTo(map);
       } catch (e) {
         console.warn('[Karte] GPX-Track Fehler:', e);
+        if (ladeEl) ladeEl.innerHTML = 'Route konnte nicht geladen werden.';
       }
+    } else {
+      // Keine GPX-URL übergeben → Lade-Hinweis ausblenden, Karte zeigt nur
+      // Landkreis-Overlay und ggf. den eigenen Standort.
+      if (ladeEl) ladeEl.style.display = 'none';
     }
 
-    // Legende oben rechts: Start (grün), Ziel (rot) - bei Rundwegen nur "Start/Ziel"
-    var istRundwegLeg = opts.startPunkt && opts.zielPunkt &&
-      Math.abs(opts.startPunkt.lat - opts.zielPunkt.lat) < 0.0001 &&
-      Math.abs(opts.startPunkt.lng - opts.zielPunkt.lng) < 0.0001;
-    var legende = L.control({ position: 'topright' });
-    legende.onAdd = function() {
-      var div = L.DomUtil.create('div', 'karte-legende');
-      var html = '';
-      if (istRundwegLeg) {
-        html += '<div class="legende-zeile"><span class="legende-punkt punkt-start"></span> Start / Ziel</div>';
-      } else {
-        html += '<div class="legende-zeile"><span class="legende-punkt punkt-start"></span> Start</div>'
-              + '<div class="legende-zeile"><span class="legende-punkt punkt-ziel"></span> Ziel</div>';
-      }
-      if (opts.gpxLokalUrl) {
-        html += '<div class="legende-zeile"><span class="legende-linie"></span> Route</div>';
-      }
-      div.innerHTML = html;
-      L.DomEvent.disableClickPropagation(div);
-      return div;
-    };
-    legende.addTo(map);
+    // Legende oben rechts: nur die Route, keine Start/Ziel-Punkte mehr.
+    if (opts.gpxLokalUrl) {
+      var legende = L.control({ position: 'topright' });
+      legende.onAdd = function() {
+        var div = L.DomUtil.create('div', 'karte-legende');
+        div.innerHTML = '<div class="legende-zeile"><span class="legende-linie"></span> Route</div>';
+        L.DomEvent.disableClickPropagation(div);
+        return div;
+      };
+      legende.addTo(map);
+    }
   } else if (opts.modus === 'punkt') {
     var popupContent = opts.popupHtml || ('<strong>' + escapeHtml(opts.label) + '</strong>');
     L.marker([opts.lat, opts.lng]).addTo(map).bindPopup(popupContent).openPopup();
