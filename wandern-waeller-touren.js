@@ -1350,20 +1350,53 @@ var DATA_WANDERN_WAELLER_TOUREN = [
   // ══════════════════════════════════════════════════════════════════════════════
   {
       "id": 17,
-      "_status": "stub",
+      "_status": "partial",
       "title": "Wäller Tour Bachgeflüster",
-      "subtitle": "Marienstatt",
+      "subtitle": "Marienstatt (Eröffnung am 30. Mai 2026)",
       "type": "Wäller Tour",
-      "km": null,
-      "difficulty": null,
-      "tags": "Marienstatt, neu, Eröffnung 30.05.2026",
-      "sourceUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/tour/807064767/",
+      "km": "16,2",
+      "difficulty": "Schwer",
+      "tags": "Marienstatt, Große Nister, Kleine Nister, Hachenburger Westerwald, Eröffnung 30.05.2026",
+      "sourceUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/tour/wanderung/waeller-tour-bachgefluester-marienstatt-eroeffnung-am-30.-mai-2026-/807064767/",
       "gpxUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/download.tour.gpx?i=807064767&project=oar-rlp",
       "tourenplanerUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/tour/807064767/",
-      "stats": { "ascent": null, "descent": null, "duration": null, "highPoint": null, "lowPoint": null },
+      "stats": { "ascent": "350 hm", "descent": "350 hm", "duration": "4:35 h", "highPoint": "338 m", "lowPoint": "222 m" },
       "description": {
-        "headline": "Neue Wäller Tour – Eröffnung am 30. Mai 2026",
-        "text": "Diese neue Wäller Tour wird am 30. Mai 2026 in Marienstatt offiziell eröffnet. Detaillierte Wegbeschreibung, Streckenprofil und weitere Informationen folgen nach der Eröffnung."
+        "headline": "Achtung: Aktuell ist die Tour noch nicht durchgehend ausgeschildert/markiert.",
+        "text": "Ein Duett aus dem munteren Plätschern zweier Flüsse und spannenden Geschichten von ausgewählten Sehenswürdigkeiten entlang der Bachläufe – das ist der Kern der 16 km langen Wäller Tour Bachgeflüster. Große und Kleine Nister prägen seit vielen Jahrhunderten das Leben der Menschen in diesen Flusstälern des Hachenburger Westerwaldes. So finden sich in der Landschaft vielfältige Zeugnisse jahrhundertelangen kulturellen und wirtschaftlichen Wirkens.\n\nOffizielle Eröffnung: 30. Mai 2026."
+      },
+      "directions": { "byCar": null },
+      "publicTransport": { "arrival": null, "returnTrip": null, "returnTripUrl": null, "stops": [], "links": [], "taxis": [], "sustainableTip": null, "sustainableTipUrls": [], "moreInfoUrl": null },
+      "parking": [],
+      "routeDescription": { "general": null, "accessTrails": [], "accessTrailMarking": null },
+      "safetyNotes": "Aktuell ist die Tour noch nicht durchgehend ausgeschildert/markiert.",
+      "safetyAppUrl": null,
+      "equipment": "Festes Schuhwerk wird empfohlen.",
+      "tips": [],
+      "literature": [],
+      "start": { "name": "Kloster Marienstatt", "address": "Streithausen / Marienstatt", "coordinates": null },
+      "destination": { "name": "Kloster Marienstatt", "address": "Streithausen / Marienstatt", "coordinates": null }
+    },
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // ════════  18.  GRUBENWANDERWEG  —  Brachbach  (Westerwald-Sieg) ══════════════
+  // ══════════════════════════════════════════════════════════════════════════════
+  {
+      "id": 18,
+      "_status": "partial",
+      "title": "Wäller Tour Grubenwanderweg",
+      "subtitle": "Brachbach",
+      "type": "Wäller Tour & GeoRoute",
+      "km": "10,1",
+      "difficulty": "Mittel",
+      "tags": "Bergbaugeschichte, Schieferstollen Josefsglück, GeoRoute, Heimatverein Glück-Auf",
+      "sourceUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/tour/wanderung/waeller-tour-grubenwanderweg-brachbach/51782512/",
+      "gpxUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/download.tour.gpx?i=51782512&project=oar-rlp",
+      "tourenplanerUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/tour/51782512/",
+      "stats": { "ascent": "298 hm", "descent": "283 hm", "duration": "3:05 h", "highPoint": "413 m", "lowPoint": "205 m" },
+      "description": {
+        "headline": null,
+        "text": "Du begibst Dich auf der GeoRoute auf die Spuren der Bergbaugeschichte rund um Brachbach mit vielen Stationen und dem Besucherbergwerk Schieferstollen \"Josefsglück\" als Highlight.\n\nGehe auf eine 10 km lange Entdeckungsreise durch die traditionsreiche Bergbaugeschichte der Ortsgemeinde Brachbach. Zahlreiche Relikte aus vergangenen Tagen, vor allem Mundlöcher zu alten Bergwerken, in denen einst Schiefer und Erz abgebaut wurden, erwarten Dich. Der Heimatverein \"Glück-Auf\" Brachbach hat diesen Weg mit viel Herzblut angelegt, und nun wurde er zu einer offiziellen Wäller-Tour aufgewertet. Entlang der Strecke bieten Infotafeln zu 30 markanten, bergbaurelevanten Punkten viele spannende Einblicke in die Welt unter Tage. Das Highlight der Tour ist das Besucherbergwerk Schieferstollen \"Josefsglück\" (GeoPunkt)."
       },
       "directions": { "byCar": null },
       "publicTransport": { "arrival": null, "returnTrip": null, "returnTripUrl": null, "stops": [], "links": [], "taxis": [], "sustainableTip": null, "sustainableTipUrls": [], "moreInfoUrl": null },
@@ -1371,11 +1404,89 @@ var DATA_WANDERN_WAELLER_TOUREN = [
       "routeDescription": { "general": null, "accessTrails": [], "accessTrailMarking": null },
       "safetyNotes": null,
       "safetyAppUrl": null,
-      "equipment": null,
-      "tips": [],
+      "equipment": "Festes Schuhwerk wird empfohlen.",
+      "tips": [
+        { "name": "Besucherbergwerk Schieferstollen Josefsglück", "note": "GeoPunkt am Weg — Besuche nur nach Anmeldung.", "url": null }
+      ],
       "literature": [],
-      "start": { "name": "Marienstatt", "address": null, "coordinates": null },
-      "destination": { "name": "Marienstatt", "address": null, "coordinates": null }
+      "start": { "name": "Brachbach", "address": "Brachbach (Verbandsgemeinde Kirchen/Sieg)", "coordinates": null },
+      "destination": { "name": "Brachbach", "address": "Brachbach (Verbandsgemeinde Kirchen/Sieg)", "coordinates": null }
+    },
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // ═══════  19.  DRUIDENSTEIN-WANDERWEG  —  Kirchen (Sieg) ══════════════════════
+  // ══════════════════════════════════════════════════════════════════════════════
+  {
+      "id": 19,
+      "_status": "partial",
+      "title": "Wäller Tour Druidenstein-Wanderweg",
+      "subtitle": "Kirchen (Sieg)",
+      "type": "Wäller Tour",
+      "km": "15,7",
+      "difficulty": "Mittel",
+      "tags": "Druidenstein, Nationaler Geotop, Ottoturm, Landschaftskino, Kreuzweg",
+      "sourceUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/tour/wanderung/waeller-tour-druidenstein-wanderweg-kirchen-sieg-/45101804/",
+      "gpxUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/download.tour.gpx?i=45101804&project=oar-rlp",
+      "tourenplanerUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/tour/45101804/",
+      "stats": { "ascent": "387 hm", "descent": "393 hm", "duration": "4:30 h", "highPoint": "517 m", "lowPoint": "187 m" },
+      "description": {
+        "headline": null,
+        "text": "Die Druiden wären auf ihrem Weg zum mystischen Druidenstein überrascht gewesen: Mühle, Ottoturm, Landschaftskino, Kreuzweg und Geotop – viele Highlights auf nur einem Wanderweg!\n\nWandle auf Panoramawegen aus dem Siegtal hinauf bis zum 517 m hoch gelegenen Gipfel des Windhahns und weiter zum Naturdenkmal \"Druidenstein\", so wie es sicher schon die alten Kelten (Druiden) machten. Leicht ansteigend wanderst Du zum Kahlberg und passierst dabei zahlreiche kulturelle und landschaftliche Höhepunkte der Region."
+      },
+      "directions": { "byCar": null },
+      "publicTransport": { "arrival": null, "returnTrip": null, "returnTripUrl": null, "stops": [], "links": [], "taxis": [], "sustainableTip": null, "sustainableTipUrls": [], "moreInfoUrl": null },
+      "parking": [],
+      "routeDescription": { "general": null, "accessTrails": [], "accessTrailMarking": null },
+      "safetyNotes": null,
+      "safetyAppUrl": null,
+      "equipment": "Festes Schuhwerk wird empfohlen.",
+      "tips": [
+        { "name": "Nationaler Geotop Druidenstein", "note": "Eines der bedeutendsten Naturdenkmäler der Region.", "url": null },
+        { "name": "Ottoturm", "note": "Aussichtsturm mit Panoramablick auf das Siegtal.", "url": null }
+      ],
+      "literature": [],
+      "start": { "name": "Kirchen (Sieg)", "address": "Kirchen (Sieg)", "coordinates": null },
+      "destination": { "name": "Kirchen (Sieg)", "address": "Kirchen (Sieg)", "coordinates": null }
+    },
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // ════════  20.  RAIFFEISENS SONNTAGSSPAZIERGANG  —  Hamm (Sieg) ═══════════════
+  // ══════════════════════════════════════════════════════════════════════════════
+  {
+      "id": 20,
+      "_status": "partial",
+      "title": "Wäller Tour Raiffeisens Sonntagsspaziergang",
+      "subtitle": "Hamm (Sieg)",
+      "type": "Wäller Tour",
+      "km": "6,8",
+      "difficulty": "Leicht",
+      "tags": "Friedrich Wilhelm Raiffeisen, Geburtshaus, Deutsches Raiffeisenmuseum, Mümmelbach, Bahnhof Au (Sieg)",
+      "sourceUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/tour/wanderung/waeller-tour-raiffeisens-sonntagsspaziergang-hamm-sieg-/56665663/",
+      "gpxUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/download.tour.gpx?i=56665663&project=oar-rlp",
+      "tourenplanerUrl": "https://www.tourenplaner-rheinland-pfalz.de/de/tour/56665663/",
+      "stats": { "ascent": "80 hm", "descent": "80 hm", "duration": "1:45 h", "highPoint": "212 m", "lowPoint": "134 m" },
+      "description": {
+        "headline": null,
+        "text": "Idyllisch, einzigartig, historisch. Du begibst dich auf Zeitreise und entschleunigst, wie einst Raiffeisen, immer wieder sonntags nach dem Essen, von Hamm nach Fürthen und zurück.\n\nRaiffeisen hat seinen Spaziergang natürlich von seinem Geburtshaus aus gemacht. Du könntest die Wanderung aber auch vom Bahnhof Au (Sieg) aus starten. Von der Raiffeisenstraße in Hamm aus geht es zum Mümmelbach bis an die Uferstraße – eine entspannte Rundwanderung auf den Spuren des Genossenschaftsgründers."
+      },
+      "directions": { "byCar": null },
+      "publicTransport": {
+        "arrival": "Bahnhof Au (Sieg) als alternativer Startpunkt nutzbar.",
+        "returnTrip": null, "returnTripUrl": null,
+        "stops": [], "links": [], "taxis": [],
+        "sustainableTip": null, "sustainableTipUrls": [], "moreInfoUrl": null
+      },
+      "parking": [],
+      "routeDescription": { "general": null, "accessTrails": [], "accessTrailMarking": null },
+      "safetyNotes": null,
+      "safetyAppUrl": null,
+      "equipment": "Bequemes Schuhwerk genügt.",
+      "tips": [
+        { "name": "Deutsches Raiffeisenmuseum", "note": "Im Geburtshaus von Friedrich Wilhelm Raiffeisen.", "url": null }
+      ],
+      "literature": [],
+      "start": { "name": "Raiffeisenstraße, Hamm (Sieg)", "address": "Hamm (Sieg)", "coordinates": null },
+      "destination": { "name": "Raiffeisenstraße, Hamm (Sieg)", "address": "Hamm (Sieg)", "coordinates": null }
     }
 
 ];

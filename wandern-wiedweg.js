@@ -142,5 +142,22 @@ var DATA_WANDERN_WIEDWEG=[
     literature:'\u201eFerienland Westerwald Blatt 1\u201c, 4. Auflage 2007 (ISBN 978-3-89637-253-6); \u201eNaturpark Rhein-Westerwald Blatt 3 (S\u00fcd)\u201c, 6. Auflage 2008 (ISBN 978-3-89637-266-6).',
     startPoint:'Campingplatz Neuerburg, 56589 Niederbreitbach',
     endPoint:'Wiedm\u00fcndung, Kurtrierer Stra\u00dfe, 56567 Irlich/Neuwied'
+  },
+  {
+    t:'Wiedweg Gesamtstrecke',
+    km:'117',
+    sw:'mittel',
+    d:'Hachenburg \u2013 Linden \u2013 H\u00f6chstenbach \u2013 Altenkirchen \u2013 Oberlahr \u2013 Neustadt (Wied) \u2013 Ro\u00dfbach \u2013 Niederbreitbach \u2013 Irlich/Neuwied; 8 Etappen, Qualit\u00e4tsweg Wanderbares Deutschland',
+    url:'https://www.tourenplaner-rheinland-pfalz.de/de/tour/fernwanderweg/wiedweg-gesamtstrecke/2892545/',
+    gpx:'https://www.tourenplaner-rheinland-pfalz.de/de/download.tour.gpx?i=2892545&project=oar-rlp',
+    stats:{duration:'\u2013',ascent:'\u2013',descent:'\u2013',highPoint:'\u2013',lowPoint:'\u2013'},
+    description:'Der gut 117 km lange Wiedweg verd\u00e4nkt seinen Namen dem gleichnamigen Fluss. Als l\u00e4ngster Fluss des Westerwaldes schl\u00e4ngelt sich die Wied von ihrer Quelle an der Westerw\u00e4lder Seenplatte bis zur M\u00fcndung am Rhein in Neuwied.<br><br>Diese Gesamtstrecke umfasst alle acht Etappen des Wiedwegs in einer durchgehenden GPX-Datei. F\u00fcr die Planung als Mehrtagestour empfiehlt sich die Aufteilung in die einzelnen Etappen (siehe Wiedweg 01 bis 08), die jeweils detaillierte Informationen zu Wegbeschreibung, Anfahrt, R\u00fcckfahrt, Unterk\u00fcnften und Einkehrm\u00f6glichkeiten enthalten.',
+    directions:{byCar:'Anreisem\u00f6glichkeiten siehe Etappen 1 (Hachenburg) und 8 (Irlich/Neuwied).',byPublicTransport:'Anreise und R\u00fcckfahrt mit Bahn und Bus sind an mehreren Etappenpunkten m\u00f6glich. Details siehe Beschreibung der einzelnen Etappen.',parking:'Parkm\u00f6glichkeiten siehe Beschreibung der einzelnen Etappen.'},
+    wayDescription:'Die Wegbeschreibungen der acht Einzeletappen findest du in den jeweiligen Etappen-Eintr\u00e4gen (Wiedweg 01 bis 08).',
+    safetyNotes:'\u2022 Trage festes Schuhwerk sowie witterungsangepasste Kleidung.<br>\u2022 Nimm ausreichend Fl\u00fcssigkeit mit.<br>\u2022 Plane Etappen und Unterk\u00fcnfte im Voraus.<br>\u2022 F\u00fcr Kinderwagen und Rollstuhlfahrer nicht geeignet.',
+    equipment:'Festes Schuhwerk; bei Mehrtagestour mit \u00dcbernachtung passende Ausr\u00fcstung.',
+    literature:'Siehe Beschreibung der einzelnen Etappen.',
+    startPoint:'Westerwald-Brauerei, Am Hopfengarten 1, 57627 Hachenburg',
+    endPoint:'Wiedm\u00fcndung, Kurtrierer Stra\u00dfe, 56567 Irlich/Neuwied'
   }
 ];

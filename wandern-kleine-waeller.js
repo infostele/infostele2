@@ -1358,6 +1358,237 @@ var DATA_WANDERN_KLEINE_WAELLER = [
     address: "56422 Wirges",
     coordinates: null
   }
+},
+
+// ═══════════════════════════════════════════════════════════
+// 16 – Schwarze Nister (Bad Marienberg)  [PARTIAL]
+// ═══════════════════════════════════════════════════════════
+{
+  id: 16,
+  _status: "partial",
+  title: "Kleiner Wäller Schwarze Nister",
+  subtitle: "Bad Marienberg",
+  type: "Spazierwanderweg",
+  km: "4,3",
+  difficulty: "Leicht",
+  tags: "Schwarze Nister, Naturschutzgebiet Bacher Lay, Basaltwand, Park der Sinne",
+  sourceUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/tour/wanderung/kleiner-waeller-schwarze-nister-bad-marienberg/64379431/",
+  gpxUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/download.tour.gpx?i=64379431&project=oar-rlp",
+  tourenplanerUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/tour/64379431/",
+  stats: {
+    ascent: "80 hm",
+    descent: "80 hm",
+    duration: "1:10 h",
+    highPoint: "483 m",
+    lowPoint: "435 m"
+  },
+  description: {
+    headline: null,
+    text: "Dieser gemütliche SpazierWanderweg begleitet das Flüsschen Schwarze Nister auf seinem Weg durch das Naturschutzgebiet Bacher Lay.\n\nDer Kleine Wäller Schwarze Nister ist der zweite SpazierWanderweg in Bad Marienberg. Hier kannst du gemütlich schlendern und die Natur geniessen. Und obwohl die Tour nur knapp 4,5 km lang ist, gibt es doch einiges zu sehen, selbst in Herbst und Winter. Im Sommer bietet ein Kneipp-Tretbecken oder das Flüsschen selber eine Abkühlung für Füße und Beine und in der Bacher Lay ist es sowieso immer kühl. Sehenswert ist dort die Basaltwand und auch sonst kannst du noch Reste des früheren Basaltabbaus entdecken, immer begleitet von der Schwarzen Nister. Zurück in der Stadt warten im Park der Sinne Barfußweg und Apothekergarten auf einen Besuch."
+  },
+  directions: { byCar: null },
+  publicTransport: {
+    arrival: null, returnTrip: null, returnTripUrl: null,
+    stops: [], links: [], taxis: [],
+    sustainableTip: null, sustainableTipUrls: [], moreInfoUrl: null
+  },
+  parking: [],
+  routeDescription: { general: null, accessTrails: [], accessTrailMarking: null },
+  safetyNotes: "Besonders im Herbst ist darauf zu achten, dass das am Boden liegende Laub Unebenheiten, Wurzeln, Steine oder Löcher im Weg verdecken kann.",
+  safetyAppUrl: null,
+  equipment: "Festes Schuhwerk wird empfohlen.",
+  tips: [
+    {
+      name: "Apothekergarten im Park der Sinne",
+      note: "Im Frühling leuchtet der Apothekergarten in frischem Grün, die Schautafeln informieren über die Wirkungen und Anwendungsgebiete der Heilkräuter.",
+      url: null
+    }
+  ],
+  literature: [],
+  start: { name: "Bad Marienberg", address: "Bad Marienberg", coordinates: null },
+  destination: { name: "Bad Marienberg", address: "Bad Marienberg", coordinates: null }
+},
+
+// ═══════════════════════════════════════════════════════════
+// 17 – Wiesensee (Stahlhofen am Wiesensee)  [PARTIAL]
+// ═══════════════════════════════════════════════════════════
+{
+  id: 17,
+  _status: "partial",
+  title: "Kleiner Wäller Wiesensee",
+  subtitle: "Stahlhofen am Wiesensee",
+  type: "Spazierwanderweg",
+  km: "6,4",
+  difficulty: "Leicht",
+  tags: "Wiesensee, Westerwälder Seenplatte, barrierefrei, Familienfreundlich",
+  sourceUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/tour/wanderung/kleiner-waeller-wiesensee-stahlhofen-am-wiesensee/44998998/",
+  gpxUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/download.tour.gpx?i=44998998&project=oar-rlp",
+  tourenplanerUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/tour/44998998/",
+  stats: {
+    ascent: "32 hm",
+    descent: "32 hm",
+    duration: "1:43 h",
+    highPoint: "438 m",
+    lowPoint: "407 m"
+  },
+  description: {
+    headline: null,
+    text: "Barrierefreier Rundwanderweg Kleiner Wäller Wiesensee mit Einkehrmöglichkeit und vielen Bänken rund um den Wiesensee. Aktuell führt der See aufgrund von Reparaturarbeiten kein Wasser.\n\nStart und Ziel ist der Parkplatz am Winner Ufer 9 in Stahlhofen am Wiesensee, direkt am See gelegen. Die Strecke führt komplett um den Wiesensee herum und ist mit ihrem nahezu ebenen Verlauf auch für Kinderwagen und mobilitätseingeschränkte Personen gut geeignet."
+  },
+  directions: { byCar: null },
+  publicTransport: {
+    arrival: null, returnTrip: null, returnTripUrl: null,
+    stops: [], links: [], taxis: [],
+    sustainableTip: null, sustainableTipUrls: [], moreInfoUrl: null
+  },
+  parking: [
+    { location: "Stahlhofen am Wiesensee", free: "Parkplatz Winner Ufer 9, 56459 Stahlhofen am Wiesensee", paid: null }
+  ],
+  routeDescription: { general: null, accessTrails: [], accessTrailMarking: null },
+  safetyNotes: null,
+  safetyAppUrl: null,
+  equipment: "Bequemes Schuhwerk genügt.",
+  tips: [],
+  literature: [],
+  start: { name: "Parkplatz Winner Ufer", address: "Winner Ufer 9, 56459 Stahlhofen am Wiesensee", coordinates: null },
+  destination: { name: "Parkplatz Winner Ufer", address: "Winner Ufer 9, 56459 Stahlhofen am Wiesensee", coordinates: null }
+},
+
+// ═══════════════════════════════════════════════════════════
+// 18 – Westerburg  [PARTIAL]
+// ═══════════════════════════════════════════════════════════
+{
+  id: 18,
+  _status: "partial",
+  title: "Kleiner Wäller Westerburg",
+  subtitle: "Westerburg",
+  type: "Spazierwanderweg",
+  km: "4,8",
+  difficulty: "Mittel",
+  tags: "Liebfrauenkirche, Christ-König-Kirche, Rathausplatz, Schloss Westerburg",
+  sourceUrl: "https://www.westerwald.info/d/kleiner-waeller-westerburg/",
+  gpxUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/download.tour.gpx?i=806200957&project=oar-rlp",
+  tourenplanerUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/tour/806200957/",
+  stats: {
+    ascent: "137 hm",
+    descent: "137 hm",
+    duration: "1:20 h",
+    highPoint: "420 m",
+    lowPoint: "327 m"
+  },
+  description: {
+    headline: null,
+    text: "Kleiner Wäller Westerburg – anspruchsvoll, abwechslungsreich und voller kultureller Highlights. Unterwegs warten eindrucksvolle Ausblicke und historische Sehenswürdigkeiten.\n\nErleben Sie einen abwechslungsreichen Spaziergang durch Geschichte, Kultur und Natur – auf dem Kleinen Wäller Westerburg. Der Weg verbindet eindrucksvolle Aussichtspunkte, kulturelle Highlights und stille Waldpfade zu einem kurzweiligen Rundweg mit Anspruch.\n\nStartpunkt ist die imposante Liebfrauenkirche, die mit ihrer erhöhten Lage über der Stadt thront. Von hier führt der Weg durch das Wohngebiet vorbei an der Christ-König-Kirche, einem modernen Sakralbau aus der Nachkriegszeit. Über den Rathausplatz geht es weiter zu Schloss Westerburg und durch ruhige Waldpassagen zurück zum Ausgangspunkt."
+  },
+  directions: { byCar: null },
+  publicTransport: {
+    arrival: null, returnTrip: null, returnTripUrl: null,
+    stops: [], links: [], taxis: [],
+    sustainableTip: null, sustainableTipUrls: [], moreInfoUrl: null
+  },
+  parking: [],
+  routeDescription: { general: null, accessTrails: [], accessTrailMarking: null },
+  safetyNotes: null,
+  safetyAppUrl: null,
+  equipment: "Festes Schuhwerk wird empfohlen.",
+  tips: [],
+  literature: [],
+  start: { name: "Liebfrauenkirche Westerburg", address: "Westerburg", coordinates: null },
+  destination: { name: "Liebfrauenkirche Westerburg", address: "Westerburg", coordinates: null }
+},
+
+// ═══════════════════════════════════════════════════════════
+// 19 – Rund um Mabühl / Oberroder Knoten  [PARTIAL]
+// ═══════════════════════════════════════════════════════════
+{
+  id: 19,
+  _status: "partial",
+  title: "Kleiner Wäller Rund um Mabühl",
+  subtitle: "Oberroder Knoten",
+  type: "Spazierwanderweg",
+  km: "3,4",
+  difficulty: "Leicht",
+  tags: "Familienfreundlich, Lehrpfad, Oberroder Knoten, Sportfischerverein Früh auf",
+  sourceUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/tour/wanderung/kleiner-waeller-rund-um-mabuehl-oberroder-knoten/57040240/",
+  gpxUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/download.tour.gpx?i=57040240&project=oar-rlp",
+  tourenplanerUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/tour/57040240/",
+  stats: {
+    ascent: "70 hm",
+    descent: "70 hm",
+    duration: "0:55 h",
+    highPoint: "546 m",
+    lowPoint: "485 m"
+  },
+  description: {
+    headline: null,
+    text: "Familienfreundliche Rundtour mit schönen Ausblicken und viel Abwechslung.\n\nDie anschaulichen Tafeln erzählen viel über Wald und Flur, Bäume, Tiere und machen die Rundtour besonders abwechslungs- und lehrreich. Picknickmöglichkeiten gibt es am Parkplatz am Oberroder Knoten oder am Vereinsheim des Sportfischervereins \"Früh auf\"."
+  },
+  directions: { byCar: null },
+  publicTransport: {
+    arrival: null, returnTrip: null, returnTripUrl: null,
+    stops: [], links: [], taxis: [],
+    sustainableTip: null, sustainableTipUrls: [], moreInfoUrl: null
+  },
+  parking: [
+    { location: "Oberroder Knoten", free: "Parkplatz am Oberroder Knoten mit Picknickmöglichkeit", paid: null }
+  ],
+  routeDescription: { general: null, accessTrails: [], accessTrailMarking: null },
+  safetyNotes: null,
+  safetyAppUrl: null,
+  equipment: "Festes Schuhwerk wird empfohlen.",
+  tips: [
+    {
+      name: "Vereinsheim Sportfischerverein \"Früh auf\"",
+      note: "An den Wochenenden meist geöffnet — Möglichkeit, Getränke zu kaufen.",
+      url: null
+    }
+  ],
+  literature: [],
+  start: { name: "Parkplatz Oberroder Knoten", address: "Oberroden", coordinates: null },
+  destination: { name: "Parkplatz Oberroder Knoten", address: "Oberroden", coordinates: null }
+},
+
+// ═══════════════════════════════════════════════════════════
+// 20 – Hessentagswanderweg (Herborn)  [PARTIAL]
+// ═══════════════════════════════════════════════════════════
+{
+  id: 20,
+  _status: "partial",
+  title: "Kleiner Wäller Hessentagswanderweg",
+  subtitle: "Herborn",
+  type: "Spazierwanderweg",
+  km: "5,0",
+  difficulty: "Leicht",
+  tags: "Herborner Altstadt, Fachwerk, Aussichtsturm Dillblick, Wildgehege, Naturpark Lahn-Dill-Bergland",
+  sourceUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/tour/wanderung/kleiner-waeller-hessentagswanderweg-herborn/44998827/",
+  gpxUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/download.tour.gpx?i=44998827&project=oar-rlp",
+  tourenplanerUrl: "https://www.tourenplaner-rheinland-pfalz.de/de/tour/44998827/",
+  stats: {
+    ascent: "156 hm",
+    descent: "156 hm",
+    duration: "1:30 h",
+    highPoint: "332 m",
+    lowPoint: "199 m"
+  },
+  description: {
+    headline: null,
+    text: "Erlebe die sehenswerte Herborner Altstadt mit malerischem Fachwerk, den Aussichtsturm Dillblick und das Wildgehege mit seinen freundlichen Bewohnern. Viele Sitzplätze und Aussichtspunkte entlang des Weges, dazu Einkehrmöglichkeiten in der Altstadt.\n\nStartpunkt dieses abwechslungsreichen Spaziergangs ist der 17 m hohe Aussichtsturm Dillblick. Vor dem Start kann man hier den herrlichen Panoramablick genießen. Vom Turm führt der Weg durch das Wildgehege. Die Ziegen, Lamas und Esel freuen sich über Besuch. Das Damwild kann von einer Aussichtsplattform beobachtet werden. Für Kinder gibt es tolle Spiel- und Klettergeräte. Der Rundweg führt weiter vorbei an der Kriegsgräberstätte zurück in die Altstadt."
+  },
+  directions: { byCar: null },
+  publicTransport: {
+    arrival: null, returnTrip: null, returnTripUrl: null,
+    stops: [], links: [], taxis: [],
+    sustainableTip: null, sustainableTipUrls: [], moreInfoUrl: null
+  },
+  parking: [],
+  routeDescription: { general: null, accessTrails: [], accessTrailMarking: null },
+  safetyNotes: null,
+  safetyAppUrl: null,
+  equipment: "Festes Schuhwerk wird empfohlen.",
+  tips: [],
+  literature: [],
+  start: { name: "Aussichtsturm Dillblick", address: "Herborn", coordinates: null },
+  destination: { name: "Aussichtsturm Dillblick", address: "Herborn", coordinates: null }
 }
 
 ];
