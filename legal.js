@@ -1,6 +1,25 @@
 /* ════════════════════════════════════════════════════════════════
    IMPRESSUM und DATENSCHUTZERKLÄRUNG
-   Texte 1:1 aus offiziellem Auftraggeber-Material übernommen
+   Stand: Mai 2026 (überarbeitete Fassung)
+
+   ÜBERARBEITUNGSGRUND:
+   - Datenschutz-Audit Mai 2026 deckte mehrere Diskrepanzen
+     zwischen DSE-Text und tatsächlicher Datenverarbeitung auf.
+   - Bildnachweis bereinigt um nicht in der App enthaltene Bilder.
+   - DSE um tatsächlich genutzte Drittanbieter ergänzt:
+     jsDelivr, unpkg, OpenStreetMap-Tiles, Nominatim-Geocoding,
+     Overpass-API, mitfahrerbank-ww.de, Geolocation-API.
+   - Rechtsgrundlage für öffentliche Stelle angepasst (Art. 6 Abs. 1
+     lit. e DSGVO i.V.m. LDSG Rheinland-Pfalz).
+   - Hinweis auf EU-U.S. Data Privacy Framework ergänzt.
+   - localStorage-Verwendung (Geocoding-Cache) transparent gemacht.
+   - Falsche Angabe zum Google Docs Viewer entfernt.
+
+   FREIGABE:
+   Diese Fassung ist als DSB-Vorlage zu betrachten. Die finale
+   Freigabe muss durch den/die behördliche(n) Datenschutz-
+   beauftragte(n) der drei Trägerlandkreise oder durch einen
+   Fachanwalt für IT-Recht erfolgen.
    ════════════════════════════════════════════════════════════════ */
 
 window._IMPRESSUM_HTML =
@@ -70,55 +89,17 @@ window._IMPRESSUM_HTML =
 + '<li>Facebook</li>'
 + '</ul>'
 
-+ '<h3>Bildnachweis</h3>'
-+ '<p>Dominik Ketz Fotografie, <a href="https://www.dominikketz.de" target="_blank" rel="noopener">www.dominikketz.de</a><br>'
-+ 'Matthias Ketz Photographie, <a href="https://www.foto-ketz.de" target="_blank" rel="noopener">www.foto-ketz.de</a><br>'
-+ 'Martin Fandler, foto-fandler.de<br>'
-+ 'Tourist-Information Montabaur, kmaas@montabaur.de<br>'
-+ 'Tourist-Information Rengsdorf, tourist@rengsdorf.de<br>'
-+ 'Hotel Heinz GmbH, info@hotel-heinz.de<br>'
-+ 'Rheinland-Pfalz Tourismus GmbH, info@gastlandschaften.de<br>'
-+ 'J\u00F6rg Hohenadl; Naturgenuss Rhein-Westerwald, <a href="https://www.naturgenuss-partner.de" target="_blank" rel="noopener">www.naturgenuss-partner.de</a><br>'
-+ 'Regionale Partner aus dem Einkaufsf\u00FChrer Westerwald</p>'
-
-+ '<h3>Bildnachweise</h3>'
-+ '<p>Die folgenden Bilder wurden verwendet und stammen von den genannten Quellen:</p>'
-+ '<p><strong>Adobe Stock</strong></p>'
++ '<h3>Bildnachweis (in dieser App verwendete Bilder)</h3>'
++ '<p>In dieser App werden ausschlie\u00DFlich folgende Bildmaterialien verwendet:</p>'
 + '<ul>'
-+ '<li>AdobeStock_144420188.ai</li>'
-+ '<li>AdobeStock_244784231.jpeg</li>'
-+ '<li>AdobeStock_352139863.jpeg</li>'
-+ '<li>AdobeStock_354792162.jpeg</li>'
-+ '<li>AdobeStock_397095086.ai</li>'
-+ '<li>AdobeStock_442937999.jpeg</li>'
-+ '<li>AdobeStock_553143458.ai</li>'
-+ '<li>AdobeStock_576871114.ai</li>'
-+ '<li>AdobeStock_576871114.jpeg</li>'
-+ '<li>AdobeStock_807136369.jpeg</li>'
-+ '<li>AdobeStock_825087493.jpeg</li>'
-+ '<li>AdobeStock_890986439.jpeg</li>'
-+ '<li>AdobeStock_1007148027.jpeg</li>'
-+ '<li>AdobeStock_1012018936.jpeg</li>'
-+ '<li>AdobeStock_1024593601.jpeg</li>'
-+ '<li>AdobeStock_1037823821.jpeg</li>'
-+ '<li>AdobeStock_1070253592.jpeg</li>'
-+ '<li>AdobeStock_1088483877.jpeg</li>'
-+ '<li>AdobeStock_1136711510.jpeg</li>'
-+ '<li>AdobeStock_1200051178.jpeg</li>'
-+ '<li>AdobeStock_1233686142.jpeg</li>'
-+ '<li>AdobeStock_1251914079.jpeg</li>'
++ '<li><strong>Header-Logo, Wasserzeichen, Maskottchen (W\u00E4ller-Hase):</strong> Eigengestaltung im Auftrag der Wir Westerw\u00E4lder gA\u00F6R.</li>'
++ '<li><strong>Westerwald-Box-Foto und PDF-Cover-Bilder</strong> (Einkaufsf\u00FChrer, Naturgenuss-Magazin, Naturgenuss-Erzeuger, Naturgenuss-Rezepte): Wir Westerw\u00E4lder gA\u00F6R.</li>'
++ '<li><strong>Bildergalerie zur Westerwald-Box</strong> (Slider): Wir Westerw\u00E4lder gA\u00F6R, geladen vom Server <code>wir-westerwaelder.de</code>.</li>'
++ '<li><strong>Logos der Westerwald-Box-Betriebe:</strong> Bereitgestellt durch die jeweiligen Betriebe, geladen vom Server <code>wir-westerwaelder.de</code>.</li>'
++ '<li><strong>Icons</strong> (Wandern, Radfahren, Kategorien usw.): Eigengestaltung im Auftrag der Wir Westerw\u00E4lder gA\u00F6R.</li>'
++ '<li><strong>Bilder zu Ausflugszielen und Unterk\u00FCnften:</strong> Werden \u00FCber den eingebetteten Inhalt von <code>westerwald.info</code> dargestellt; die Bildrechte liegen beim Westerwald Touristik-Service e.V. und den jeweiligen Anbietern.</li>'
++ '<li><strong>Kartenmaterial:</strong> \u00A9 OpenStreetMap-Mitwirkende, abrufbar unter <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">openstreetmap.org/copyright</a>.</li>'
 + '</ul>'
-+ '<p><strong>iStock</strong></p>'
-+ '<ul>'
-+ '<li>iStock-683962670.jpg</li>'
-+ '<li>iStock-1159783574.eps</li>'
-+ '<li>iStock-1176632037.jpg</li>'
-+ '<li>iStock-1316989941.eps</li>'
-+ '<li>iStock-1318686980.eps</li>'
-+ '<li>iStock-2174600729.jpg</li>'
-+ '<li>iStock-2191560255.jpg</li>'
-+ '</ul>'
-+ '<p>Martina Haas, <a href="https://www.haas-ideen.com" target="_blank" rel="noopener">www.haas-ideen.com</a></p>'
 
 + '<h3>HAFTUNGSAUSSCHLUSS (DISCLAIMER)</h3>'
 + '<p><strong>HAFTUNG F\u00DCR INHALTE</strong></p>'
@@ -140,120 +121,133 @@ window._IMPRESSUM_HTML =
 
 
 window._DATENSCHUTZ_HTML =
-'<h3>Datenschutzerklärung</h3>'
-+ '<p><em>Stand: Mai 2026</em></p>'
-+ '<p>Diese Datenschutzerklärung beschreibt, wie diese App – die mobile Web-App <strong>„Guck ma, Westerwald"</strong> – mit personenbezogenen Daten umgeht. Die App ist absichtlich datenschutzfreundlich gestaltet und erhebt selbst keine personenbezogenen Daten.</p>'
+'<h3>Datenschutzerkl\u00E4rung</h3>'
++ '<p><em>Stand: Mai 2026 (\u00FCberarbeitete Fassung nach Datenschutz-Audit)</em></p>'
++ '<p>Diese Datenschutzerkl\u00E4rung beschreibt, wie die mobile Web-App <strong>\u201EGuck ma, Westerwald\u201C</strong> personenbezogene Daten verarbeitet. Wir haben die App so gestaltet, dass die Datenverarbeitung auf das technisch notwendige Minimum beschr\u00E4nkt bleibt. Eine eigene Speicherung personenbezogener Daten durch die verantwortliche Stelle findet \u2013 mit der unter Ziffer 4 beschriebenen Ausnahme f\u00FCr einen technischen Adressen-Cache \u2013 nicht statt.</p>'
 
 + '<h3>1. Verantwortliche Stelle</h3>'
-+ '<p>Verantwortlich für die Datenverarbeitung im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:</p>'
-+ '<p><strong>Wir Westerwälder gAöR</strong><br>'
-+ 'Königsberger Straße 40<br>'
++ '<p>Verantwortlich f\u00FCr die Datenverarbeitung im Sinne der Datenschutz-Grundverordnung (DSGVO) und des Landesdatenschutzgesetzes Rheinland-Pfalz (LDSG RLP) ist:</p>'
++ '<p><strong>Wir Westerw\u00E4lder gA\u00F6R</strong><br>'
++ 'K\u00F6nigsberger Stra\u00DFe 40<br>'
 + '56269 Dierdorf<br>'
 + 'Telefon: 02689 95929-40<br>'
 + 'Telefax: 02689 95929-49<br>'
 + 'E-Mail: <a href="mailto:info@wir-westerwaelder.de">info@wir-westerwaelder.de</a><br>'
 + 'Website: <a href="https://www.wir-westerwaelder.de" target="_blank" rel="noopener">www.wir-westerwaelder.de</a></p>'
-+ '<p>Vorstand: Sandra Köster<br>'
++ '<p>Vorstand: Sandra K\u00F6ster<br>'
 + 'Vorsitzender des Verwaltungsrates: Landrat Achim Hallerbach</p>'
++ '<p>Die Wir Westerw\u00E4lder gA\u00F6R ist eine gemeinn\u00FCtzige Anstalt \u00F6ffentlichen Rechts (g.A.\u00F6.R.), getragen durch die Landkreise Altenkirchen, Neuwied und Westerwaldkreis.</p>'
 
 + '<h3>2. Datenschutzbeauftragte</h3>'
-+ '<p>Bei datenschutzrechtlichen Fragen können Sie sich an die Datenschutzbeauftragten der Trägerlandkreise wenden:</p>'
-+ '<p><strong>Behördlicher Datenschutzbeauftragter Landkreis Altenkirchen:</strong><br>'
-+ 'Parkstraße 1, 57610 Altenkirchen<br>'
++ '<p>Bei datenschutzrechtlichen Fragen zur Verarbeitung Ihrer personenbezogenen Daten durch die Wir Westerw\u00E4lder gA\u00F6R k\u00F6nnen Sie sich an die behördlichen Datenschutzbeauftragten der Tr\u00E4gerlandkreise wenden:</p>'
++ '<p><strong>Beh\u00F6rdlicher Datenschutzbeauftragter Landkreis Altenkirchen:</strong><br>'
++ 'Parkstra\u00DFe 1, 57610 Altenkirchen<br>'
 + 'Telefon: 02681 81-3636<br>'
 + 'E-Mail: <a href="mailto:datenschutz@kreis-ak.de">datenschutz@kreis-ak.de</a></p>'
-+ '<p><strong>Behördlicher Datenschutzbeauftragter Kreisverwaltung Neuwied:</strong><br>'
-+ 'Christian Fuß, Wilhelm-Leuschner-Straße 9, 56564 Neuwied<br>'
++ '<p><strong>Beh\u00F6rdlicher Datenschutzbeauftragter Kreisverwaltung Neuwied:</strong><br>'
++ 'Christian Fu\u00DF, Wilhelm-Leuschner-Stra\u00DFe 9, 56564 Neuwied<br>'
 + 'Telefon: 02631 803-435<br>'
 + 'E-Mail: <a href="mailto:Christian.Fuss@kreis-neuwied.de">Christian.Fuss@kreis-neuwied.de</a></p>'
-+ '<p><strong>Behördliche Datenschutzbeauftragte Westerwaldkreis:</strong><br>'
++ '<p><strong>Beh\u00F6rdliche Datenschutzbeauftragte Westerwaldkreis:</strong><br>'
 + 'Sabine Schulz-Lauth<br>'
 + 'Telefon: 02602 124-792<br>'
 + 'E-Mail: <a href="mailto:Sabine.Schulz-Lauth@westerwaldkreis.de">Sabine.Schulz-Lauth@westerwaldkreis.de</a></p>'
 
-+ '<h3>3. Umfang der Datenverarbeitung</h3>'
-+ '<p>Diese App ist eine reine Informations-App. Sie wird als statische Web-Anwendung über GitHub Pages ausgeliefert.</p>'
-+ '<p><strong>Wir selbst erheben und speichern KEINE personenbezogenen Daten.</strong> Insbesondere:</p>'
++ '<h3>3. Rechtsgrundlagen</h3>'
++ '<p>Die Verarbeitung personenbezogener Daten erfolgt auf folgenden Rechtsgrundlagen:</p>'
 + '<ul>'
-+ '<li>Es werden <strong>keine Cookies</strong> auf Ihrem Endgerät gesetzt.</li>'
-+ '<li>Es werden <strong>keine Daten in den lokalen Speicher (LocalStorage / SessionStorage)</strong> Ihres Geräts geschrieben.</li>'
-+ '<li>Es findet <strong>kein Tracking, kein Profiling, keine Reichweitenmessung</strong> statt.</li>'
-+ '<li>Es werden <strong>keine Analyse-Tools</strong> (z. B. Google Analytics, Matomo) eingesetzt.</li>'
-+ '<li>Es gibt <strong>kein Nutzerkonto, kein Kontaktformular, keinen Newsletter</strong> innerhalb dieser App.</li>'
-+ '<li>Die Datenschutz-Akzeptanz wird bei jedem Aufruf der App neu abgefragt und nicht gespeichert.</li>'
++ '<li><strong>Art. 6 Abs. 1 lit. e DSGVO</strong> in Verbindung mit \u00A7 3 LDSG Rheinland-Pfalz: Wahrnehmung einer Aufgabe im \u00F6ffentlichen Interesse (touristische und wirtschaftsf\u00F6rdernde Informationen f\u00FCr die Tr\u00E4gerlandkreise).</li>'
++ '<li><strong>Art. 6 Abs. 1 lit. a DSGVO</strong>: Einwilligung, soweit Sie aktiv eine Funktion ausl\u00F6sen, die einen externen Dienst aufruft (z. B. das \u00D6ffnen einer Karte, eines eingebetteten Fahrplans oder das Anzeigen Ihres eigenen Standorts).</li>'
 + '</ul>'
 
-+ '<h3>4. Hosting durch GitHub Pages</h3>'
-+ '<p>Die App wird über den Dienst GitHub Pages der GitHub Inc., 88 Colin P Kelly Jr St, San Francisco, CA 94107, USA, ausgeliefert.</p>'
-+ '<p>Bei jedem Aufruf der App werden technisch zwingend folgende Daten an die Server von GitHub übertragen und in <strong>Server-Log-Dateien</strong> gespeichert:</p>'
++ '<h3>4. Umfang der Datenverarbeitung in der App</h3>'
++ '<p>Die App wird als statische Web-Anwendung \u00FCber GitHub Pages ausgeliefert. Wir betreiben keinen eigenen Server, der Nutzungsdaten speichert.</p>'
++ '<p><strong>Innerhalb der App findet folgende Datenverarbeitung statt:</strong></p>'
 + '<ul>'
-+ '<li>IP-Adresse des aufrufenden Geräts</li>'
++ '<li>Es werden <strong>keine Cookies</strong> gesetzt.</li>'
++ '<li>Es findet <strong>kein Tracking, kein Profiling und keine Reichweitenmessung</strong> statt.</li>'
++ '<li>Es werden <strong>keine Analyse-Tools</strong> (z. B. Google Analytics, Matomo) eingesetzt.</li>'
++ '<li>Es gibt <strong>kein Nutzerkonto, kein Kontaktformular und keinen Newsletter</strong> innerhalb dieser App.</li>'
++ '<li>Die Datenschutz-Akzeptanz beim App-Start wird <strong>nicht gespeichert</strong> und bei jedem Aufruf erneut abgefragt.</li>'
++ '<li><strong>LocalStorage \u2013 begrenzte technische Nutzung:</strong> Wenn Sie die Kartenansicht eines Ausflugsziels, einer Unterkunft, eines Badesees oder eines anderen Ortes \u00F6ffnen und f\u00FCr diesen Ort noch keine Koordinaten hinterlegt sind, wird zur Anzeige des Markers eine Geocoding-Abfrage (siehe Ziffer 5.4) durchgef\u00FChrt. Das Ergebnis (Adress-Zeichenkette und zugeh\u00F6rige Koordinaten) wird zur Vermeidung wiederholter Abfragen lokal im Browser-LocalStorage Ihres Endger\u00E4ts gespeichert (Schl\u00FCssel-Pr\u00E4fix: <code>wwgeo:</code>). Diese Speicherung erfolgt ausschlie\u00DFlich auf Ihrem Endger\u00E4t, es findet keine \u00DCbermittlung an uns oder Dritte statt. Sie k\u00F6nnen den lokalen Speicher Ihres Browsers jederzeit \u00FCber dessen Einstellungen l\u00F6schen.</li>'
++ '</ul>'
+
++ '<h3>5. Externe Inhalte und eingebundene Dienste Dritter</h3>'
++ '<p>Beim Aufruf bestimmter Funktionen der App werden Inhalte von Drittanbietern geladen. Bei jedem Aufruf wird mindestens Ihre IP-Adresse an den jeweiligen Anbieter \u00FCbertragen; in einigen F\u00E4llen werden auch weitergehende Informationen \u00FCbermittelt (etwa der angefragte Adressbestandteil beim Geocoding). Dies erfolgt aufgrund Ihrer Einwilligung nach Art. 6 Abs. 1 lit. a DSGVO durch das aktive Ausl\u00F6sen der jeweiligen Funktion.</p>'
+
++ '<p><strong>5.1 GitHub Pages (Hosting der App)</strong></p>'
++ '<p>Die App selbst sowie alle in ihr enthaltenen statischen Daten werden \u00FCber den Dienst GitHub Pages ausgeliefert (Anbieter: GitHub Inc., 88 Colin P Kelly Jr Street, San Francisco, CA 94107, USA). Beim Aufruf der App werden technisch zwingend folgende Daten an GitHub \u00FCbertragen und in Server-Log-Dateien verarbeitet:</p>'
++ '<ul>'
++ '<li>IP-Adresse des aufrufenden Ger\u00E4ts</li>'
 + '<li>Datum und Uhrzeit der Anfrage</li>'
 + '<li>Aufgerufene Datei</li>'
 + '<li>User-Agent (Browser-Kennung) und Referrer</li>'
 + '</ul>'
-+ '<p>Diese Verarbeitung erfolgt durch GitHub Inc. auf Grundlage des berechtigten Interesses gemäß Art. 6 Abs. 1 lit. f DSGVO an einer technisch stabilen und sicheren Auslieferung der App.</p>'
-+ '<p>GitHub kann Daten in die USA übertragen. Rechtsgrundlage hierfür sind die Standardvertragsklauseln der EU-Kommission. Weitere Informationen finden Sie in der Datenschutzerklärung von GitHub: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement</a></p>'
++ '<p>GitHub Inc. kann Daten in die USA \u00FCbertragen. Rechtsgrundlage hierf\u00FCr sind das EU-U.S. Data Privacy Framework (Microsoft Corporation als Mutter von GitHub ist zertifizierter Teilnehmer) sowie erg\u00E4nzend die Standardvertragsklauseln der EU-Kommission. N\u00E4here Informationen: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">github.com \u2013 General Privacy Statement</a>.</p>'
 
-+ '<h3>5. Externe Inhalte (eingebettete Dienste Dritter)</h3>'
-+ '<p>Diese App bindet zur Anzeige von Inhalten externe Dienste Dritter ein. Beim Aufruf dieser Inhalte wird Ihre IP-Adresse direkt an den jeweiligen Anbieter übertragen. Sie haben jeweils die Möglichkeit, den Inhalt nicht zu nutzen oder die App zu schließen.</p>'
++ '<p><strong>5.2 jsDelivr (Auslieferung von PDF-Dokumenten und JavaScript-Bibliotheken)</strong></p>'
++ '<p>F\u00FCr die schnelle Auslieferung von vier PDF-Brosch\u00FCren (Einkaufsf\u00FChrer, Naturgenuss-Magazin, Naturgenuss-Erzeuger, Naturgenuss-Rezepte) sowie f\u00FCr einzelne JavaScript-Bibliotheken (PDF.js zum Anzeigen von PDFs auf Mobilger\u00E4ten, leaflet-gpx, osmtogeojson) wird das Content Delivery Network <strong>jsDelivr</strong> verwendet (Anbieter: Prospect One sp. z o.o., Krak\u00F3w, Polen; Auslieferung \u00FCber globale Edge-Server der Cloudflare Inc. und Fastly Inc.). Beim Aufruf der jeweiligen Dateien wird Ihre IP-Adresse an jsDelivr und den ausliefernden Edge-Server-Anbieter \u00FCbertragen.</p>'
++ '<p>Datenschutzerkl\u00E4rung jsDelivr: <a href="https://www.jsdelivr.com/terms/privacy-policy-jsdelivr-net" target="_blank" rel="noopener">jsdelivr.com \u2013 Privacy Policy</a></p>'
 
-+ '<p><strong>5.1 Logos und Bilder von wir-westerwaelder.de</strong></p>'
-+ '<p>In der Rubrik „Westerwald-Box" werden Logos und Beispielbilder direkt von <a href="https://wir-westerwaelder.de" target="_blank" rel="noopener">wir-westerwaelder.de</a> geladen. Anbieter ist die Wir Westerwälder gAöR (siehe Verantwortliche Stelle). Da Anbieter und verantwortliche Stelle identisch sind, findet hier keine Datenweitergabe an Dritte statt.</p>'
++ '<p><strong>5.3 unpkg.com (Auslieferung der Karten-Bibliothek Leaflet)</strong></p>'
++ '<p>Sobald Sie eine Kartenansicht in der App \u00F6ffnen, wird die Karten-Bibliothek <strong>Leaflet</strong> dynamisch von <code>unpkg.com</code> nachgeladen (Anbieter: Michael Jackson, betrieben \u00FCber das Content Delivery Network der Cloudflare Inc.). Dabei wird Ihre IP-Adresse \u00FCbertragen. Ein Drittlandtransfer in die USA ist m\u00F6glich; Rechtsgrundlage ist Ihre Einwilligung gem\u00E4\u00DF Art. 6 Abs. 1 lit. a DSGVO durch \u00D6ffnen der Karte.</p>'
 
-+ '<p><strong>5.2 Westerwald Touristik-Service (westerwald.info)</strong></p>'
-+ '<p>In den Rubriken „Unterkünfte" und „Ausflugsziele" werden Live-Daten in einem iFrame von <a href="https://www.westerwald.info" target="_blank" rel="noopener">www.westerwald.info</a> eingebettet. Anbieter ist der Westerwald Touristik-Service e.V., Kirchstraße 48a, 56410 Montabaur. Beim Aufruf werden u. a. IP-Adresse und Browser-Kennung an deren Server übertragen.</p>'
-+ '<p>Datenschutzerklärung des Anbieters: <a href="https://www.westerwald.info/datenschutz/" target="_blank" rel="noopener">https://www.westerwald.info/datenschutz/</a></p>'
-
-+ '<p><strong>5.3 ÖPNV-Anbieter (Bahn & Bus)</strong></p>'
-+ '<p>In der Rubrik „Bahn & Bus" werden in einem iFrame folgende Webseiten eingebettet:</p>'
++ '<p><strong>5.4 OpenStreetMap, Nominatim und Overpass-API</strong></p>'
++ '<p>F\u00FCr die Darstellung von Karten, das Auffinden von Adressen und das Laden zus\u00E4tzlicher Geodaten verwendet die App folgende Dienste der OpenStreetMap-Initiative:</p>'
 + '<ul>'
-+ '<li>Westerwaldbus GmbH, <a href="https://www.westerwaldbus.de" target="_blank" rel="noopener">www.westerwaldbus.de</a></li>'
-+ '<li>Westerwaldkreis (ÖPNV), <a href="https://www.westerwaldkreis.de" target="_blank" rel="noopener">www.westerwaldkreis.de</a></li>'
-+ '<li>Verkehrsverbund Rhein-Mosel (VRM), <a href="https://www.vrminfo.de" target="_blank" rel="noopener">www.vrminfo.de</a></li>'
++ '<li><strong>OpenStreetMap-Kartenkacheln</strong> (<code>tile.openstreetmap.org</code>): Bei jeder Kartenansicht werden Kartenausschnitte einzeln nachgeladen. Anbieter: OpenStreetMap Foundation, St John\u2019s Innovation Centre, Cowley Road, Cambridge CB4 0WS, Vereinigtes K\u00F6nigreich. \u00DCbertragen werden IP-Adresse, Zoom-Stufe und Kartenausschnitt.</li>'
++ '<li><strong>Nominatim (Adress-Suche / Geocoding)</strong> (<code>nominatim.openstreetmap.org</code>): F\u00FCr Orte ohne hinterlegte Koordinaten wird die Adresse (Stra\u00DFe, Hausnummer, PLZ, Ort) an Nominatim \u00FCbertragen, um die zugeh\u00F6rigen Koordinaten zu ermitteln. Auch der gleiche Anbieter wie bei OpenStreetMap.</li>'
++ '<li><strong>Overpass-API</strong> (<code>overpass-api.de</code>): F\u00FCr das Anzeigen der drei Landkreisgrenzen sowie f\u00FCr die Standorte der Mitfahrerb\u00E4nke wird die Overpass-API abgefragt. Anbieter: Roland Olbricht, Deutschland.</li>'
 + '</ul>'
-+ '<p>Beim Öffnen dieser Inhalte werden Ihre IP-Adresse und Browser-Kennung an die jeweiligen Anbieter übertragen. Bitte beachten Sie deren Datenschutzerklärungen.</p>'
++ '<p>Datenschutzerkl\u00E4rung OpenStreetMap Foundation: <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener">osmfoundation.org \u2013 Privacy Policy</a></p>'
 
-+ '<p><strong>5.4 Google Docs Viewer (PDF-Anzeige auf Desktop)</strong></p>'
-+ '<p>Auf Desktop-Browsern werden eingebettete PDF-Dokumente (z. B. Einkaufsführer, Naturgenuss-Broschüre) über den Google Docs Viewer (<code>https://docs.google.com/viewer</code>) angezeigt. Hierdurch werden Ihre IP-Adresse und die URL des aufgerufenen PDF an die Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA übertragen.</p>'
-+ '<p>Auf Smartphones wird der Google Docs Viewer nicht verwendet; PDFs öffnen sich dort über Ihren Browser oder System-Viewer.</p>'
-+ '<p>Datenschutzerklärung von Google: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">https://policies.google.com/privacy</a></p>'
++ '<p><strong>5.5 Geolocation-Browserfunktion (eigener Standort)</strong></p>'
++ '<p>In der Kartenansicht k\u00F6nnen Sie \u00FCber die Schaltfl\u00E4che \u201EEigenen Standort anzeigen\u201C die Geolocation-Funktion Ihres Browsers ausl\u00F6sen. Ihr Browser fragt Sie dann nach einer ausdr\u00FCcklichen Erlaubnis und ermittelt anschlie\u00DFend Ihre ungef\u00E4hre Position. Diese Position wird ausschlie\u00DFlich lokal im Browser verarbeitet, um Ihren Standort als Markierung auf der Karte anzuzeigen. <strong>Es findet keine \u00DCbermittlung der Position an uns oder Dritte statt; die Position wird nicht gespeichert.</strong></p>'
 
-+ '<p><strong>5.5 Externe Links</strong></p>'
-+ '<p>Die App enthält an verschiedenen Stellen Links zu externen Webseiten. Beim Anklicken solcher Links verlassen Sie diese App; ab diesem Zeitpunkt gelten die Datenschutzbestimmungen des jeweiligen Anbieters. Wir haben keinen Einfluss auf die Datenverarbeitung durch diese Anbieter.</p>'
++ '<p><strong>5.6 westerwald.info (Westerwald Touristik-Service)</strong></p>'
++ '<p>In den Rubriken \u201EUnterk\u00FCnfte\u201C und \u201EAusflugsziele\u201C werden Inhalte des Westerwald Touristik-Service als eingebettete Seite (iFrame) von <a href="https://www.westerwald.info" target="_blank" rel="noopener">www.westerwald.info</a> angezeigt. Anbieter ist der Westerwald Touristik-Service e.V., Kirchstra\u00DFe 48a, 56410 Montabaur. Beim \u00D6ffnen werden u. a. IP-Adresse und Browser-Kennung an dessen Server \u00FCbertragen.</p>'
++ '<p>Datenschutzerkl\u00E4rung des Anbieters: <a href="https://www.westerwald.info/datenschutz/" target="_blank" rel="noopener">westerwald.info/datenschutz/</a></p>'
 
-+ '<h3>6. Rechtsgrundlagen der Datenverarbeitung</h3>'
-+ '<p>Soweit im Rahmen der Bereitstellung dieser App eine technisch zwingende Datenverarbeitung erfolgt (z. B. durch GitHub Pages), beruht diese auf unserem berechtigten Interesse an der technisch fehlerfreien Bereitstellung der App gemäß Art. 6 Abs. 1 lit. f DSGVO.</p>'
-+ '<p>Die Anzeige eingebundener externer Inhalte (siehe Ziffer 5) erfolgt erst, nachdem Sie die jeweilige Funktion der App aufrufen, und damit auf Grundlage Ihrer Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO.</p>'
++ '<p><strong>5.7 Verkehrsverbund Rhein-Mosel (VRM) \u2013 Fahrplanauskunft</strong></p>'
++ '<p>In der Rubrik \u201EBahn &amp; Bus\u201C wird f\u00FCr alle drei Landkreis-Auswahlen (Altenkirchen, Westerwaldkreis, Neuwied) die Fahrplanauskunft des Verkehrsverbund Rhein-Mosel (VRM) als eingebettete Seite (iFrame) angezeigt: <a href="https://www.vrminfo.de/fahrplanauskunft/" target="_blank" rel="noopener">vrminfo.de/fahrplanauskunft</a>. Anbieter: Verkehrsverbund Rhein-Mosel GmbH, Bahnhofstra\u00DFe 9, 56068 Koblenz. Beim \u00D6ffnen werden Ihre IP-Adresse und Browser-Kennung an den VRM \u00FCbertragen. Bitte beachten Sie die Datenschutzhinweise des VRM unter <a href="https://www.vrminfo.de" target="_blank" rel="noopener">vrminfo.de</a>.</p>'
 
-+ '<h3>7. Speicherdauer</h3>'
-+ '<p>Wir selbst speichern keine personenbezogenen Daten. Die Speicherdauer der Server-Log-Daten bei GitHub Pages bzw. den eingebundenen Drittanbietern ergibt sich aus deren jeweiligen Datenschutzerklärungen.</p>'
++ '<p><strong>5.8 Mitfahrerbank Westerwald</strong></p>'
++ '<p>In der Rubrik \u201EMitfahrerb\u00E4nke\u201C kann eine eingebettete Seite (iFrame) zum Projekt Mitfahrerbank Westerwald aufgerufen werden: <a href="https://mitfahrerbank-ww.de/" target="_blank" rel="noopener">mitfahrerbank-ww.de</a>. Beim \u00D6ffnen werden Ihre IP-Adresse und Browser-Kennung an den Anbieter \u00FCbertragen.</p>'
 
-+ '<h3>8. Ihre Rechte als betroffene Person</h3>'
-+ '<p>Sie haben gegenüber der verantwortlichen Stelle folgende Rechte hinsichtlich der Sie betreffenden personenbezogenen Daten:</p>'
++ '<p><strong>5.9 Bilder vom Server der Wir Westerw\u00E4lder gA\u00F6R</strong></p>'
++ '<p>In der Rubrik \u201EWesterwald-Box\u201C sowie bei den Logos der angeschlossenen Betriebe werden Bilder direkt vom Server <code>wir-westerwaelder.de</code> geladen. Anbieter ist die Wir Westerw\u00E4lder gA\u00F6R (siehe Ziffer 1). Da Anbieter und Verantwortlicher identisch sind, findet hier keine Daten\u00FCbertragung an Dritte au\u00DFerhalb der verantwortlichen Stelle statt.</p>'
+
++ '<p><strong>5.10 Externe Links</strong></p>'
++ '<p>Die App enth\u00E4lt an verschiedenen Stellen Links zu externen Webseiten. Beim Anklicken solcher Links verlassen Sie diese App; ab diesem Zeitpunkt gelten die Datenschutzbestimmungen des jeweiligen Anbieters. Wir haben keinen Einfluss auf die Datenverarbeitung durch diese Anbieter.</p>'
+
++ '<h3>6. Speicherdauer</h3>'
++ '<p>Wir selbst speichern keine personenbezogenen Daten au\u00DFerhalb des unter Ziffer 4 beschriebenen lokalen Adress-Caches auf Ihrem Endger\u00E4t. Die Speicherdauer der Server-Log-Daten bei GitHub Pages und den unter Ziffer 5 beschriebenen Drittanbietern ergibt sich aus deren jeweiligen Datenschutzerkl\u00E4rungen.</p>'
+
++ '<h3>7. Ihre Rechte als betroffene Person</h3>'
++ '<p>Sie haben gegen\u00FCber der verantwortlichen Stelle folgende Rechte hinsichtlich der Sie betreffenden personenbezogenen Daten:</p>'
 + '<ul>'
 + '<li><strong>Auskunftsrecht</strong> (Art. 15 DSGVO)</li>'
 + '<li><strong>Recht auf Berichtigung</strong> (Art. 16 DSGVO)</li>'
-+ '<li><strong>Recht auf Löschung</strong> (Art. 17 DSGVO)</li>'
-+ '<li><strong>Recht auf Einschränkung der Verarbeitung</strong> (Art. 18 DSGVO)</li>'
-+ '<li><strong>Recht auf Datenübertragbarkeit</strong> (Art. 20 DSGVO)</li>'
++ '<li><strong>Recht auf L\u00F6schung</strong> (Art. 17 DSGVO)</li>'
++ '<li><strong>Recht auf Einschr\u00E4nkung der Verarbeitung</strong> (Art. 18 DSGVO)</li>'
++ '<li><strong>Recht auf Daten\u00FCbertragbarkeit</strong> (Art. 20 DSGVO)</li>'
 + '<li><strong>Widerspruchsrecht</strong> (Art. 21 DSGVO)</li>'
-+ '<li><strong>Recht auf Widerruf einer einmal erteilten Einwilligung</strong> mit Wirkung für die Zukunft (Art. 7 Abs. 3 DSGVO)</li>'
++ '<li><strong>Recht auf Widerruf einer einmal erteilten Einwilligung</strong> mit Wirkung f\u00FCr die Zukunft (Art. 7 Abs. 3 DSGVO)</li>'
 + '</ul>'
-+ '<p>Zur Ausübung dieser Rechte wenden Sie sich bitte an die unter Ziffer 1 genannte verantwortliche Stelle.</p>'
++ '<p>Zur Aus\u00FCbung dieser Rechte wenden Sie sich bitte an die unter Ziffer 1 genannte verantwortliche Stelle.</p>'
 
-+ '<h3>9. Beschwerderecht bei der Aufsichtsbehörde</h3>'
-+ '<p>Sie haben außerdem das Recht, sich mit einer Beschwerde an eine Datenschutz-Aufsichtsbehörde zu wenden, insbesondere im Mitgliedstaat Ihres gewöhnlichen Aufenthaltsorts, Ihres Arbeitsplatzes oder des Orts des mutmaßlichen Verstoßes.</p>'
-+ '<p>Zuständige Aufsichtsbehörde für die verantwortliche Stelle:</p>'
-+ '<p><strong>Der Landesbeauftragte für den Datenschutz und die Informationsfreiheit Rheinland-Pfalz</strong><br>'
++ '<h3>8. Beschwerderecht bei der Aufsichtsbeh\u00F6rde</h3>'
++ '<p>Sie haben au\u00DFerdem das Recht, sich mit einer Beschwerde an eine Datenschutz-Aufsichtsbeh\u00F6rde zu wenden, insbesondere im Mitgliedstaat Ihres gew\u00F6hnlichen Aufenthaltsorts, Ihres Arbeitsplatzes oder des Orts des mutma\u00DFlichen Versto\u00DFes.</p>'
++ '<p>Zust\u00E4ndige Aufsichtsbeh\u00F6rde f\u00FCr die verantwortliche Stelle:</p>'
++ '<p><strong>Der Landesbeauftragte f\u00FCr den Datenschutz und die Informationsfreiheit Rheinland-Pfalz</strong><br>'
 + 'Hintere Bleiche 34<br>'
 + '55116 Mainz<br>'
 + 'Telefon: 06131 8920-0<br>'
 + 'E-Mail: <a href="mailto:poststelle@datenschutz.rlp.de">poststelle@datenschutz.rlp.de</a><br>'
 + 'Website: <a href="https://www.datenschutz.rlp.de" target="_blank" rel="noopener">www.datenschutz.rlp.de</a></p>'
 
-+ '<h3>10. SSL/TLS-Verschlüsselung</h3>'
-+ '<p>Diese App wird ausschließlich verschlüsselt über HTTPS ausgeliefert. Eine verschlüsselte Verbindung erkennen Sie am „https://" in der Adresszeile Ihres Browsers sowie am Schloss-Symbol.</p>'
++ '<h3>9. SSL/TLS-Verschl\u00FCsselung</h3>'
++ '<p>Diese App wird ausschlie\u00DFlich verschl\u00FCsselt \u00FCber HTTPS ausgeliefert. Eine verschl\u00FCsselte Verbindung erkennen Sie am \u201Ehttps://\u201C in der Adresszeile Ihres Browsers sowie am Schloss-Symbol.</p>'
 
-+ '<h3>11. Aktualität und Änderung dieser Datenschutzerklärung</h3>'
-+ '<p>Diese Datenschutzerklärung hat den Stand Mai 2026. Durch die Weiterentwicklung der App oder geänderte gesetzliche bzw. behördliche Vorgaben kann es notwendig werden, diese Datenschutzerklärung anzupassen. Die jeweils aktuelle Version ist in dieser App über den Footer-Link „Datenschutz" abrufbar.</p>';
++ '<h3>10. Aktualit\u00E4t und \u00C4nderung dieser Datenschutzerkl\u00E4rung</h3>'
++ '<p>Diese Datenschutzerkl\u00E4rung hat den Stand Mai 2026 in der \u00FCberarbeiteten Fassung. Durch die Weiterentwicklung der App oder ge\u00E4nderte gesetzliche bzw. beh\u00F6rdliche Vorgaben kann es notwendig werden, diese Datenschutzerkl\u00E4rung anzupassen. Die jeweils aktuelle Version ist in dieser App \u00FCber den Footer-Link \u201EDatenschutz\u201C abrufbar.</p>';
