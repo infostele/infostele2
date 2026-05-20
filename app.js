@@ -1114,7 +1114,7 @@ function renderWwLit(ziel, slug, l) {
 // ════════════════════════════════════════════════════════════════
 
 // Termin-Filter-State (eigener State)
-var TERMIN_FILTER = { datum: 'alle', bezirk: 'alle', kids: 'alle' };
+var TERMIN_FILTER = { datum: 'alle', bezirk: 'alle', art: 'alle' };
 window._aktuelleTermine = null;
 
 function termineFilterUI() {
@@ -1139,9 +1139,11 @@ function termineFilterUI() {
     + pill('bezirk','WW','Westerwald')
     + pill('bezirk','Hessen','Hessen')
     + '</div>';
-  html += '<div class="filter-gruppe"><span class="filter-label">👶 Kinder:</span>'
-    + pill('kids','alle','Alle')
-    + pill('kids','ja','Familienfreundlich')
+  html += '<div class="filter-gruppe"><span class="filter-label">🎭 Art:</span>'
+    + pill('art','alle','Alle')
+    + pill('art','lit','WW-Lit')
+    + pill('art','natur','Naturerlebnisse')
+    + pill('art','sonstige','Sonstige')
     + '</div>';
   html += '</div>';
   return html;
@@ -1199,7 +1201,13 @@ function termineFilterAnwenden(items) {
     }
 
     if (TERMIN_FILTER.bezirk !== 'alle' && item.bezirk !== TERMIN_FILTER.bezirk) return false;
-    if (TERMIN_FILTER.kids === 'ja' && !item.fuerKids) return false;
+    if (TERMIN_FILTER.art !== 'alle') {
+      var istLit = (item.quelle === 'lit');
+      var istNatur = (item.quelle === 'natur');
+      if (TERMIN_FILTER.art === 'lit'      && !istLit)   return false;
+      if (TERMIN_FILTER.art === 'natur'    && !istNatur) return false;
+      if (TERMIN_FILTER.art === 'sonstige' && (istLit || istNatur)) return false;
+    }
     return true;
   });
 }
