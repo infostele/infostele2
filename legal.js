@@ -41,7 +41,7 @@ window._IMPRESSUM_HTML =
 
 + '<p><strong>Kreisverwaltung des Westerwaldkreises</strong><br>'
 + 'Vertreten durch:<br>'
-+ 'Landrat Achim Schwickert<br>'
++ 'Erste Beigeordnete Gabriele Wieland<br>'
 + 'Peter-Altmeier-Platz 1<br>'
 + '56410 Montabaur<br>'
 + 'Telefon: 02602 124-0<br>'
@@ -55,9 +55,9 @@ window._IMPRESSUM_HTML =
 + 'Telefon 02689-95929-40</p>'
 
 + '<h3>Konzeption, Design, Entwicklung &amp; Programmierung</h3>'
-+ '<p>PAGE &amp; PAPER \u2013 Agentur f\u00FCr Kommunikation GmbH &amp; Co. KG<br>'
-+ 'Barrwiese 3<br>'
-+ '57627 Hachenburg</p>'
++ '<p>Lars Kober<br>'
++ 'Hintere Buchwiese 7<br>'
++ '57586 Weitefeld</p>'
 
 + '<p><strong>Weitere Kan\u00E4le der Wir Westerw\u00E4lder gA\u00F6R</strong></p>'
 + '<ul>'
