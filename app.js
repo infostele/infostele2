@@ -395,7 +395,7 @@ function renderHome(ziel) {
     + '<nav class="kategorien">'
       + kachel('tourismus', 'Tourismus<br>&amp; Freizeit', ICONS.wandern)
       + kachel('regional',  'Regionale<br>Produkte',     ICONS.korb)
-      + kachel('kultur',    'Kunst<br>&amp; Kultur',     ICONS.krug)
+      + kachel('veranstaltungen', 'Veranstaltungen',           ICONS.kalender)
       + kachel('mobilitaet','Mobilität<br>&amp; Verkehr',ICONS.bus)
     + '</nav>'
     + '<div class="spacer"></div>';
@@ -418,8 +418,7 @@ var KATEGORIEN = {
       {slug:'radfahren',       label:'Radfahren',       meta:'5 Routenarten',     icon:ICONS.fahrrad},
       {slug:'ausflugsziele',   label:'Ausflugsziele',   meta:'POIs in der Region',icon:ICONS.markierung},
       {slug:'badeseen',        label:'Badeseen',        meta:'Naturbadestellen',  icon:ICONS.welle},
-      {slug:'unterkuenfte',    label:'Unterkünfte',     meta:'Hotels & Pensionen',icon:ICONS.haus},
-      {slug:'veranstaltungen', label:'Veranstaltungen', meta:'Alle Termine in der Region', icon:ICONS.kalender}
+      {slug:'unterkuenfte',    label:'Unterkünfte',     meta:'Hotels & Pensionen',icon:ICONS.haus}
     ]
   },
   'regional': {
@@ -431,12 +430,9 @@ var KATEGORIEN = {
       {slug:'naturgenuss',     label:'Naturgenuss Partner',       meta:'Erzeuger & Produkte',         icon:ICONS.korb}
     ]
   },
-  'kultur': {
-    titel:'Kunst & Kultur', untertitel:'Museen, Veranstaltungen und Festivals.',
-    subs:[
-      {slug:'museen',          label:'Museen',          meta:'14 Sammlungen & Ausstellungen', icon:ICONS.krug}
-    ]
-  },
+  // (Kunst & Kultur wurde entfernt – die Hauptrubrik 'Veranstaltungen' ersetzt sie.
+  //  Klick auf die Kachel "Veranstaltungen" wird direkt in renderKategorie auf
+  //  die Veranstaltungs-Liste umgeleitet, ohne Zwischenmenü.)
   'mobilitaet': {
     titel:'Mobilität & Verkehr', untertitel:'So bist du in der Region unterwegs.',
     subs:[
@@ -448,6 +444,12 @@ var KATEGORIEN = {
 };
 
 function renderKategorie(ziel, slug) {
+  // Sonderfall: Hauptrubrik "Veranstaltungen" hat keine Zwischenseite,
+  // sondern öffnet direkt die Termin-Liste.
+  if (slug === 'veranstaltungen') {
+    renderListe(ziel, 'veranstaltungen-alle');
+    return;
+  }
   var kat = KATEGORIEN[slug];
   if (!kat) { renderHome(ziel); return; }
   var subsHTML = kat.subs.map(function(s) {
@@ -490,7 +492,7 @@ var LISTEN = {
     typ:'unterkategorie',
     items:[
       {label:'WesterwaldSteig', meta:'16 Etappen, ca. 235 km', sub:'westerwaldsteig', icon:ICONS.wandernSimple},
-      {label:'Druidensteig',    meta:'8 Etappen, ca. 84 km',    sub:'druidensteig',    icon:ICONS.wandernSimple},
+      {label:'Druidensteig',    meta:'7 Etappen, ca. 84 km',    sub:'druidensteig',    icon:ICONS.wandernSimple},
       {label:'Wiedweg',         meta:'8 Etappen, ca. 117 km',   sub:'wiedweg',         icon:ICONS.wandernSimple},
       {label:'Wäller Touren',   meta:'Tageswanderungen',         sub:'waeller-touren',  icon:ICONS.wandernSimple},
       {label:'Kleine Wäller',   meta:'Kurze Rundtouren',         sub:'kleine-waeller',  icon:ICONS.wandernSimple}
@@ -556,10 +558,9 @@ var LISTEN = {
     iframeTyp:'webseite',
     mobilIframe:true
   },
-  'tourismus-veranstaltungen': {datenName:'DATA_VERANSTALTUNGEN_ALLE', titel:'Veranstaltungen', breadcrumb:'Tourismus &amp; Freizeit › <strong>Veranstaltungen</strong>', zurueck:'kategorie/tourismus', untertitel:'Alle Termine in der Region.', detailKey:'event', renderTyp:'termine'},
+  'veranstaltungen-alle': {datenName:'DATA_VERANSTALTUNGEN_ALLE', titel:'Veranstaltungen', breadcrumb:'<strong>Veranstaltungen</strong>', zurueck:'home', untertitel:'Alle Termine in der Region.', detailKey:'event', renderTyp:'termine'},
 
-  // KUNST & KULTUR
-  'kultur-museen': {datenName:'DATA_KULTUR_MUSEEN', titel:'Museen', breadcrumb:'Kunst &amp; Kultur › <strong>Museen</strong>', zurueck:'kategorie/kultur', untertitel:'Sammlungen und Ausstellungen.', detailKey:'museum', renderTyp:'museenInline'},
+  // KUNST & KULTUR – entfällt (Museen-Inhalte wurden gestrichen)
 
   // REGIONALE PRODUKTE
   'regional-einkaufsfuehrer': {titel:'Regionaler Einkaufsführer Westerwald', breadcrumb:'Regionale Produkte › <strong>Einkaufsführer</strong>', zurueck:'kategorie/regional', untertitel:'Direktvermarkter & Hofläden im Westerwald.', renderTyp:'iframe', iframeUrl:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/einkaufsfuehrer.pdf', coverBild:'https://cdn.jsdelivr.net/gh/infostele/infostele2@main/startbild_einkaufsfuehrer.jpg'},
@@ -2430,22 +2431,30 @@ function renderIframeSeite(ziel, slug, l) {
     //     vom Anbieter erlaubt ist, sieht der User zusätzlich die echte
     //     Vorschau. Wenn nicht, bleibt der iframe-Bereich entweder leer
     //     oder er wird per Heuristik nach 3.5s ausgeblendet.
+    //   - Ausnahme mobilIframe:true: nur iframe, keine Info-Karte
+    //     (Ausflugsziele, Unterkünfte, Bahn & Bus — alle Live-Apps,
+    //     die ohne Vorrede direkt eingebettet werden sollen).
     var iframeId = 'iframe-' + Math.random().toString(36).slice(2);
     var hostname = iframeUrl.replace(/^https?:\/\//,'').split('/')[0];
+
+    var infoKarteHtml = '';
+    if (!l.mobilIframe) {
+      infoKarteHtml =
+        '<div class="iframe-info-karte">'
+          + '<div class="iframe-info-text">'
+            + '<strong>Inhalt von ' + escapeHtml(hostname) + '</strong>'
+            + '<span class="iframe-info-hinweis">Falls die eingebettete Vorschau unten leer bleibt, kannst du die Seite hier in einem neuen Tab öffnen:</span>'
+          + '</div>'
+          + '<a class="btn-pdf-oeffnen-gross btn-info-karte" href="' + iframeUrl + '" target="_blank" rel="noopener">🌐 Seite öffnen</a>'
+        + '</div>';
+    }
 
     ziel.innerHTML =
       '<div class="sticky-region">'
         + navBar(l.zurueck, l.breadcrumb)
         + intro(l.titel, l.untertitel)
       + '</div>'
-      // Karte oben — immer sichtbar
-      + '<div class="iframe-info-karte">'
-        + '<div class="iframe-info-text">'
-          + '<strong>Inhalt von ' + escapeHtml(hostname) + '</strong>'
-          + '<span class="iframe-info-hinweis">Falls die eingebettete Vorschau unten leer bleibt, kannst du die Seite hier in einem neuen Tab öffnen:</span>'
-        + '</div>'
-        + '<a class="btn-pdf-oeffnen-gross btn-info-karte" href="' + iframeUrl + '" target="_blank" rel="noopener">🌐 Seite öffnen</a>'
-      + '</div>'
+      + infoKarteHtml
       // iframe-Versuch
       + '<div class="iframe-wrap iframe-versuch" id="' + iframeId + '-wrap">'
         + '<div class="iframe-lade-hinweis">Versuche, die Seite einzubetten …</div>'
