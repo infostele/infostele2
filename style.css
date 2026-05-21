@@ -1776,3 +1776,76 @@ body.barrierefrei .nav-zurueck::before {
     text-align: center;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   STANDORT-BUTTON (Custom Leaflet Control)
+   Fügt einen Button oben links auf der Karte hinzu. Standort wird
+   nur nach aktivem Klick angefragt (Datenschutz-Audit Mai 2026, A.5).
+   ════════════════════════════════════════════════════════════════ */
+.standort-btn-container {
+  background: #ffffff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+  border-radius: 4px;
+}
+
+.standort-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: #ffffff;
+  color: var(--grau-dk);
+  text-decoration: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.standort-btn:hover,
+.standort-btn:focus {
+  background: var(--grau-lt);
+  outline: 2px solid var(--dunkelgruen);
+  outline-offset: -2px;
+}
+
+.standort-btn.aktiv {
+  background: var(--hellgruen-s);
+  color: #ffffff;
+}
+
+.standort-btn.aktiv:hover,
+.standort-btn.aktiv:focus {
+  background: var(--hellgruen-p);
+}
+
+.standort-btn.fehler {
+  background: var(--rot);
+  color: #ffffff;
+}
+
+.standort-btn.laedt {
+  background: #ffffff;
+  pointer-events: none;
+}
+
+.standort-btn-icon {
+  display: inline-block;
+  line-height: 1;
+}
+
+.standort-btn-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--grau-lt);
+  border-top-color: var(--dunkelgruen);
+  border-radius: 50%;
+  animation: standort-spinner-rotate 0.7s linear infinite;
+}
+
+@keyframes standort-spinner-rotate {
+  to { transform: rotate(360deg); }
+}

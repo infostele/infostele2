@@ -3574,8 +3574,11 @@ function initWesterwaldKarte(mapId, opts) {
     // ladeEl bleibt sichtbar mit Fehlermeldung (vom Aufrufer gesetzt)
   }
 
-  // 3. Eigener Standort (asynchron, nur wenn User erlaubt)
-  zeigeEigenenStandort(map);
+  // 3. Standort-Button als Karten-Control hinzufügen.
+  // WICHTIG: Die Geolocation-API wird AUSSCHLIESSLICH auf aktiven Klick
+  // des Nutzers angefragt – keine automatische Abfrage beim Karten-Aufruf.
+  // Siehe Datenschutz-Audit Mai 2026, Befund A.5.
+  fuegeStandortButtonHinzu(map);
 }
 
 // ─── LANDKREIS-OVERLAY ─────────────────────────────────────────
@@ -3625,8 +3628,15 @@ function ueberlageKreise(map, geojson) {
 }
 
 // ─── EIGENER STANDORT ──────────────────────────────────────────
-function zeigeEigenenStandort(map) {
-  if (!navigator.geolocation) return;
+// Wird AUSSCHLIESSLICH aus fuegeStandortButtonHinzu() heraus
+// aufgerufen, niemals automatisch beim Karten-Aufruf.
+// Ruft den Callback mit (true) bei Erfolg oder (false) bei Fehler/
+// Permission-Verweigerung auf.
+function zeigeEigenenStandort(map, callback) {
+  if (!navigator.geolocation) {
+    if (callback) callback(false);
+    return;
+  }
   navigator.geolocation.getCurrentPosition(function(pos) {
     var lat = pos.coords.latitude, lng = pos.coords.longitude;
     // Marker für Eigen-Standort: blauer Kreis mit weißem Rand
@@ -3647,14 +3657,85 @@ function zeigeEigenenStandort(map) {
         opacity: 0.4,
         fillColor: '#3388ff',
         fillOpacity: 0.08,
-        interactive: false
+        interactive: false        // Klicks gehen durch zur Karte
       }).addTo(map);
     }
-  }, function() { /* User hat abgelehnt oder Fehler – still */ }, {
+    // Karte sanft auf den Standort zentrieren
+    map.panTo([lat, lng]);
+    if (callback) callback(true);
+  }, function() {
+    if (callback) callback(false);
+  }, {
     enableHighAccuracy: false,
     timeout: 8000,
     maximumAge: 60000
   });
+}
+
+// ─── STANDORT-BUTTON (Custom Leaflet Control) ──────────────────
+// Fügt einen Button oben links unter den Zoom-Controls hinzu.
+// Erst wenn der Nutzer auf den Button klickt, wird die Geolocation-
+// API aufgerufen. Damit ist sichergestellt, dass die Abfrage des
+// eigenen Standorts ausschließlich auf aktive User-Aktion erfolgt
+// (Art. 6 Abs. 1 lit. a DSGVO).
+//
+// Button-Zustände:
+//   default → 📍 grau, Tooltip "Eigenen Standort anzeigen"
+//   lädt    → kleiner Spinner, Tooltip "Standort wird ermittelt …"
+//   aktiv   → 📍 grün, Tooltip "Standort wird angezeigt"
+//   fehler  → 📍 rot, Tooltip "Standort konnte nicht ermittelt werden"
+//             (kehrt nach 3 Sekunden in den Default-Zustand zurück)
+function fuegeStandortButtonHinzu(map) {
+  if (!navigator.geolocation) return;  // Browser ohne Geolocation → kein Button
+
+  var standortAktiv = false;
+
+  var StandortControl = L.Control.extend({
+    options: { position: 'topleft' },
+    onAdd: function() {
+      var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control standort-btn-container');
+      var btn = L.DomUtil.create('a', 'standort-btn', container);
+      btn.href = '#';
+      btn.title = 'Eigenen Standort anzeigen';
+      btn.setAttribute('role', 'button');
+      btn.setAttribute('aria-label', 'Eigenen Standort anzeigen');
+      btn.innerHTML = '<span class="standort-btn-icon" aria-hidden="true">\u{1F4CD}</span>';
+
+      L.DomEvent.disableClickPropagation(container);
+      L.DomEvent.on(btn, 'click', function(e) {
+        L.DomEvent.preventDefault(e);
+        if (standortAktiv) return;            // bereits aktiv → kein erneuter Aufruf
+
+        standortAktiv = true;
+        btn.classList.remove('fehler');
+        btn.classList.add('laedt');
+        btn.innerHTML = '<span class="standort-btn-spinner" aria-hidden="true"></span>';
+        btn.title = 'Standort wird ermittelt \u2026';
+
+        zeigeEigenenStandort(map, function(erfolg) {
+          btn.classList.remove('laedt');
+          btn.innerHTML = '<span class="standort-btn-icon" aria-hidden="true">\u{1F4CD}</span>';
+          if (erfolg) {
+            btn.classList.add('aktiv');
+            btn.title = 'Standort wird angezeigt';
+          } else {
+            btn.classList.add('fehler');
+            btn.title = 'Standort konnte nicht ermittelt werden';
+            standortAktiv = false;
+            // Nach 3 Sekunden zurück in den Default-Zustand
+            setTimeout(function() {
+              btn.classList.remove('fehler');
+              btn.title = 'Eigenen Standort anzeigen';
+            }, 3000);
+          }
+        });
+      });
+
+      return container;
+    }
+  });
+
+  new StandortControl().addTo(map);
 }
 
 // Helper: Karte-Button HTML für Detail-Views

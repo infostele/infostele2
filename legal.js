@@ -201,8 +201,16 @@ window._DATENSCHUTZ_HTML =
 + '</ul>'
 + '<p>Datenschutzerkl\u00E4rung OpenStreetMap Foundation: <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener">osmfoundation.org \u2013 Privacy Policy</a></p>'
 
-+ '<p><strong>5.5 Geolocation-Browserfunktion (eigener Standort)</strong></p>'
-+ '<p>In der Kartenansicht k\u00F6nnen Sie \u00FCber die Schaltfl\u00E4che \u201EEigenen Standort anzeigen\u201C die Geolocation-Funktion Ihres Browsers ausl\u00F6sen. Ihr Browser fragt Sie dann nach einer ausdr\u00FCcklichen Erlaubnis und ermittelt anschlie\u00DFend Ihre ungef\u00E4hre Position. Diese Position wird ausschlie\u00DFlich lokal im Browser verarbeitet, um Ihren Standort als Markierung auf der Karte anzuzeigen. <strong>Es findet keine \u00DCbermittlung der Position an uns oder Dritte statt; die Position wird nicht gespeichert.</strong></p>'
++ '<p><strong>5.5 Standort-Abfrage (Geolocation-Browserfunktion)</strong></p>'
++ '<p>In jeder Kartenansicht der App finden Sie oben links eine Schaltfl\u00E4che mit einem Stecknadel-Symbol (\u{1F4CD}). \u00DCber diese Schaltfl\u00E4che k\u00F6nnen Sie aktiv Ihren eigenen Standort auf der Karte anzeigen lassen. Eine automatische Standort-Abfrage beim \u00D6ffnen einer Karte findet nicht statt.</p>'
++ '<p>Wenn Sie auf die Schaltfl\u00E4che klicken, fragt Ihr Browser Sie zun\u00E4chst um eine ausdr\u00FCckliche Erlaubnis. Sie haben dabei drei M\u00F6glichkeiten:</p>'
++ '<ul>'
++ '<li><strong>Einmal erlauben:</strong> Ihr Standort wird ermittelt und auf der Karte angezeigt. Die Erlaubnis gilt nur f\u00FCr die aktuelle Sitzung.</li>'
++ '<li><strong>Dauerhaft erlauben:</strong> Ihr Browser merkt sich die Erlaubnis. Bei k\u00FCnftigen Klicks auf die Schaltfl\u00E4che wird der Standort ohne erneutes Nachfragen ermittelt. Sie k\u00F6nnen diese Erlaubnis jederzeit in den Einstellungen Ihres Browsers widerrufen.</li>'
++ '<li><strong>Ablehnen:</strong> Es wird kein Standort ermittelt. Die App funktioniert vollst\u00E4ndig weiter.</li>'
++ '</ul>'
++ '<p><strong>Verarbeitung der Standortdaten:</strong> Die ermittelte Position wird ausschlie\u00DFlich lokal in Ihrem Browser verarbeitet und auf der Karte als Markierung dargestellt. Es findet <strong>keine \u00DCbermittlung Ihrer Position</strong> an die verantwortliche Stelle oder an Dritte statt. Die Position wird weder im Browser-Speicher noch auf einem Server gespeichert; sie ist nach dem Verlassen der Kartenansicht nicht mehr verf\u00FCgbar.</p>'
++ '<p>Rechtsgrundlage f\u00FCr diese Verarbeitung ist Ihre Einwilligung gem\u00E4\u00DF Art. 6 Abs. 1 lit. a DSGVO, die Sie durch den aktiven Klick auf die Schaltfl\u00E4che und die anschlie\u00DFende Best\u00E4tigung im Browser-Permission-Dialog erteilen.</p>'
 
 + '<p><strong>5.6 westerwald.info (Westerwald Touristik-Service)</strong></p>'
 + '<p>In den Rubriken \u201EUnterk\u00FCnfte\u201C und \u201EAusflugsziele\u201C werden Inhalte des Westerwald Touristik-Service als eingebettete Seite (iFrame) von <a href="https://www.westerwald.info" target="_blank" rel="noopener">www.westerwald.info</a> angezeigt. Anbieter ist der Westerwald Touristik-Service e.V., Kirchstra\u00DFe 48a, 56410 Montabaur. Beim \u00D6ffnen werden u. a. IP-Adresse und Browser-Kennung an dessen Server \u00FCbertragen.</p>'
