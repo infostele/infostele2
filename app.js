@@ -3624,11 +3624,11 @@ function initWesterwaldKarte(mapId, opts) {
     // ladeEl bleibt sichtbar mit Fehlermeldung (vom Aufrufer gesetzt)
   }
 
-  // 3. Standort-Button als Karten-Control hinzufügen.
+  // 3. Standort-Einwilligungs-Banner als Overlay über der Karte einblenden.
   // WICHTIG: Die Geolocation-API wird AUSSCHLIESSLICH auf aktiven Klick
-  // des Nutzers angefragt – keine automatische Abfrage beim Karten-Aufruf.
-  // Siehe Datenschutz-Audit Mai 2026, Befund A.5.
-  fuegeStandortButtonHinzu(map);
+  // ("Ja, anzeigen") des Nutzers angefragt – keine automatische Abfrage
+  // beim Karten-Aufruf. Siehe Datenschutz-Audit Mai 2026, Befund A.5.
+  fuegeStandortBannerHinzu(map);
 }
 
 // ─── LANDKREIS-OVERLAY ─────────────────────────────────────────
@@ -3678,7 +3678,7 @@ function ueberlageKreise(map, geojson) {
 }
 
 // ─── EIGENER STANDORT ──────────────────────────────────────────
-// Wird AUSSCHLIESSLICH aus fuegeStandortButtonHinzu() heraus
+// Wird AUSSCHLIESSLICH aus fuegeStandortBannerHinzu() heraus
 // aufgerufen, niemals automatisch beim Karten-Aufruf.
 // Ruft den Callback mit (true) bei Erfolg oder (false) bei Fehler/
 // Permission-Verweigerung auf.
@@ -3722,70 +3722,100 @@ function zeigeEigenenStandort(map, callback) {
   });
 }
 
-// ─── STANDORT-BUTTON (Custom Leaflet Control) ──────────────────
-// Fügt einen Button oben links unter den Zoom-Controls hinzu.
-// Erst wenn der Nutzer auf den Button klickt, wird die Geolocation-
-// API aufgerufen. Damit ist sichergestellt, dass die Abfrage des
-// eigenen Standorts ausschließlich auf aktive User-Aktion erfolgt
-// (Art. 6 Abs. 1 lit. a DSGVO).
+// ─── STANDORT-EINWILLIGUNGS-BANNER (Variante 3: Hybrid) ────────
+// Zeigt einen gut sichtbaren Banner über der Karte mit der Frage,
+// ob der Nutzer seinen eigenen Standort anzeigen lassen möchte.
+// Die Karte selbst rendert sofort – der Banner ist ein Overlay
+// innerhalb des Karten-Containers.
 //
-// Button-Zustände:
-//   default → 📍 grau, Tooltip "Eigenen Standort anzeigen"
-//   lädt    → kleiner Spinner, Tooltip "Standort wird ermittelt …"
-//   aktiv   → 📍 grün, Tooltip "Standort wird angezeigt"
-//   fehler  → 📍 rot, Tooltip "Standort konnte nicht ermittelt werden"
-//             (kehrt nach 3 Sekunden in den Default-Zustand zurück)
-function fuegeStandortButtonHinzu(map) {
-  if (!navigator.geolocation) return;  // Browser ohne Geolocation → kein Button
+// Bei "Ja": Banner verschwindet, Geolocation-API wird abgefragt,
+//           Standort wird als blauer Marker eingezeichnet.
+// Bei "Nein" oder ×: Banner verschwindet, kein Standort.
+//
+// Die Entscheidung wird nicht gespeichert; der Banner erscheint
+// bei jedem neuen Karten-Aufruf erneut.
+function fuegeStandortBannerHinzu(map) {
+  if (!navigator.geolocation) return;  // Browser ohne Geolocation → kein Banner
 
-  var standortAktiv = false;
+  // Karten-Container ermitteln (Leaflet legt die Karte in ein <div>)
+  var container = map.getContainer();
+  if (!container) return;
 
-  var StandortControl = L.Control.extend({
-    options: { position: 'topleft' },
-    onAdd: function() {
-      var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control standort-btn-container');
-      var btn = L.DomUtil.create('a', 'standort-btn', container);
-      btn.href = '#';
-      btn.title = 'Eigenen Standort anzeigen';
-      btn.setAttribute('role', 'button');
-      btn.setAttribute('aria-label', 'Eigenen Standort anzeigen');
-      btn.innerHTML = '<span class="standort-btn-icon" aria-hidden="true">\u{1F4CD}</span>';
+  // Banner-Element bauen
+  var banner = document.createElement('div');
+  banner.className = 'standort-banner';
+  banner.setAttribute('role', 'dialog');
+  banner.setAttribute('aria-label', 'Einwilligung zur Standort-Anzeige');
+  banner.innerHTML =
+      '<button class="standort-banner-close" type="button" aria-label="Schließen" title="Schließen">\u00D7</button>'
+    + '<div class="standort-banner-icon" aria-hidden="true">\u{1F4CD}</div>'
+    + '<div class="standort-banner-text">'
+    +   '<strong>Standort anzeigen?</strong>'
+    +   '<span>Möchtest du deinen eigenen Standort auf der Karte sehen?</span>'
+    + '</div>'
+    + '<div class="standort-banner-actions">'
+    +   '<button class="standort-banner-btn ja" type="button">Ja, anzeigen</button>'
+    +   '<button class="standort-banner-btn nein" type="button">Nein, danke</button>'
+    + '</div>';
 
-      L.DomEvent.disableClickPropagation(container);
-      L.DomEvent.on(btn, 'click', function(e) {
-        L.DomEvent.preventDefault(e);
-        if (standortAktiv) return;            // bereits aktiv → kein erneuter Aufruf
+  container.appendChild(banner);
 
-        standortAktiv = true;
-        btn.classList.remove('fehler');
-        btn.classList.add('laedt');
-        btn.innerHTML = '<span class="standort-btn-spinner" aria-hidden="true"></span>';
-        btn.title = 'Standort wird ermittelt \u2026';
+  // Klicks und Touch-Events im Banner dürfen NICHT zur Karte durchgereicht
+  // werden (sonst löst der Klick gleichzeitig einen Pan/Zoom aus).
+  L.DomEvent.disableClickPropagation(banner);
+  L.DomEvent.disableScrollPropagation(banner);
 
-        zeigeEigenenStandort(map, function(erfolg) {
-          btn.classList.remove('laedt');
-          btn.innerHTML = '<span class="standort-btn-icon" aria-hidden="true">\u{1F4CD}</span>';
-          if (erfolg) {
-            btn.classList.add('aktiv');
-            btn.title = 'Standort wird angezeigt';
-          } else {
-            btn.classList.add('fehler');
-            btn.title = 'Standort konnte nicht ermittelt werden';
-            standortAktiv = false;
-            // Nach 3 Sekunden zurück in den Default-Zustand
-            setTimeout(function() {
-              btn.classList.remove('fehler');
-              btn.title = 'Eigenen Standort anzeigen';
-            }, 3000);
-          }
-        });
-      });
-
-      return container;
+  function bannerEntfernen() {
+    if (banner && banner.parentNode) {
+      banner.parentNode.removeChild(banner);
     }
-  });
+  }
 
-  new StandortControl().addTo(map);
+  function statusSpinnerZeigen() {
+    banner.classList.add('laedt');
+    var actions = banner.querySelector('.standort-banner-actions');
+    if (actions) actions.innerHTML = '<span class="standort-banner-spinner" aria-hidden="true"></span><span>Standort wird ermittelt \u2026</span>';
+  }
+
+  function statusFehlerZeigen() {
+    banner.classList.remove('laedt');
+    banner.classList.add('fehler');
+    var textEl = banner.querySelector('.standort-banner-text');
+    if (textEl) textEl.innerHTML = '<strong>Standort nicht verfügbar</strong><span>Die Standort-Abfrage wurde abgelehnt oder ist fehlgeschlagen.</span>';
+    var actions = banner.querySelector('.standort-banner-actions');
+    if (actions) actions.innerHTML = '<button class="standort-banner-btn nein" type="button">Schließen</button>';
+    var schliessenBtn = banner.querySelector('.standort-banner-btn.nein');
+    if (schliessenBtn) schliessenBtn.addEventListener('click', bannerEntfernen);
+    // Auto-Schließen nach 4 Sekunden
+    setTimeout(bannerEntfernen, 4000);
+  }
+
+  // Ja-Button: Standort holen
+  var jaBtn = banner.querySelector('.standort-banner-btn.ja');
+  if (jaBtn) {
+    jaBtn.addEventListener('click', function() {
+      statusSpinnerZeigen();
+      zeigeEigenenStandort(map, function(erfolg) {
+        if (erfolg) {
+          bannerEntfernen();
+        } else {
+          statusFehlerZeigen();
+        }
+      });
+    });
+  }
+
+  // Nein-Button: einfach schließen
+  var neinBtn = banner.querySelector('.standort-banner-btn.nein');
+  if (neinBtn) {
+    neinBtn.addEventListener('click', bannerEntfernen);
+  }
+
+  // ×-Button: einfach schließen
+  var closeBtn = banner.querySelector('.standort-banner-close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', bannerEntfernen);
+  }
 }
 
 // Helper: Karte-Button HTML für Detail-Views

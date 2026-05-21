@@ -1834,74 +1834,168 @@ body.barrierefrei .nav-zurueck::before {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   STANDORT-BUTTON (Custom Leaflet Control)
-   Fügt einen Button oben links auf der Karte hinzu. Standort wird
-   nur nach aktivem Klick angefragt (Datenschutz-Audit Mai 2026, A.5).
+   STANDORT-EINWILLIGUNGS-BANNER (Variante 3: Hybrid)
+   Wird als Overlay über der Karte eingeblendet und fragt aktiv,
+   ob der Standort angezeigt werden soll. Karte rendert sofort,
+   Standort-Abfrage nur bei "Ja" (Datenschutz-Audit Mai 2026, A.5).
    ════════════════════════════════════════════════════════════════ */
-.standort-btn-container {
+.standort-banner {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  max-width: calc(100% - 24px);
+  width: 360px;
   background: #ffffff;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
-  border-radius: 4px;
+  border-left: 5px solid var(--dunkelgruen);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  border-radius: 6px;
+  padding: 14px 16px 14px 14px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "icon text"
+    "actions actions";
+  gap: 10px 12px;
+  animation: standort-banner-in 0.25s ease-out;
+  font-family: var(--font);
 }
 
-.standort-btn {
+@keyframes standort-banner-in {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.standort-banner-close {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--grau-md);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+.standort-banner-close:hover,
+.standort-banner-close:focus {
+  background: var(--grau-lt);
+  color: var(--grau-dk);
+  outline: none;
+}
+
+.standort-banner-icon {
+  grid-area: icon;
+  font-size: 26px;
+  line-height: 1;
+  align-self: center;
+}
+
+.standort-banner-text {
+  grid-area: text;
+  align-self: center;
   display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 18px;  /* Platz für ×-Button */
+}
+
+.standort-banner-text strong {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--dunkelgruen);
+}
+
+.standort-banner-text span {
+  font-size: 13px;
+  color: var(--grau-dk);
+  line-height: 1.4;
+}
+
+.standort-banner-actions {
+  grid-area: actions;
+  display: flex;
+  gap: 8px;
   align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
+  margin-top: 4px;
+}
+
+.standort-banner-btn {
+  flex: 1;
+  padding: 10px 14px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 2px solid var(--dunkelgruen);
+  transition: all 0.15s ease;
+}
+
+.standort-banner-btn.ja {
+  background: var(--dunkelgruen);
+  color: #ffffff;
+}
+.standort-banner-btn.ja:hover,
+.standort-banner-btn.ja:focus {
+  background: var(--hellgruen-p);
+  border-color: var(--hellgruen-p);
+  outline: none;
+}
+
+.standort-banner-btn.nein {
   background: #ffffff;
   color: var(--grau-dk);
-  text-decoration: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 18px;
-  line-height: 1;
-  transition: background 0.15s ease, color 0.15s ease;
+  border-color: var(--grau-lt);
 }
-
-.standort-btn:hover,
-.standort-btn:focus {
+.standort-banner-btn.nein:hover,
+.standort-banner-btn.nein:focus {
   background: var(--grau-lt);
-  outline: 2px solid var(--dunkelgruen);
-  outline-offset: -2px;
+  border-color: var(--grau-md);
+  outline: none;
 }
 
-.standort-btn.aktiv {
-  background: var(--hellgruen-s);
-  color: #ffffff;
+.standort-banner.laedt .standort-banner-actions {
+  font-size: 13px;
+  color: var(--grau-dk);
+  justify-content: center;
+  gap: 10px;
 }
 
-.standort-btn.aktiv:hover,
-.standort-btn.aktiv:focus {
-  background: var(--hellgruen-p);
-}
-
-.standort-btn.fehler {
-  background: var(--rot);
-  color: #ffffff;
-}
-
-.standort-btn.laedt {
-  background: #ffffff;
-  pointer-events: none;
-}
-
-.standort-btn-icon {
-  display: inline-block;
-  line-height: 1;
-}
-
-.standort-btn-spinner {
+.standort-banner-spinner {
   display: inline-block;
   width: 16px;
   height: 16px;
   border: 2px solid var(--grau-lt);
   border-top-color: var(--dunkelgruen);
   border-radius: 50%;
-  animation: standort-spinner-rotate 0.7s linear infinite;
+  animation: standort-banner-rotate 0.7s linear infinite;
 }
 
-@keyframes standort-spinner-rotate {
+@keyframes standort-banner-rotate {
   to { transform: rotate(360deg); }
+}
+
+.standort-banner.fehler {
+  border-left-color: var(--rot);
+}
+.standort-banner.fehler .standort-banner-text strong {
+  color: var(--rot);
+}
+
+/* Mobile-Anpassung: Banner nimmt fast volle Breite */
+@media (max-width: 420px) {
+  .standort-banner {
+    width: calc(100% - 16px);
+    top: 8px;
+    padding: 12px 14px 12px 12px;
+  }
+  .standort-banner-btn {
+    padding: 9px 10px;
+    font-size: 13px;
+  }
 }
