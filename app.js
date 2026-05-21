@@ -215,16 +215,42 @@ function initSplash() {
 // wird KEINE App gerendert.
 // ════════════════════════════════════════════════════════════════
 function initCookieGate() {
-  var ov  = document.getElementById('cookie-overlay');
-  var btn = document.getElementById('cookie-akzeptieren');
-  var app = document.getElementById('app');
+  var ov         = document.getElementById('cookie-overlay');
+  var box        = document.getElementById('cookie-box');
+  var btn        = document.getElementById('cookie-akzeptieren');
+  var btnAblehnen= document.getElementById('cookie-ablehnen');
+  var checkbox   = document.getElementById('cookie-checkbox');
+  var text       = document.getElementById('cookie-text');
+  var label      = document.getElementById('cookie-checkbox-label');
+  var ablehnung  = document.getElementById('cookie-ablehnung');
+  var zurueckLink= document.getElementById('cookie-zurueck');
+  var app        = document.getElementById('app');
 
-  // App initial verstecken bis Akzeptanz
+  // App ist initial nicht sichtbar — wird erst nach Einwilligung freigegeben.
   if (app) app.style.visibility = 'hidden';
 
   function freischalten() {
+    if (ov)  ov.style.display = 'none';
     if (app) app.style.visibility = '';
     router();
+  }
+
+  function zeigeAblehnung() {
+    if (text)       text.style.display = 'none';
+    if (label)      label.style.display = 'none';
+    if (btn)        btn.style.display = 'none';
+    if (btnAblehnen)btnAblehnen.style.display = 'none';
+    if (ablehnung)  ablehnung.style.display = 'block';
+  }
+
+  function zurueckZurAbfrage() {
+    if (ablehnung)  ablehnung.style.display = 'none';
+    if (text)       text.style.display = '';
+    if (label)      label.style.display = '';
+    if (btn)        btn.style.display = '';
+    if (btnAblehnen)btnAblehnen.style.display = '';
+    if (checkbox)   checkbox.checked = false;
+    if (btn)        btn.disabled = true;
   }
 
   // Overlay erscheint nach Splash-Ende
@@ -232,10 +258,34 @@ function initCookieGate() {
     if (ov) ov.style.display = 'flex';
   }, 3400);
 
+  // Button-Aktivierung ist an die Checkbox gekoppelt.
+  if (checkbox && btn) {
+    btn.disabled = !checkbox.checked;
+    checkbox.addEventListener('change', function() {
+      btn.disabled = !checkbox.checked;
+    });
+  }
+
+  // Zustimmen-Button
   if (btn) {
     btn.addEventListener('click', function() {
-      if (ov) ov.style.display = 'none';
+      if (!checkbox || !checkbox.checked) return;   // Sicherheits-Doppelprüfung
       freischalten();
+    });
+  }
+
+  // Ablehnen-Button
+  if (btnAblehnen) {
+    btnAblehnen.addEventListener('click', function() {
+      zeigeAblehnung();
+    });
+  }
+
+  // Zurück-Link in der Ablehnungs-Ansicht
+  if (zurueckLink) {
+    zurueckLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      zurueckZurAbfrage();
     });
   }
 }

@@ -369,15 +369,41 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════
-     COOKIE / DATENSCHUTZ-OVERLAY
+     EINWILLIGUNGS-GATE (Datenverarbeitung muss aktiv akzeptiert werden)
      ═══════════════════════════════════════════════════════════════ -->
-<div id="cookie-overlay" style="display:none">
+<div id="cookie-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="cookie-titel" aria-describedby="cookie-text">
   <div id="cookie-box">
-    <h2>Hui Wäller? Allemol!</h2>
-    <p>Schön, dass du da bist! Diese App nutzt ausschließlich technisch notwendige Funktionen – keine Tracking-Cookies, keine externen Analysedienste.</p>
-    <p>Diese App speichert keinerlei Daten – weder im lokalen Speicher noch in Cookies. Damit du jederzeit volle Kontrolle hast, bestätigst du diese Hinweise bei jedem App-Start neu.</p>
-    <p>Mehr Infos in unserer <a data-modal="datenschutz">Datenschutzerklärung</a>.</p>
-    <button id="cookie-akzeptieren">Verstanden &amp; Weiter</button>
+    <h2 id="cookie-titel">Hui Wäller? Allemol!</h2>
+    <div id="cookie-text">
+      <p>Schön, dass du da bist! Bevor es losgeht, brauchen wir kurz deine Zustimmung – damit du genau weißt, was die App tut und was nicht.</p>
+
+      <p><strong>Was die App nicht macht:</strong> Kein Tracking, keine Werbung, keine Analyse-Tools, kein Profilbildung über dich.</p>
+
+      <p><strong>Was die App technisch nutzt:</strong></p>
+      <ul>
+        <li>Speichert Orts-Koordinaten lokal in deinem Browser, damit Karten und Adressen schnell angezeigt werden können. Diese Daten verlassen dein Gerät nicht.</li>
+        <li>Lädt Karten, PDFs, Fahrpläne und einige Bibliotheken von Drittanbietern (z.&nbsp;B. OpenStreetMap, jsDelivr, VRM-Fahrplanauskunft, Mitfahrerbank Westerwald). Dabei wird deine IP-Adresse an die jeweiligen Anbieter übertragen.</li>
+        <li>Auf Wunsch zeigt die App deinen Standort auf Karten – aber nur, wenn du in der Karte aktiv auf den Standort-Button (📍) klickst.</li>
+      </ul>
+
+      <p>Alle Details findest du in unserer <a data-modal="datenschutz">Datenschutzerklärung</a>.</p>
+
+      <p>Deine Zustimmung speichern wir nicht – deshalb fragen wir bei jedem App-Start neu.</p>
+    </div>
+
+    <label id="cookie-checkbox-label" for="cookie-checkbox">
+      <input type="checkbox" id="cookie-checkbox">
+      <span>Ich willige in die oben beschriebene Datenverarbeitung ein.</span>
+    </label>
+
+    <button id="cookie-akzeptieren" disabled>Zustimmen und App öffnen</button>
+    <button id="cookie-ablehnen" type="button">Nicht zustimmen</button>
+
+    <div id="cookie-ablehnung" style="display:none">
+      <p><strong>Ohne deine Einwilligung können wir die App nicht starten.</strong></p>
+      <p>Da die App auf Drittanbieter-Inhalte (Karten, Fahrpläne, PDFs) angewiesen ist, ist deine Zustimmung technisch erforderlich.</p>
+      <p>Du kannst diese Seite jetzt schließen oder zurück zur <a id="cookie-zurueck">Einwilligungs-Abfrage</a>.</p>
+    </div>
   </div>
 </div>
 

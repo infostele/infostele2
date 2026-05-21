@@ -190,7 +190,63 @@ img { max-width: 100%; display: block; }
   cursor: pointer; transition: all .15s;
   width: 100%; margin-top: 8px;
 }
-#cookie-akzeptieren:hover { background: var(--hellgruen-p); border-color: var(--hellgruen-p); }
+#cookie-akzeptieren:hover:not(:disabled) { background: var(--hellgruen-p); border-color: var(--hellgruen-p); }
+#cookie-akzeptieren:disabled {
+  background: var(--grau-lt); color: var(--grau-md);
+  border-color: var(--grau-lt);
+  cursor: not-allowed;
+}
+
+/* Checkbox-Block — muss aktiv angehakt werden, damit der Zustimmen-Button aktiv wird */
+#cookie-checkbox-label {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-family: var(--font); font-size: 14px; color: var(--grau-dk);
+  line-height: 1.5;
+  padding: 12px 14px;
+  background: var(--creme);
+  border: 1px solid var(--grau-lt);
+  border-radius: 6px;
+  margin-top: 8px; margin-bottom: 14px;
+  cursor: pointer;
+}
+#cookie-checkbox-label:hover { background: #fff; border-color: var(--hellgruen-s); }
+#cookie-checkbox {
+  flex: 0 0 auto;
+  width: 22px; height: 22px;
+  margin-top: 1px;
+  accent-color: var(--dunkelgruen);
+  cursor: pointer;
+}
+
+/* Aufzählung im Cookie-Box */
+#cookie-text ul {
+  margin: 8px 0 12px 0;
+  padding-left: 22px;
+  font-family: var(--font); font-size: 14px; color: var(--grau-dk);
+  line-height: 1.55;
+}
+#cookie-text ul li { margin-bottom: 6px; }
+
+/* Ablehnen-Button (sekundär, gleichwertig sichtbar) */
+#cookie-ablehnen {
+  background: transparent; color: var(--grau-dk);
+  font-family: var(--font); font-weight: 700;
+  font-size: 14px; letter-spacing: 0.3px;
+  padding: 10px 16px;
+  border: 1px solid var(--grau-lt);
+  cursor: pointer; transition: all .15s;
+  width: 100%; margin-top: 8px;
+}
+#cookie-ablehnen:hover { background: var(--grau-lt); }
+
+/* Ablehnungs-Ansicht (wird angezeigt, wenn der Nutzer „Nicht zustimmen" wählt) */
+#cookie-ablehnung p {
+  font-family: var(--font); font-size: 15px; color: var(--grau-dk);
+  line-height: 1.55; margin-bottom: 12px;
+}
+#cookie-ablehnung a {
+  color: var(--hellgruen-p); text-decoration: underline; cursor: pointer;
+}
 
 /* ══════════════════════════════════════════════════════════════
    MODAL für Impressum / Datenschutz

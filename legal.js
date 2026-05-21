@@ -168,7 +168,7 @@ window._DATENSCHUTZ_HTML =
 + '<li>Es findet <strong>kein Tracking, kein Profiling und keine Reichweitenmessung</strong> statt.</li>'
 + '<li>Es werden <strong>keine Analyse-Tools</strong> (z. B. Google Analytics, Matomo) eingesetzt.</li>'
 + '<li>Es gibt <strong>kein Nutzerkonto, kein Kontaktformular und keinen Newsletter</strong> innerhalb dieser App.</li>'
-+ '<li>Die Datenschutz-Akzeptanz beim App-Start wird <strong>nicht gespeichert</strong> und bei jedem Aufruf erneut abgefragt.</li>'
++ '<li>Vor der ersten Nutzung der App-Funktionen werden Sie um eine ausdr\u00FCckliche Einwilligung in die in dieser Datenschutzerkl\u00E4rung beschriebene Datenverarbeitung gebeten. Erst nach Ihrer Einwilligung wird die App freigeschaltet. Diese Einwilligung wird <strong>nicht gespeichert</strong> und bei jedem App-Start erneut eingeholt. Sie k\u00F6nnen die Einwilligung jederzeit verweigern; in diesem Fall wird die App nicht ge\u00F6ffnet.</li>'
 + '<li><strong>LocalStorage \u2013 begrenzte technische Nutzung:</strong> Wenn Sie die Kartenansicht eines Ausflugsziels, einer Unterkunft, eines Badesees oder eines anderen Ortes \u00F6ffnen und f\u00FCr diesen Ort noch keine Koordinaten hinterlegt sind, wird zur Anzeige des Markers eine Geocoding-Abfrage (siehe Ziffer 5.4) durchgef\u00FChrt. Das Ergebnis (Adress-Zeichenkette und zugeh\u00F6rige Koordinaten) wird zur Vermeidung wiederholter Abfragen lokal im Browser-LocalStorage Ihres Endger\u00E4ts gespeichert (Schl\u00FCssel-Pr\u00E4fix: <code>wwgeo:</code>). Diese Speicherung erfolgt ausschlie\u00DFlich auf Ihrem Endger\u00E4t, es findet keine \u00DCbermittlung an uns oder Dritte statt. Sie k\u00F6nnen den lokalen Speicher Ihres Browsers jederzeit \u00FCber dessen Einstellungen l\u00F6schen.</li>'
 + '</ul>'
 
