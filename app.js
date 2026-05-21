@@ -3690,7 +3690,7 @@ function zeigeEigenenStandort(map, callback) {
   navigator.geolocation.getCurrentPosition(function(pos) {
     var lat = pos.coords.latitude, lng = pos.coords.longitude;
     // Marker für Eigen-Standort: blauer Kreis mit weißem Rand
-    L.circleMarker([lat, lng], {
+    var marker = L.circleMarker([lat, lng], {
       radius: 8,
       fillColor: '#3388ff',
       color: '#ffffff',
@@ -3699,8 +3699,9 @@ function zeigeEigenenStandort(map, callback) {
       fillOpacity: 0.9
     }).addTo(map).bindPopup('<strong>Dein Standort</strong>');
     // Genauigkeits-Radius andeuten
+    var radius = null;
     if (pos.coords.accuracy && pos.coords.accuracy < 5000) {
-      L.circle([lat, lng], {
+      radius = L.circle([lat, lng], {
         radius: pos.coords.accuracy,
         color: '#3388ff',
         weight: 1,
@@ -3710,8 +3711,39 @@ function zeigeEigenenStandort(map, callback) {
         interactive: false        // Klicks gehen durch zur Karte
       }).addTo(map);
     }
-    // Karte sanft auf den Standort zentrieren
-    map.panTo([lat, lng]);
+    // Karten-Ausschnitt intelligent anpassen:
+    // Wenn bereits Inhalte (z. B. GPX-Track) auf der Karte sind, erweitern
+    // wir den Ausschnitt so, dass BEIDE sichtbar sind – Track UND Standort.
+    // Wenn die Karte leer ist, zentrieren wir auf den Standort.
+    try {
+      var aktuelleBounds = null;
+      // Aktuelle Bounds aller Layer ermitteln
+      map.eachLayer(function(layer) {
+        // Tile-Layer und unseren eigenen Marker/Radius ausklammern
+        if (layer === marker || layer === radius) return;
+        if (layer instanceof L.TileLayer) return;
+        if (typeof layer.getBounds === 'function') {
+          try {
+            var b = layer.getBounds();
+            if (b && b.isValid && b.isValid()) {
+              aktuelleBounds = aktuelleBounds ? aktuelleBounds.extend(b) : L.latLngBounds(b.getSouthWest(), b.getNorthEast());
+            }
+          } catch (e) { /* Layer ohne Bounds → ignorieren */ }
+        }
+      });
+
+      if (aktuelleBounds && aktuelleBounds.isValid()) {
+        // Standort zu den vorhandenen Bounds hinzunehmen und Karte fitten
+        aktuelleBounds.extend([lat, lng]);
+        map.fitBounds(aktuelleBounds, { padding: [40, 40], maxZoom: 14 });
+      } else {
+        // Keine vorhandenen Inhalte (z. B. Karte ohne GPX) → auf Standort zentrieren
+        map.setView([lat, lng], 14);
+      }
+    } catch (err) {
+      // Fallback: sanft auf den Standort schwenken
+      map.panTo([lat, lng]);
+    }
     if (callback) callback(true);
   }, function() {
     if (callback) callback(false);
